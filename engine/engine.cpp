@@ -20,6 +20,8 @@ namespace engine {
         glEnable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        stbi_set_flip_vertically_on_load(true);
     }
 
     void close() {

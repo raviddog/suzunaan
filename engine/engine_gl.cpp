@@ -301,6 +301,73 @@ namespace engine {
         SDL_Window *window;
         SDL_GLContext maincontext;
 
+        void VAO::init() {
+            glGenVertexArrays(1, &ID);
+        }
+
+        void VAO::bind() {
+            glBindVertexArray(ID);
+        }
+
+        void VAO::unbind() {
+            glBindVertexArray(0);
+        }
+
+        void VBO::init() {
+            glGenBuffers(1, &ID_VBO);
+            glGenBuffers(1, &ID_EBO);
+            vertexAttribs = -1;            
+        }
+
+        void VBO::bind() {
+            glBindBuffer(GL_ARRAY_BUFFER, ID_VBO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID_EBO);
+        }
+
+        void VBO::unbind() {
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        }
+
+        void VBO::bufferVerts(int vertsize, float *verts, int indsize, uint32_t *indices) {
+            glBufferData(GL_ARRAY_BUFFER, vertsize, verts, GL_DYNAMIC_DRAW);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indsize, indices, GL_DYNAMIC_DRAW);
+        }
+
+        void VBO::createVertexAttribPointer(int size, GLenum type, GLsizei stride, const void *pointer) {
+            vertexAttribs += 1;
+            glVertexAttribPointer(vertexAttribs, size, type, GL_FALSE, stride, pointer);
+            glEnableVertexAttribArray(vertexAttribs);
+        }
+
+        void VBO::createVertexAttribPointerNormalized(int size, GLenum type, GLsizei stride, const void *pointer) {
+            vertexAttribs += 1;
+            glVertexAttribPointer(vertexAttribs, size, type, GL_TRUE, stride, pointer);
+            glEnableVertexAttribArray(vertexAttribs);
+        }
+
+        void Texture::init() {
+            glGenTextures(1, &ID);
+        }
+
+        void Texture::bind() {
+            glBindTexture(GL_TEXTURE_2D, ID);
+        }
+
+        void Texture::load(std::string path) {
+            unsigned char *data = stbi_load(path.c_str(), &srcWidth, &srcHeight, &srcChanels, 0);
+            if(data) {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, srcWidth, srcHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+                glGenerateMipmap(GL_TEXTURE_2D);
+                stbi_image_free(data);
+
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            }
+        }
 
         void Shader::load(const GLchar* vertexPath, const GLchar* fragmentPath)
         {

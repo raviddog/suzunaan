@@ -4,6 +4,7 @@
 #include "glad/glad.h"
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_opengl.h"
+#include "stb_image.h"
 
 #include <string>
 #include <fstream>
@@ -36,40 +37,60 @@ namespace engine {
 
 
         class VAO {
-                private:
-                    GLuint ID;
-                public:
+            public:
+                GLuint ID;
+                void init();
+                void bind();
+                static void unbind();
+        };
 
-            };
+        class VBO {
+            public:
+                GLuint ID_VBO, ID_EBO;
+                int vertexAttribs;
+                void init();
+                void bind();
 
-            class VBO {
+                void bufferVerts(int, float*, int, uint32_t*);
+                void createVertexAttribPointer(int, GLenum, GLsizei, const void*);
+                void createVertexAttribPointerNormalized(int, GLenum, GLsizei, const void*);
 
-            };
+                static void unbind();
+        };
 
-            class Shader
-            {
-                public:
-                    //program id
-                    uint32_t ID;
+        class Texture {
+            public:
+                GLuint ID;
+                int srcWidth, srcHeight, srcChanels;
+                void init();
+                void bind();
+                void load(std::string);
+        };
 
-                    //reads and builds the shader
-                    void load(const GLchar*, const GLchar*);
-                    //use/activate the shader
-                    void use();
-                    //utility uniform functions
-                    void setBool(const std::string&, bool) const;
-                    void setInt(const std::string&, int) const;
-                    void setFloat(const std::string&, float) const;
-                    void setVec2(const std::string&, const glm::vec2&) const;
-                    void setVec2(const std::string&, float, float) const;
-                    void setVec3(const std::string&, const glm::vec3&) const;
-                    void setVec3(const std::string&, float, float, float) const;
-                    void setVec4(const std::string&, const glm::vec4&) const;
-                    void setVec4(const std::string&, float, float, float, float) const;
-                    void setMat2(const std::string&, const glm::mat2&) const;
-                    void setMat3(const std::string&, const glm::mat3&) const;
-                    void setMat4(const std::string&, const glm::mat4&) const;
-            };
+        class Shader
+        {
+            public:
+                //program id
+                uint32_t ID;
+
+                //reads and builds the shader
+                void load(const GLchar*, const GLchar*);
+                //use/activate the shader
+                void use();
+                //utility uniform functions
+                void setBool(const std::string&, bool) const;
+                void setInt(const std::string&, int) const;
+                void setFloat(const std::string&, float) const;
+                void setVec2(const std::string&, const glm::vec2&) const;
+                void setVec2(const std::string&, float, float) const;
+                void setVec3(const std::string&, const glm::vec3&) const;
+                void setVec3(const std::string&, float, float, float) const;
+                void setVec4(const std::string&, const glm::vec4&) const;
+                void setVec4(const std::string&, float, float, float, float) const;
+                void setMat2(const std::string&, const glm::mat2&) const;
+                void setMat3(const std::string&, const glm::mat3&) const;
+                void setMat4(const std::string&, const glm::mat4&) const;
+        };
 
     }    
 }
