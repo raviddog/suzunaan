@@ -393,7 +393,7 @@ namespace engine {
 
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                printf("loaded texture %s", path.c_str());
+                printf("loaded texture %s\n", path.c_str());
             }
         }
 

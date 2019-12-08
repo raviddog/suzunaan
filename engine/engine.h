@@ -10,10 +10,12 @@ namespace engine {
     void close();
 
     struct Sprite {
-        int x;
-        int y;
-        int width;
-        int height;
+        float x;
+        float y;
+        float z;
+        float w;
+        float width;
+        float height;
     };
 
     class SpriteSheet {

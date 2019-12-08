@@ -11,6 +11,5 @@ uniform mat4 scrScale;
 void main()
 {
     txCoord = coord.zw;
-    gl_Position = scrProjection * scrModel * scrScale * vec4(coord.xy, 0.0, 1.0);
-    //gl_Position = vec4(coord.xy, 0.0, 1.0);
+    gl_Position = scrProjection * scrModel * vec4(coord.xy, 0.0, 1.0);
 }

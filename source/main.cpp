@@ -43,16 +43,18 @@ int main(int args, char** argv) {
     // vao->unbind();
 
     engine::SpriteSheet *s = new engine::SpriteSheet();
-    s->load("./data/pl00.png", 1);
+    s->load("./data/pl00.png", 2);
+    s->setSprite(0, 0, 0, 32, 46);
+    s->setSprite(1, 224, 92, 32, 46);
     int frame = 0;
     while(!engine::quit) {
         engine::inputs();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        s->drawSprite(1, 10, 10);
-        s->drawSprite(1, 200, 200);
+        s->drawSprite(0, 10, 10);
+        s->drawSprite(0, 200, 200);
         s->drawSprite(1, 0, 0);
         s->drawSprite(1, 2, 1);
-        s->drawSprite(0, 400, 0);
+        s->drawSprite(1, 400, 0);
         
         
         // vao->bind();

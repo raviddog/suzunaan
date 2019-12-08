@@ -8,6 +8,6 @@ uniform sampler2D txUnit;
 
 void main()
 {
-    //color = vec4(texture(image, txProjection * txCoord));
+    //color = texture(txUnit, vec4(txProjection * vec4(txCoord, 0.0, 0.0)).xy);
     color = texture(txUnit, txCoord);
 }
