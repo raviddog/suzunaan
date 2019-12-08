@@ -9,7 +9,30 @@ namespace engine {
     void inputs();
     void close();
 
+    struct Sprite {
+        int x;
+        int y;
+        int width;
+        int height;
+    };
 
+    class SpriteSheet {
+        public:
+            glm::mat4 texProjection;
+            int numSprites;
+            Sprite *sprites;
+            gl::VAO *vao;
+            gl::VBO *vbo;
+            gl::Texture *tex;
+
+
+
+            void load(const std::string&, int);
+            void setSprite(int, int, int, int, int);
+
+            // temp
+            void drawSprite(int, int, int);
+    };
 
 }
 

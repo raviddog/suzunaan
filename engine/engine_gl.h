@@ -38,33 +38,37 @@ namespace engine {
 
         class VAO {
             public:
-                GLuint ID;
+                GLuint *ID;
                 void init();
                 void bind();
+                void remove();
                 static void unbind();
         };
 
         class VBO {
             public:
-                GLuint ID_VBO, ID_EBO;
+                GLuint *ID_VBO, *ID_EBO;
                 int vertexAttribs;
                 void init();
                 void bind();
+                void remove();
+                static void unbind();
 
                 void bufferVerts(int, float*, int, uint32_t*);
                 void createVertexAttribPointer(int, GLenum, GLsizei, const void*);
                 void createVertexAttribPointerNormalized(int, GLenum, GLsizei, const void*);
 
-                static void unbind();
         };
 
         class Texture {
             public:
-                GLuint ID;
+                GLuint *ID;
                 int srcWidth, srcHeight, srcChanels;
                 void init();
                 void bind();
-                void load(std::string);
+                void load(const std::string&);
+                void remove();
+                static void unbind();
         };
 
         class Shader

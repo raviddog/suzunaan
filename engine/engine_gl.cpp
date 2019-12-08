@@ -297,16 +297,24 @@ namespace engine {
         }
     } 
 
+    void *currentShader = NULL;
+
     namespace gl {
         SDL_Window *window;
         SDL_GLContext maincontext;
 
         void VAO::init() {
-            glGenVertexArrays(1, &ID);
+            ID = new GLuint();
+            glGenVertexArrays(1, ID);
         }
 
         void VAO::bind() {
-            glBindVertexArray(ID);
+            glBindVertexArray(*ID);
+        }
+
+        void VAO::remove() {
+            glDeleteVertexArrays(1, ID);
+            delete ID;
         }
 
         void VAO::unbind() {
@@ -314,14 +322,23 @@ namespace engine {
         }
 
         void VBO::init() {
-            glGenBuffers(1, &ID_VBO);
-            glGenBuffers(1, &ID_EBO);
+            ID_VBO = new GLuint();
+            ID_EBO = new GLuint();
+            glGenBuffers(1, ID_VBO);
+            glGenBuffers(1, ID_EBO);
             vertexAttribs = -1;            
         }
 
         void VBO::bind() {
-            glBindBuffer(GL_ARRAY_BUFFER, ID_VBO);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID_EBO);
+            glBindBuffer(GL_ARRAY_BUFFER, *ID_VBO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ID_EBO);
+        }
+
+        void VBO::remove() {
+            glDeleteBuffers(1, ID_VBO);
+            glDeleteBuffers(1, ID_EBO);
+            delete ID_VBO;
+            delete ID_EBO;
         }
 
         void VBO::unbind() {
@@ -347,14 +364,24 @@ namespace engine {
         }
 
         void Texture::init() {
-            glGenTextures(1, &ID);
+            ID = new GLuint();
+            glGenTextures(1, ID);
         }
 
         void Texture::bind() {
-            glBindTexture(GL_TEXTURE_2D, ID);
+            glBindTexture(GL_TEXTURE_2D, *ID);
         }
 
-        void Texture::load(std::string path) {
+        void Texture::unbind() {
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+
+        void Texture::remove() {
+            glDeleteTextures(1, ID);
+            delete ID;
+        }
+
+        void Texture::load(const std::string &path) {
             unsigned char *data = stbi_load(path.c_str(), &srcWidth, &srcHeight, &srcChanels, 0);
             if(data) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, srcWidth, srcHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -364,8 +391,9 @@ namespace engine {
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                printf("loaded texture %s", path.c_str());
             }
         }
 
@@ -449,7 +477,10 @@ namespace engine {
 
         void Shader::use()
         {
-            glUseProgram(ID);
+            if(currentShader != this) {
+                glUseProgram(ID);
+                currentShader = this;
+            }
         }
 
         void Shader::setBool(const std::string &name, bool value) const
