@@ -21,8 +21,12 @@ int main(int args, char** argv) {
     s->load("./data/pl00.png", 2);
     s->setSprite(0, 0, 0, 32, 46);
     s->setSprite(1, 224, 92, 32, 46);
-    int frame = 0;
+    
+    uint32_t ticks[4] = {0};
+    ticks[0] = SDL_GetTicks();
+
     while(!engine::quit) {
+        ticks[2] = SDL_GetTicks();
         engine::inputs();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         s->drawSprite(0, 10, 10);
@@ -32,7 +36,12 @@ int main(int args, char** argv) {
         s->drawSprite(1, 400, 0);
         s->draw();
 
+        ticks[3] = SDL_GetTicks();
+        printf("draw time: %dms, ", ticks[3] - ticks[2]);
         SDL_GL_SwapWindow(engine::gl::window);
+        ticks[1] = SDL_GetTicks();
+        printf("frame time: %dms\n", ticks[1] - ticks[0]);
+        ticks[0] = ticks[1];
     }
     engine::close();
     return 0;
