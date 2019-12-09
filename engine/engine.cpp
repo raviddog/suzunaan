@@ -17,16 +17,10 @@ namespace engine {
 
         vbo->init();
         vbo->bind();
-
-        
-
-        //vbo->bufferVerts(sizeof(verts), verts, sizeof(inds), inds);
         vbo->createVertexAttribPointer(4, GL_FLOAT, 4*sizeof(float), (void*)0);
-
 
         this->numSprites = numSprites;
         sprites = new Sprite[numSprites];
-        //glActiveTexture(GL_TEXTURE0);
         tex = new gl::Texture();
         tex->init();
         tex->bind();
@@ -39,6 +33,8 @@ namespace engine {
         spriteShader->setMat4("scrScale", scale);
 
         vao->unbind();
+
+        data = new std::vector<float>();
     }
 
     void SpriteSheet::setSprite(int num, int x, int y, int width, int height)
@@ -55,33 +51,38 @@ namespace engine {
     }
 
     void SpriteSheet::drawSprite(int num, int x, int y) {
-        vao->bind();
-        spriteShader->use();
-
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3((float)x, (float)y, 0.0f));
-        spriteShader->setMat4("scrModel", model);
 
         float verts[] = {
-            0.0f, sprites[num].height, sprites[num].x, sprites[num].w,
-            sprites[num].width, 0.0f, sprites[num].z, sprites[num].y,
-            0.0f, 0.0f, sprites[num].x, sprites[num].y,
-            sprites[num].width, sprites[num].height, sprites[num].z, sprites[num].w
+            (float)x, (float)y + sprites[num].height, sprites[num].x, sprites[num].w,
+            (float)x + sprites[num].width, (float)y, sprites[num].z, sprites[num].y,
+            (float)x, (float)y, sprites[num].x, sprites[num].y,
+            (float)x, (float)y + sprites[num].height, sprites[num].x, sprites[num].w,
+            (float)x + sprites[num].width, (float)y, sprites[num].z, sprites[num].y,
+            (float)x + sprites[num].width, (float)y + sprites[num].height, sprites[num].z, sprites[num].w
         };
 
-        uint32_t inds[] = {
-            0, 1, 2,
-            0, 1, 3
-        };
-        vbo->bufferVerts(sizeof(verts), verts, sizeof(inds), inds);
-
-        // std::cout<<glm::to_string(model)<<std::endl;
-        //tex->bind();
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        vao->unbind();
-
-
+        for(int i = 0; i < 24; i++) {
+            data->push_back(verts[i]);
+        }
     };
+
+    void SpriteSheet::draw() {
+        vao->bind();
+        spriteShader->use();
+        tex->bind();
+        vbo->bufferVerts(sizeof(float) * data->size(), data->data());
+        glDrawArrays(GL_TRIANGLES, 0, data->size()/4);
+        vao->unbind();
+        data->clear();
+    }
+
+    void SpriteSheet::unload() {
+        tex->remove();
+        vbo->remove();
+        vao->remove();
+        delete data;
+        delete sprites;
+    }
 
 
 

@@ -54,6 +54,7 @@ namespace engine {
                 void remove();
                 static void unbind();
 
+                void bufferVerts(int, float*);
                 void bufferVerts(int, float*, int, uint32_t*);
                 
                 void createVertexAttribPointer(int, GLenum, GLsizei, const void*);

@@ -2,6 +2,7 @@
 #define _ENGINE_H
 
 #include "engine_gl.h"
+#include <vector>
 
 namespace engine {
 
@@ -19,6 +20,8 @@ namespace engine {
     };
 
     class SpriteSheet {
+        private:
+            std::vector<float> *data;
         public:
             glm::mat4 texProjection;
             int numSprites;
@@ -31,9 +34,11 @@ namespace engine {
 
             void load(const std::string&, int);
             void setSprite(int, int, int, int, int);
+            void unload();
 
             // temp
             void drawSprite(int, int, int);
+            void draw();
     };
 
 }

@@ -346,6 +346,10 @@ namespace engine {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
 
+        void VBO::bufferVerts(int vertsize, float *verts) {
+            glBufferData(GL_ARRAY_BUFFER, vertsize, verts, GL_DYNAMIC_DRAW);
+        }
+
         void VBO::bufferVerts(int vertsize, float *verts, int indsize, uint32_t *indices) {
             glBufferData(GL_ARRAY_BUFFER, vertsize, verts, GL_DYNAMIC_DRAW);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indsize, indices, GL_DYNAMIC_DRAW);
@@ -394,6 +398,8 @@ namespace engine {
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
                 printf("loaded texture %s\n", path.c_str());
+            } else {
+                printf("failed to load %s\n", path.c_str());
             }
         }
 
@@ -429,7 +435,7 @@ namespace engine {
             }
             catch(std::ifstream::failure e)
             {
-                //report error
+                printf("failed to load shaders, unable to read files %s %s\n", vertexPath, fragmentPath);
             }
 
             const char* vShaderCode = vertexCode.c_str();
@@ -470,6 +476,8 @@ namespace engine {
                 //glGetProgramInfoLog(ID, 512, NULL, infoLog)
                 //report error
             }
+
+            printf("loaded shaders %s %s\n", vertexPath, fragmentPath);
 
             glDeleteShader(vertex);
             glDeleteShader(fragment);
