@@ -5,8 +5,6 @@ layout (location = 0) in vec4 coord;
 out vec2 txCoord;
 
 uniform mat4 scrProjection;
-uniform mat4 scrModel;
-uniform mat4 scrScale;
 
 void main()
 {

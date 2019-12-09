@@ -25,12 +25,6 @@ namespace engine {
         tex->init();
         tex->bind();
         tex->load(path);
-        
-        texProjection = glm::ortho(0.0f, (float)tex->srcWidth, 0.0f, (float)tex->srcHeight);
-        spriteShader->setMat4("txProjection", texProjection);
-
-        glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3((float)tex->srcWidth, (float)tex->srcHeight, 1.0f));
-        spriteShader->setMat4("scrScale", scale);
 
         vao->unbind();
 
@@ -50,15 +44,15 @@ namespace engine {
         printf("sprite #%d: %f %f %f %f\n", num, sprites[num].x, sprites[num].y, sprites[num].z, sprites[num].w);
     }
 
-    void SpriteSheet::drawSprite(int num, int x, int y) {
+    void SpriteSheet::drawSprite(int num, float x, float y) {
 
         float verts[] = {
-            (float)x, (float)y + sprites[num].height, sprites[num].x, sprites[num].w,
-            (float)x + sprites[num].width, (float)y, sprites[num].z, sprites[num].y,
-            (float)x, (float)y, sprites[num].x, sprites[num].y,
-            (float)x, (float)y + sprites[num].height, sprites[num].x, sprites[num].w,
-            (float)x + sprites[num].width, (float)y, sprites[num].z, sprites[num].y,
-            (float)x + sprites[num].width, (float)y + sprites[num].height, sprites[num].z, sprites[num].w
+            x, y + sprites[num].height, sprites[num].x, sprites[num].w,
+            x + sprites[num].width, y, sprites[num].z, sprites[num].y,
+            x, y, sprites[num].x, sprites[num].y,
+            x, y + sprites[num].height, sprites[num].x, sprites[num].w,
+            x + sprites[num].width, y, sprites[num].z, sprites[num].y,
+            x + sprites[num].width, y + sprites[num].height, sprites[num].z, sprites[num].w
         };
 
         for(int i = 0; i < 24; i++) {
@@ -70,6 +64,7 @@ namespace engine {
         vao->bind();
         spriteShader->use();
         tex->bind();
+        vbo->bind();
         vbo->bufferVerts(sizeof(float) * data->size(), data->data());
         glDrawArrays(GL_TRIANGLES, 0, data->size()/4);
         vao->unbind();
@@ -101,7 +96,7 @@ namespace engine {
         gl::maincontext = SDL_GL_CreateContext(gl::window);
         gladLoadGLLoader(SDL_GL_GetProcAddress);
 
-        SDL_GL_SetSwapInterval(1);
+        SDL_GL_SetSwapInterval(0);
         glViewport(0, 0, width, height);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glEnable(GL_BLEND);
@@ -122,4 +117,5 @@ namespace engine {
         SDL_DestroyWindow(gl::window);
         SDL_Quit();
     }
+
 }
