@@ -28,7 +28,8 @@ namespace engine {
 
         vao->unbind();
 
-        data = new std::vector<float>();
+        verts = new std::vector<float>();
+        indices = new std::vector<uint32_t>();
     }
 
     void SpriteSheet::setSprite(int num, int x, int y, int width, int height)
@@ -45,18 +46,26 @@ namespace engine {
     }
 
     void SpriteSheet::drawSprite(int num, float x, float y) {
-
-        float verts[] = {
+        float v[] = {
             x, y + sprites[num].height, sprites[num].x, sprites[num].w,
             x + sprites[num].width, y, sprites[num].z, sprites[num].y,
             x, y, sprites[num].x, sprites[num].y,
-            x, y + sprites[num].height, sprites[num].x, sprites[num].w,
-            x + sprites[num].width, y, sprites[num].z, sprites[num].y,
             x + sprites[num].width, y + sprites[num].height, sprites[num].z, sprites[num].w
         };
 
-        for(int i = 0; i < 24; i++) {
-            data->push_back(verts[i]);
+        uint32_t size = verts->size();
+
+        uint32_t ind[] = {
+            size, size + 1, size + 2,
+            size, size + 1, size + 3
+        };
+
+        for(int i = 0; i < 16; i++) {
+            verts->push_back(v[i]);
+        }
+
+        for(int i = 0; i < 6; i++) {
+            indices->push_back(ind[i]);
         }
     };
 
@@ -65,17 +74,21 @@ namespace engine {
         spriteShader->use();
         tex->bind();
         vbo->bind();
-        vbo->bufferVerts(sizeof(float) * data->size(), data->data());
-        glDrawArrays(GL_TRIANGLES, 0, data->size()/4);
+        // vbo->bufferVerts(sizeof(float) * data->size(), data->data());
+        vbo->bufferVerts(sizeof(float) * verts->size(), verts->data(), sizeof(uint32_t) * indices->size(), indices->data());
+        // glDrawArrays(GL_TRIANGLES, 0, data->size()/4);
+        glDrawElements(GL_TRIANGLES, indices->size(), GL_UNSIGNED_INT, (void*)0);
         vao->unbind();
-        data->clear();
+        verts->clear();
+        indices->clear();
     }
 
     void SpriteSheet::unload() {
         tex->remove();
         vbo->remove();
         vao->remove();
-        delete data;
+        delete verts;
+        delete indices;
         delete sprites;
     }
 

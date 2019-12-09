@@ -64,7 +64,7 @@ int main(int args, char** argv) {
         // }
         int count = 0;
         for(int i = 0; i < 640; i += 2) {
-            for(int j = 0; j < 480; j += 2) {
+            for(int j = 0; j < 480; j += 3) {
                 s->drawSprite(animationFrame, (float)i, (float)j);
                 count += 1;
             }
