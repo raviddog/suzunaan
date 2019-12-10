@@ -5,7 +5,9 @@ namespace engine {
 
     int scrWidth;
     int scrHeight;
-    gl::Shader *spriteShader;
+
+    static gl::Shader *shaderSpriteSheet;
+    // static gl::Shader *shaderSprite;
 
     void SpriteSheet::load(const std::string &path, int numSprites) {
 
@@ -18,6 +20,7 @@ namespace engine {
         vbo->init();
         vbo->bind();
         vbo->createVertexAttribPointer(4, GL_FLOAT, 4*sizeof(float), (void*)0);
+        vbo->unbind();
 
         this->numSprites = numSprites;
         sprites = new Sprite[numSprites];
@@ -25,6 +28,7 @@ namespace engine {
         tex->init();
         tex->bind();
         tex->load(path);
+        tex->unbind();
 
         vao->unbind();
 
@@ -47,10 +51,10 @@ namespace engine {
 
     void SpriteSheet::drawSprite(int num, float x, float y) {
         float v[] = {
-            x, y + sprites[num].height, sprites[num].x, sprites[num].w,
-            x + sprites[num].width, y, sprites[num].z, sprites[num].y,
-            x, y, sprites[num].x, sprites[num].y,
-            x + sprites[num].width, y + sprites[num].height, sprites[num].z, sprites[num].w
+            x,                      y + sprites[num].height,    sprites[num].x, sprites[num].w,
+            x + sprites[num].width, y,                          sprites[num].z, sprites[num].y,
+            x,                      y,                          sprites[num].x, sprites[num].y,
+            x + sprites[num].width, y + sprites[num].height,    sprites[num].z, sprites[num].w
         };
 
         uint32_t size = verts->size();
@@ -69,18 +73,22 @@ namespace engine {
         }
     };
 
-    void SpriteSheet::draw() {
+    void SpriteSheet::buffer() {
         vao->bind();
-        spriteShader->use();
-        tex->bind();
         vbo->bind();
-        // vbo->bufferVerts(sizeof(float) * data->size(), data->data());
         vbo->bufferVerts(sizeof(float) * verts->size(), verts->data(), sizeof(uint32_t) * indices->size(), indices->data());
-        // glDrawArrays(GL_TRIANGLES, 0, data->size()/4);
-        glDrawElements(GL_TRIANGLES, indices->size(), GL_UNSIGNED_INT, (void*)0);
+        indices_stored_size = indices->size();
         vao->unbind();
         verts->clear();
         indices->clear();
+    }
+
+    void SpriteSheet::draw() {
+        vao->bind();
+        shaderSpriteSheet->use();
+        tex->bind();
+        glDrawElements(GL_TRIANGLES, indices_stored_size, GL_UNSIGNED_INT, (void*)0);
+        vao->unbind();
     }
 
     void SpriteSheet::unload() {
@@ -109,7 +117,7 @@ namespace engine {
         gl::maincontext = SDL_GL_CreateContext(gl::window);
         gladLoadGLLoader(SDL_GL_GetProcAddress);
 
-        SDL_GL_SetSwapInterval(0);
+        SDL_GL_SetSwapInterval(1);
         glViewport(0, 0, width, height);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glEnable(GL_BLEND);
@@ -118,11 +126,17 @@ namespace engine {
 
         //stbi_set_flip_vertically_on_load(true);
         glm::mat4 scrProjection = glm::ortho(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f);
-        spriteShader = new gl::Shader();
-        spriteShader->load("./shaders/sprite.vert", "./shaders/sprite.frag");
-        spriteShader->use();
-        spriteShader->setMat4("scrProjection", scrProjection);
-        spriteShader->setInt("txUnit", 0);
+        shaderSpriteSheet = new gl::Shader();
+        shaderSpriteSheet->load("./shaders/spritesheet.vert", "./shaders/spritesheet.frag");
+        shaderSpriteSheet->use();
+        shaderSpriteSheet->setMat4("scrProjection", scrProjection);
+        shaderSpriteSheet->setInt("txUnit", 0);
+
+        // shaderSprite = new gl::Shader();
+        // shaderSprite->load("./shaders/sprite.vert", "./shaders/sprite.frag");
+        // shaderSprite->use();
+        // shaderSprite->setMat4("scrProjection", scrProjection);
+        // shaderSprite->setInt("txUnit", 0);
     }
 
     void close() {

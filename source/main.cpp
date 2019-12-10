@@ -35,44 +35,61 @@ int main(int args, char** argv) {
     float charX = 200.f, charY = 200.f;
     float moveSpeed = 4.f;
 
+    int c2 = 0;
+
+    for(int i = 0; i < 640; i += 2) {
+        for(int j = 0; j < 480; j += 2) {
+            s2->drawSprite(1, (float)i, (float)j);
+            c2 += 1;
+        }
+    }
+
+    s2->buffer();
+
     while(!engine::quit) {
         ticks[1] = SDL_GetTicks();
         engine::inputs();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        int count = c2;
+        
         animationDelay += 1;
         if(animationDelay >= 4) {
             animationDelay = 0;
             animationFrame += 1;
-        }
-
-        if(animationFrame >= 8) {
-            animationFrame = 0;
-        }
-
-        // if(engine::keyState[engine::kbLeft]) {
-        //     charX -= moveSpeed;
-        // }
-        // if(engine::keyState[engine::kbRight]) {
-        //     charX += moveSpeed;
-        // }
-        // if(engine::keyState[engine::kbUp]) {
-        //     charY -= moveSpeed;
-        // }
-        // if(engine::keyState[engine::kbDown]) {
-        //     charY += moveSpeed;
-        // }
-        int count = 0;
-        for(int i = 0; i < 640; i += 2) {
-            for(int j = 0; j < 480; j += 3) {
-                s->drawSprite(animationFrame, (float)i, (float)j);
-                count += 1;
+            if(animationFrame >= 8) {
+                animationFrame = 0;
             }
+
+            for(int i = 0; i < 640; i += 10) {
+                for(int j = 0; j < 480; j += 10) {
+                    s->drawSprite(animationFrame, (float)i, (float)j);
+                    count += 1;
+                }
+            }
+            s->buffer();
         }
 
 
-
+        s2->draw();
         s->draw();
+
+
+
+
+
+        if(engine::keyState[engine::kbLeft]) {
+            charX -= moveSpeed;
+        }
+        if(engine::keyState[engine::kbRight]) {
+            charX += moveSpeed;
+        }
+        if(engine::keyState[engine::kbUp]) {
+            charY -= moveSpeed;
+        }
+        if(engine::keyState[engine::kbDown]) {
+            charY += moveSpeed;
+        }
 
         // fps
         ticks[0] += 1;

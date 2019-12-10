@@ -10,21 +10,39 @@ namespace engine {
     void inputs();
     void close();
 
-    struct Sprite {
-        float x;
-        float y;
-        float z;
-        float w;
-        float width;
-        float height;
-    };
+    // class Sprite {
+    //     private:
+    //         std::vector<float> *verts;
+    //         std::vector<uint32_t> *indices;
+    //         uint32_t indices_stored_size;
+    //     public:
+    //         gl::VAO *vao;
+    //         gl::VBO *vbo;
+    //         gl::Texture *tex;
+    //         int width, height;
+
+    //         void load(const std::string&);
+    //         void unload();
+    //         void drawSprite(float, float);
+    //         void buffer();
+    //         void draw();
+
+    // };
 
     class SpriteSheet {
         private:
+            struct Sprite {
+                float x;
+                float y;
+                float z;
+                float w;
+                float width;
+                float height;
+            };
             std::vector<float> *verts;
             std::vector<uint32_t> *indices;
+            uint32_t indices_stored_size;
         public:
-            glm::mat4 texProjection;
             int numSprites;
             Sprite *sprites;
             gl::VAO *vao;
@@ -39,6 +57,7 @@ namespace engine {
 
             // temp
             void drawSprite(int, float, float);
+            void buffer();
             void draw();
     };
 
