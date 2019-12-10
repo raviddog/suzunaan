@@ -43,33 +43,35 @@ namespace engine {
             sprites[num].y = (1.0f / (float)tex->srcHeight) * (float)y;
             sprites[num].z = (1.0f / (float)tex->srcWidth) * (float)(x + width);
             sprites[num].w = (1.0f / (float)tex->srcWidth) * (float)(y + height);
-            sprites[num].width = width;
-            sprites[num].height = height;
+            sprites[num].width = (float)width;
+            sprites[num].height = (float)height;
         }
         printf("sprite #%d: %f %f %f %f\n", num, sprites[num].x, sprites[num].y, sprites[num].z, sprites[num].w);
     }
 
     void SpriteSheet::drawSprite(int num, float x, float y) {
-        float v[] = {
-            x,                      y + sprites[num].height,    sprites[num].x, sprites[num].w,
-            x + sprites[num].width, y,                          sprites[num].z, sprites[num].y,
-            x,                      y,                          sprites[num].x, sprites[num].y,
-            x + sprites[num].width, y + sprites[num].height,    sprites[num].z, sprites[num].w
-        };
+        if(num > -1 && num < numSprites) {
+            float v[] = {
+                x,                      y + sprites[num].height,    sprites[num].x, sprites[num].w,
+                x + sprites[num].width, y,                          sprites[num].z, sprites[num].y,
+                x,                      y,                          sprites[num].x, sprites[num].y,
+                x + sprites[num].width, y + sprites[num].height,    sprites[num].z, sprites[num].w
+            };
 
-        uint32_t size = verts->size();
+            uint32_t size = verts->size() / 4;
 
-        uint32_t ind[] = {
-            size, size + 1, size + 2,
-            size, size + 1, size + 3
-        };
+            uint32_t ind[] = {
+                size, size + 1, size + 2,
+                size, size + 1, size + 3
+            };
 
-        for(int i = 0; i < 16; i++) {
-            verts->push_back(v[i]);
-        }
+            for(int i = 0; i < 16; i++) {
+                verts->push_back(v[i]);
+            }
 
-        for(int i = 0; i < 6; i++) {
-            indices->push_back(ind[i]);
+            for(int i = 0; i < 6; i++) {
+                indices->push_back(ind[i]);
+            }
         }
     };
 
@@ -95,6 +97,9 @@ namespace engine {
         tex->remove();
         vbo->remove();
         vao->remove();
+        delete tex;
+        delete vbo;
+        delete vao;
         delete verts;
         delete indices;
         delete sprites;
