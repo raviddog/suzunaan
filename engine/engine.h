@@ -28,17 +28,17 @@ namespace engine {
     //         void draw();
 
     // };
+    struct Sprite {
+        float x;
+        float y;
+        float z;
+        float w;
+        float width;
+        float height;
+    };
 
     class SpriteSheet {
         private:
-            struct Sprite {
-                float x;
-                float y;
-                float z;
-                float w;
-                float width;
-                float height;
-            };
             std::vector<float> *verts;
             std::vector<uint32_t> *indices;
             uint32_t indices_stored_size;
