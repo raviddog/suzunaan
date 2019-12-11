@@ -28,9 +28,9 @@ namespace game::menu {
 
             if(draw_changed) {
                 //  rebuffer
-                img_base_options->drawSprite(opt_selected + 2, 320.f, 240.f + (opt_selected * 64.f));
+                img_base_options->drawSprite(opt_selected + 2, 320.f, 240.f - (opt_selected * 64.f));
                 img_base_options->drawSprite(0, 320.f, 240.f);
-                img_base_options->drawSprite(1, 320.f, 304.f);
+                img_base_options->drawSprite(1, 320.f, 176.f);
                 
                 
                 img_base_options->buffer();

@@ -57,6 +57,7 @@ namespace engine {
 
             // temp
             void drawSprite(int, float, float);
+            void drawSprite(int, float, float, float);
             void buffer();
             void draw();
     };

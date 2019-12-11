@@ -19,7 +19,10 @@ namespace engine {
 
         vbo->init();
         vbo->bind();
-        vbo->createVertexAttribPointer(4, GL_FLOAT, 4*sizeof(float), (void*)0);
+        vbo->createVertexAttribPointer(2, GL_FLOAT, 7*sizeof(float), (void*)0);
+        vbo->createVertexAttribPointer(2, GL_FLOAT, 7*sizeof(float), (void*)(2*sizeof(float)));
+        vbo->createVertexAttribPointer(2, GL_FLOAT, 7*sizeof(float), (void*)(4*sizeof(float)));
+        vbo->createVertexAttribPointer(1, GL_FLOAT, 7*sizeof(float), (void*)(6*sizeof(float)));
         vbo->unbind();
 
         this->numSprites = numSprites;
@@ -39,10 +42,11 @@ namespace engine {
     void SpriteSheet::setSprite(int num, int x, int y, int width, int height)
     {
         if(num < numSprites && num >= 0) {
+            //  normalised texture coordinates
             sprites[num].x = (1.0f / (float)tex->srcWidth) * (float)x;
             sprites[num].y = (1.0f / (float)tex->srcHeight) * (float)y;
             sprites[num].z = (1.0f / (float)tex->srcWidth) * (float)(x + width);
-            sprites[num].w = (1.0f / (float)tex->srcWidth) * (float)(y + height);
+            sprites[num].w = (1.0f / (float)tex->srcHeight) * (float)(y + height);
             sprites[num].width = (float)width;
             sprites[num].height = (float)height;
         }
@@ -50,22 +54,37 @@ namespace engine {
     }
 
     void SpriteSheet::drawSprite(int num, float x, float y) {
+        drawSprite(num, x, y, 0.0f);
+    };
+
+    void SpriteSheet::drawSprite(int num, float x, float y, float angle) {
         if(num > -1 && num < numSprites) {
-            float v[] = {
-                x,                      y + sprites[num].height,    sprites[num].x, sprites[num].w,
-                x + sprites[num].width, y,                          sprites[num].z, sprites[num].y,
-                x,                      y,                          sprites[num].x, sprites[num].y,
-                x + sprites[num].width, y + sprites[num].height,    sprites[num].z, sprites[num].w
+            // float v[] = {
+            //     x,                      (float)scrHeight - y,                           sprites[num].x, sprites[num].y, sprites[num].width / -2.f, sprites[num].height / 2.f, angle,
+            //     x + sprites[num].width, (float)scrHeight - (y + sprites[num].height),   sprites[num].z, sprites[num].w, sprites[num].width / 2.f, sprites[num].height / 2.f, angle,
+            //     x,                      (float)scrHeight - (y + sprites[num].height),   sprites[num].x, sprites[num].w, sprites[num].width / -2.f, sprites[num].height / 2.f, angle,
+            //     x + sprites[num].width, (float)scrHeight - y,                           sprites[num].z, sprites[num].y, sprites[num].width / 2.f, sprites[num].height / 2.f, angle
+            // };
+
+            //  2 3
+            //  1 4
+
+            float v[] {
+                x, y, sprites[num].x, sprites[num].w, sprites[num].width / -2.f, sprites[num].height / -2.f, angle,
+                x, y, sprites[num].x, sprites[num].y, sprites[num].width / -2.f, sprites[num].height / 2.f, angle,
+                x, y, sprites[num].z, sprites[num].y, sprites[num].width / 2.f, sprites[num].height / 2.f, angle,
+                x, y, sprites[num].z, sprites[num].w, sprites[num].width / 2.f, sprites[num].height / -2.f, angle
+
             };
 
-            uint32_t size = verts->size() / 4;
+            uint32_t size = verts->size() / 7;
 
             uint32_t ind[] = {
                 size, size + 1, size + 2,
-                size, size + 1, size + 3
+                size, size + 3, size + 2
             };
 
-            for(int i = 0; i < 16; i++) {
+            for(int i = 0; i < 28; i++) {
                 verts->push_back(v[i]);
             }
 
@@ -129,18 +148,25 @@ namespace engine {
         //glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        //stbi_set_flip_vertically_on_load(true);
-        glm::mat4 scrProjection = glm::ortho(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f);
+        // stbi_set_flip_vertically_on_load(true);
+        // glm::mat4 scrProjection = glm::ortho(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
         shaderSpriteSheet = new gl::Shader();
         shaderSpriteSheet->load("./shaders/spritesheet.vert", "./shaders/spritesheet.frag");
         shaderSpriteSheet->use();
-        shaderSpriteSheet->setMat4("scrProjection", scrProjection);
         shaderSpriteSheet->setInt("txUnit", 0);
+        // shaderSpriteSheet->setMat4("scrProjection", scrProjection);
+
+
+        // glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), glm::radians(60.0f), glm::vec3(0.0, 0.0, 1.0));
+        // shaderSpriteSheet->setMat4("r", rotate);
+        // std::cout<<glm::to_string(rotate)<<std::endl;
+
+        glm::vec2 scrRes = glm::vec2((float)width, (float)height);
+        shaderSpriteSheet->setVec2("res", scrRes);
 
         // shaderSprite = new gl::Shader();
         // shaderSprite->load("./shaders/sprite.vert", "./shaders/sprite.frag");
         // shaderSprite->use();
-        // shaderSprite->setMat4("scrProjection", scrProjection);
         // shaderSprite->setInt("txUnit", 0);
     }
 
