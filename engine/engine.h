@@ -3,6 +3,7 @@
 
 #include "engine_gl.h"
 #include <vector>
+#include "math.h"
 
 namespace engine {
 

@@ -59,16 +59,6 @@ namespace engine {
 
     void SpriteSheet::drawSprite(int num, float x, float y, float angle) {
         if(num > -1 && num < numSprites) {
-            // float v[] = {
-            //     x,                      (float)scrHeight - y,                           sprites[num].x, sprites[num].y, sprites[num].width / -2.f, sprites[num].height / 2.f, angle,
-            //     x + sprites[num].width, (float)scrHeight - (y + sprites[num].height),   sprites[num].z, sprites[num].w, sprites[num].width / 2.f, sprites[num].height / 2.f, angle,
-            //     x,                      (float)scrHeight - (y + sprites[num].height),   sprites[num].x, sprites[num].w, sprites[num].width / -2.f, sprites[num].height / 2.f, angle,
-            //     x + sprites[num].width, (float)scrHeight - y,                           sprites[num].z, sprites[num].y, sprites[num].width / 2.f, sprites[num].height / 2.f, angle
-            // };
-
-            //  2 3
-            //  1 4
-
             float v[] {
                 x, y, sprites[num].x, sprites[num].w, sprites[num].width / -2.f, sprites[num].height / -2.f, angle,
                 x, y, sprites[num].x, sprites[num].y, sprites[num].width / -2.f, sprites[num].height / 2.f, angle,
