@@ -7,7 +7,7 @@ const int scrHeight = 480;
 
 
 int main(int args, char** argv) {
-    engine::init("test", scrWidth, scrHeight);
+    engine::init("test", false, 1280, 960, 640, 480);
 
     //freopen("./test.log", "w", stdout);
     

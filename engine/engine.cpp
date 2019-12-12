@@ -114,11 +114,13 @@ namespace engine {
         delete sprites;
     }
 
+    void init(const char *title, bool fullscreen, int width, int height) {
+        init(title, fullscreen, width, height, width, height);
+    }
 
-
-    void init(const char *title, int width, int height) {
-        scrWidth = width;
-        scrHeight = height;
+    void init(const char *title, bool fullscreen, int width_win, int height_win, int width_draw, int height_draw) {
+        scrWidth = width_win;
+        scrHeight = height_win;
 
         SDL_Init(SDL_INIT_EVERYTHING);
         SDL_GL_LoadLibrary(NULL);
@@ -126,13 +128,16 @@ namespace engine {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
-
-        gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL);
+        if(fullscreen) {
+            gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+        } else {
+            gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL);
+        }
         gl::maincontext = SDL_GL_CreateContext(gl::window);
         gladLoadGLLoader(SDL_GL_GetProcAddress);
 
         SDL_GL_SetSwapInterval(1);
-        glViewport(0, 0, width, height);
+        glViewport(0, 0, width_win, height_win);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glEnable(GL_BLEND);
         //glEnable(GL_DEPTH_TEST);
@@ -151,7 +156,7 @@ namespace engine {
         // shaderSpriteSheet->setMat4("r", rotate);
         // std::cout<<glm::to_string(rotate)<<std::endl;
 
-        glm::vec2 scrRes = glm::vec2((float)width, (float)height);
+        glm::vec2 scrRes = glm::vec2((float)width_draw, (float)height_draw);
         shaderSpriteSheet->setVec2("res", scrRes);
 
         // shaderSprite = new gl::Shader();
