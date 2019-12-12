@@ -1,4 +1,4 @@
-#include "game.h"
+#include "source/game.h"
 #include "engine/engine.h"
 
 namespace game::menu {
@@ -39,7 +39,9 @@ namespace game::menu {
 
 
             if(engine::keyPressed[engine::kbZ]) {
-                if(opt_selected == 1) {
+                if(opt_selected == 0) {
+                    game::changeState(1);
+                } else if(opt_selected == 1) {
                     engine::quit = true;
                 }
             }

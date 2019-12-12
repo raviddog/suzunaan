@@ -43,14 +43,12 @@ namespace engine {
             std::vector<float> *verts;
             std::vector<uint32_t> *indices;
             uint32_t indices_stored_size;
-        public:
-            int numSprites;
             Sprite *sprites;
             gl::VAO *vao;
             gl::VBO *vbo;
             gl::Texture *tex;
-
-
+        public:
+            int numSprites;
 
             void load(const std::string&, int);
             void setSprite(int, int, int, int, int);
