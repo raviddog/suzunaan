@@ -198,14 +198,14 @@ namespace game::teststage {
         img_player = new SpriteSheet();
         img_player->load("./data/pl00.png", 25);
         for(int i = 0; i < 8; i++) {
-            img_player->setSprite(i, i * 32, 0, 32, 46);
-            img_player->setSprite(i + 8, i * 32, 46, 32, 46);
-            img_player->setSprite(i + 16, i * 32, 92, 32, 46);
+            img_player->setSprite(i, i * 32, 0, 32, 48);
+            img_player->setSprite(i + 8, i * 32, 48, 32, 48);
+            img_player->setSprite(i + 16, i * 32, 96, 32, 48);
         }
         img_player->setSprite(24, 0, 146, 16, 12);
         
-        //  center at 0,0 sprite is 32x46
-        dat_player.init(608.f, 434.f);
+        //  center at 0,0 sprite is 32x48
+        dat_player.init(608.f, 432.f);
     }
 
     void unload() {
