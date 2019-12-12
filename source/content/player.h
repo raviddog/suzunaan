@@ -5,7 +5,7 @@ namespace game::content {
 
     //  bullets part of player class for now
     //  move it to actual bullet mechanism later
-    struct bullet_s {
+    struct bullet_player_s {
         //  base shot for now
         //  12x16
         //  8 pixels per frame, shoot every other frame
@@ -26,7 +26,7 @@ namespace game::content {
         //  moveDir
         //  1 0 2
 
-        bullet_s bullet[42];
+        bullet_player_s bullet[42];
         bool shoot_enabled;
         
         void init(float, float);
