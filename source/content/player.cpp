@@ -14,6 +14,11 @@ namespace game::content {
         speed_unf_diag = 2.82843f;
         speed_foc_straight = 2.f;
         speed_foc_diag = 1.41421f;
+
+        shoot_enabled = true;
+        for(int i = 0; i < 42; i++) {
+            bullet[i].active_frame = 0;
+        }
     }
 
     void player_s::update(unsigned char keyState) {
@@ -66,6 +71,12 @@ namespace game::content {
             animDelay = 0;
             animFrame = 0;
             moveDir = 0;
+        }
+
+        //  accelerate initial direction animation frames
+        if((moveDir == 1 && animFrame < 12) || (moveDir == 2 && animFrame < 20)) {
+            animFrame += 1;
+            animDelay = 0;
         }
 
         //  roll over animation frames
@@ -142,6 +153,46 @@ namespace game::content {
         if(y_pos < 0.f) y_pos = 0.f;
 
         
+        //  shooting logic
+        //  move bullets, advance active frame, remove if out of bounds
+        for(int i = 0; i < 42; i++) {
+            if(bullet[i].active_frame > 1) {
+                bullet[i].active_frame += 1;
+                if(bullet[i].active_frame > 4) {
+                    bullet[i].active_frame = 0;
+                }
+            }
 
+            if(bullet[i].active_frame > 0) {
+                bullet[i].y_pos += 24.f;
+
+                //  testing fade out animation
+                if(bullet[i].y_pos > y_max - 40.f) {
+                    bullet[i].active_frame += 1;
+                }
+            }
+        }
+
+        //  fire new bullets
+        if(!shoot_enabled) {
+            shoot_enabled = true;
+        } else {
+            if(keys[z]) {
+                shoot_enabled = false;
+                
+                //  spawn left bullet
+                int bullet_num;
+                for(bullet_num = 0; bullet[bullet_num].active_frame != 0 && bullet_num < 42; bullet_num++);
+                bullet[bullet_num].x_pos = x_pos + 8.f;
+                bullet[bullet_num].y_pos = y_pos + 24.f;
+                bullet[bullet_num].active_frame = 1;
+
+                //  spawn right bullet
+                for(bullet_num = 0; bullet[bullet_num].active_frame != 0 && bullet_num < 42; bullet_num++);
+                bullet[bullet_num].x_pos = x_pos + 24.f;
+                bullet[bullet_num].y_pos = y_pos + 24.f;
+                bullet[bullet_num].active_frame = 1;
+            }
+        }
     }
 }
