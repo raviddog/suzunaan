@@ -12,8 +12,8 @@ add_library(engine STATIC engine/engine_gl.cpp engine/engine.cpp engine/glad.c e
 target_include_directories(engine PUBLIC ./engine)
 target_link_libraries(engine -lmingw32 -lSDL2main -lSDL2)
 
-add_library(game STATIC source/content/menu.cpp source/content/teststage.cpp)
-target_include_directories(game PUBLIC . ./engine)
+add_library(game STATIC source/content/menu.cpp source/content/teststage.cpp source/content/player.cpp)
+target_include_directories(game PUBLIC . ./engine ./source/content)
 
 add_executable(test source/main.cpp source/game.cpp)
 target_include_directories(test PUBLIC .)

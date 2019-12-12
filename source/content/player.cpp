@@ -1,0 +1,147 @@
+#include "player.h"
+
+namespace game::content {
+    void player_s::init(float width, float height) {
+        x_pos = width / 2.f;
+        y_pos = height / 4.f;
+        animFrame = 0;
+        animDelay = 0;
+
+        x_max = width;
+        y_max = height;
+
+        speed_unf_straight = 4.f;
+        speed_unf_diag = 2.82843f;
+        speed_foc_straight = 2.f;
+        speed_foc_diag = 1.41421f;
+    }
+
+    void player_s::update(unsigned char keyState) {
+        //  c shift x z right left down up
+        //  0000 0000
+
+        bool keys[8] = {
+            keyState & 0x01,
+            keyState & 0x02,
+            keyState & 0x04,
+            keyState & 0x08,
+            keyState & 0x10,
+            keyState & 0x20,
+            keyState & 0x40,
+            keyState & 0x80
+        };
+
+        enum key {
+            up = 0,
+            down,
+            left,
+            right,
+            z,
+            x,
+            shift,
+            c
+        };
+
+        //  time delay for animation update
+        animDelay += 1;
+        if(animDelay >= 4) {
+            animDelay = 0;
+            animFrame += 1;
+        }
+
+        //  movement direction animation changes
+        if(keys[left] && !keys[right] && moveDir != 1) {
+            //  left pushed but not right, not moving left
+            animDelay = 0;
+            animFrame = 8;
+            moveDir = 1;
+
+        } else if(keys[right] && !keys[left] && moveDir != 2) {
+            //  right pushed but not left, not moving right
+            animDelay = 0;
+            animFrame = 16;
+            moveDir = 2;
+        } else if(!keys[left] && !keys[right] && moveDir != 0) {
+            //  neither right or left pushed, moving sideways
+            animDelay = 0;
+            animFrame = 0;
+            moveDir = 0;
+        }
+
+        //  roll over animation frames
+        switch(moveDir) {
+            case 0:
+                if(animFrame >= 8) {
+                    animFrame = 0;
+                }
+                break;
+            case 1:
+                if(animFrame >= 16) {
+                    animFrame = 12;
+                }
+                break;
+            case 2:
+                if(animFrame >= 24) {
+                    animFrame = 20;
+                }
+                break;
+        }
+
+        //  check focused
+        float str, diag;
+        if(keys[shift]) {
+            str = speed_foc_straight;
+            diag = speed_foc_diag;
+        } else {
+            str = speed_unf_straight;
+            diag = speed_unf_diag;
+        }
+
+        //  apply movement
+        if(keys[up] && !keys[right] && !keys[down] && !keys[left]) {
+            //  up
+            y_pos += str;
+
+        } else if(keys[up] && keys[right] && !keys[down] && !keys[left]) {
+            //  up right
+            y_pos += diag;
+            x_pos += diag;
+
+        } else if(!keys[up] && keys[right] && !keys[down] && !keys[left]) {
+            //  right
+            x_pos += str;
+            
+        } else if(!keys[up] && keys[right] && keys[down] && !keys[left]) {
+            //  right down
+            x_pos += diag;
+            y_pos -= diag;
+            
+        } else if(!keys[up] && !keys[right] && keys[down] && !keys[left]) {
+            //  down
+            y_pos -= str;
+            
+        } else if(!keys[up] && !keys[right] && keys[down] && keys[left]) {
+            //  down left
+            y_pos -= diag;
+            x_pos -= diag;
+            
+        } else if(!keys[up] && !keys[right] && !keys[down] && keys[left]) {
+            //  left
+            x_pos -= str;
+            
+        } else if(keys[up] && !keys[right] && !keys[down] && keys[left]) {
+            //  left up
+            x_pos -= diag;
+            y_pos += diag;
+        }
+
+        //  clamp position
+        if(x_pos > x_max) x_pos = x_max;
+        if(x_pos < 0.f) x_pos = 0.f;
+        if(y_pos > y_max) y_pos = y_max;
+        if(y_pos < 0.f) y_pos = 0.f;
+
+        
+
+    }
+}
