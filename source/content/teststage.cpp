@@ -6,10 +6,13 @@
 #include <cstdlib>
 #include "time.h"
 
+
 using namespace engine;
 using namespace game::content;
 
 namespace game::teststage {
+    int BULLET_MAX = 20000;
+    int BULLET_HALF = 10000;
 
     SpriteSheet *img_player, *img_player_b, *img_bullet;
     player_s player;
@@ -18,8 +21,9 @@ namespace game::teststage {
 
 
     int getFreeBullet() {
-        for(int i = 0; i < 5000; i++) {
+        for(int i = 0; i < BULLET_HALF; i++) {
             if(!bullets[i].active) return i;
+            if(!bullets[i + BULLET_HALF].active) return i + BULLET_HALF;
         }
         return -1;
     }    
@@ -38,20 +42,23 @@ namespace game::teststage {
         if(engine::keyState[engine::kbC]) key = key | 0x80;
         player.update(key);
 
-        for(int j = 0; j < 12; j++) {
+        for(int j = 0; j < 40; j++) {
             int i = getFreeBullet();
             if(i > -1) {
                 bullets[i].active = true;
-                bullets[i].x_accel = (float)rand() / (float)RAND_MAX * 0.2f - 0.1f;
-                bullets[i].y_accel = (float)rand() / (float)RAND_MAX * 0.2f - 0.1f;
-                bullets[i].x_speed = (float)rand() / (float)RAND_MAX * 4.f - 2.f;
-                bullets[i].y_speed = (float)rand() / (float)RAND_MAX * 4.f - 2.f;
-                bullets[i].x_pos = (float)(j * 53);
+                // bullets[i].x_accel = (float)rand() / (float)RAND_MAX * 0.2f - 0.1f;
+                // bullets[i].y_accel = (float)rand() / (float)RAND_MAX * 0.2f - 0.1f;
+                bullets[i].x_accel = 0.f;
+                bullets[i].y_accel = 0.f;
+                bullets[i].x_speed = (float)rand() / (float)RAND_MAX * 0.4f - 0.2f;
+                bullets[i].y_speed = (float)rand() / (float)RAND_MAX * 0.4f - 0.2f;
+                bullets[i].x_pos = (float)(j * 16);
                 bullets[i].y_pos = 360.f;
                 bullets[i].instructions = nullptr;
             }
         }
     }
+    int frame = 0;
 
     void draw() {
         //  draw player bullets
@@ -64,16 +71,20 @@ namespace game::teststage {
         img_player_b->buffer();
         img_player_b->draw();
         
-        //  draw enemy bullets
+        frame += 1;
         int count = 0;
-        for(int i = 0; i < 5000; i++) {
+        //  draw enemy bullets
+        for(int i = 0; i < BULLET_MAX; i++) {
             if(bullets[i].active) {
                 bullets[i].update();
                 count += 1;
                 img_bullet->drawSprite(0, bullets[i].x_pos, bullets[i].y_pos);
             }
         }
-        printf("%d\n", count);
+        if(frame >= 60) {
+            frame = 0;
+            printf("bullets: %d ", count);
+        }
         
         img_bullet->buffer();
         img_bullet->draw();
@@ -110,8 +121,8 @@ namespace game::teststage {
         img_bullet->load("./data/bullet1.png", 1);
         img_bullet->setSprite(0, 64, 48, 16, 16);
 
-        bullets = new bullet_s[5000];
-        for(int i = 0; i < 5000; i++) {
+        bullets = new bullet_s[BULLET_MAX];
+        for(int i = 0; i < BULLET_MAX; i++) {
             bullets[i].active = false;
         }
     }
