@@ -37,14 +37,19 @@ void main()
     // float x = (cosa * normalized_size.x) - (sina * normalized_size.y);
     // float y = (sina * normalized_size.x) + (cosa * normalized_size.y);
 
+    vec2 pre_distortion = abs(sina) * (res.xy / res.yx - 1.0) + 1.0;
+    vec2 pre_distortion_ratio = vec2(mix(1.0, pre_distortion.x, abs(sin(-radians(rotation * 2)))), mix(1.0, pre_distortion.y, abs(sin(-radians(rotation * 2)))));
+    normalized_size = normalized_size * pre_distortion_ratio;
+
     vec2 rotated_coord = vec2((cosa * normalized_size.x) - (sina * normalized_size.y), (sina * normalized_size.x) + (cosa * normalized_size.y));
 
     //  fix rectangular distortion
     // vec2 ratio = vec2(res.y / res.x, res.x / res.y);
 
     //  apply amount of distortion based on rotation angle
-    vec2 distortion = vec2((abs(sina) * (res.y / res.x - 1.0)) + 1.0, (abs(sina) * (res.x / res.y - 1.0)) + 1.0);
+    // vec2 distortion = vec2((abs(sina) * (res.y / res.x - 1.0)) + 1.0, (abs(sina) * (res.x / res.y - 1.0)) + 1.0);
+    vec2 post_distortion = abs(sina) * (res.yx / res.xy - 1.0) + 1.0;
     
     //  move coord based on center destination
-    gl_Position = vec4(rotated_coord * distortion + normalized_coord, 0.0, 1.0);
+    gl_Position = vec4(rotated_coord * post_distortion + normalized_coord, 0.0, 1.0);
 }
