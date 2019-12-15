@@ -10,8 +10,9 @@ namespace game::content {
         float x_pos, y_pos;
         
         //  not sure which way to implement movement
-        float x_speed, y_speed, x_accel, y_accel;
-        float speed, angle;
+        //  should accel be per second or per frame
+        //  probably per frame, but then the values have to be super small
+        float speed, accel, angle;
 
         std::unordered_map<int, std::string> *instructions;
         void update();

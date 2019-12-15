@@ -11,21 +11,35 @@ using namespace engine;
 using namespace game::content;
 
 namespace game::teststage {
-    int BULLET_MAX = 20000;
-    int BULLET_HALF = 10000;
+    const int BULLET_MAX = 20000;
+    const int BULLET_HALF = 10000;
 
     SpriteSheet *img_player, *img_player_b, *img_bullet;
     player_s player;
 
     bullet_s *bullets;
+    std::vector<int> *bullet_draw_order;
 
+    int last_added_bullet;
 
     int getFreeBullet() {
+        int j = -1;
         for(int i = 0; i < BULLET_HALF; i++) {
-            if(!bullets[i].active) return i;
-            if(!bullets[i + BULLET_HALF].active) return i + BULLET_HALF;
+            if(i + last_added_bullet >= BULLET_MAX) last_added_bullet = 0;
+            if(!bullets[i + last_added_bullet].active) {
+                j = i + last_added_bullet;
+                break;
+            }
+            if(!bullets[i].active) {
+                j = i;
+                break;
+            };
+            if(!bullets[i + BULLET_HALF].active) {
+                j = i + BULLET_HALF;
+            }
         }
-        return -1;
+        if(j != -1) last_added_bullet = j;
+        return j;
     }    
     
     
@@ -42,17 +56,16 @@ namespace game::teststage {
         if(engine::keyState[engine::kbC]) key = key | 0x80;
         player.update(key);
 
-        for(int j = 0; j < 40; j++) {
+        for(int j = 0; j < 8; j++) {
             int i = getFreeBullet();
             if(i > -1) {
                 bullets[i].active = true;
-                // bullets[i].x_accel = (float)rand() / (float)RAND_MAX * 0.2f - 0.1f;
-                // bullets[i].y_accel = (float)rand() / (float)RAND_MAX * 0.2f - 0.1f;
-                bullets[i].x_accel = 0.f;
-                bullets[i].y_accel = 0.f;
-                bullets[i].x_speed = (float)rand() / (float)RAND_MAX * 0.4f - 0.2f;
-                bullets[i].y_speed = (float)rand() / (float)RAND_MAX * 0.4f - 0.2f;
-                bullets[i].x_pos = (float)(j * 16);
+                bullet_draw_order->push_back(i);
+                // bullets[i].accel = 0.016f;
+                // bullets[i].speed = (float)rand() / (float)RAND_MAX * 2.f - 1.f;
+                bullets[i].speed = 40.f;
+                bullets[i].angle = j * 45.f;
+                bullets[i].x_pos = (float)(j * 80);
                 bullets[i].y_pos = 360.f;
                 bullets[i].instructions = nullptr;
             }
@@ -74,11 +87,13 @@ namespace game::teststage {
         frame += 1;
         int count = 0;
         //  draw enemy bullets
-        for(int i = 0; i < BULLET_MAX; i++) {
-            if(bullets[i].active) {
-                bullets[i].update();
+        for(int i = 0; i < bullet_draw_order->size(); i++) {
+            bullets[(*bullet_draw_order)[i]].update();
+            if(!bullets[(*bullet_draw_order)[i]].active) {
+                bullet_draw_order->erase(bullet_draw_order->begin() + i);
+            } else {
                 count += 1;
-                img_bullet->drawSprite(0, bullets[i].x_pos, bullets[i].y_pos);
+                img_bullet->drawSprite(0, bullets[(*bullet_draw_order)[i]].x_pos, bullets[(*bullet_draw_order)[i]].y_pos, bullets[(*bullet_draw_order)[i]].angle);
             }
         }
         if(frame >= 60) {
@@ -119,12 +134,14 @@ namespace game::teststage {
 
         img_bullet = new SpriteSheet();
         img_bullet->load("./data/bullet1.png", 1);
-        img_bullet->setSprite(0, 64, 48, 16, 16);
+        img_bullet->setSprite(0, 64, 16, 16, 16);
 
         bullets = new bullet_s[BULLET_MAX];
         for(int i = 0; i < BULLET_MAX; i++) {
             bullets[i].active = false;
         }
+        last_added_bullet = 0;
+        bullet_draw_order = new std::vector<int>();
     }
 
     void unload() {
@@ -134,5 +151,7 @@ namespace game::teststage {
         delete img_player;
         delete img_player_b;
         delete img_bullet;
+        delete bullets;
+        delete bullet_draw_order;
     }
 }
