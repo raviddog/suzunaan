@@ -7,12 +7,6 @@ namespace engine {
     int scrHeight;
 
     static gl::Shader *shaderSpriteSheet;
-    // static gl::Shader *shaderSprite;
-
-    //  test function
-    void setspritesheetfloat(float val) {
-        shaderSpriteSheet->setFloat("distortion_amount", val);
-    }
 
     void SpriteSheet::load(const std::string &path, int numSprites) {
 
@@ -150,17 +144,10 @@ namespace engine {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // stbi_set_flip_vertically_on_load(true);
-        // glm::mat4 scrProjection = glm::ortho(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
         shaderSpriteSheet = new gl::Shader();
         shaderSpriteSheet->load("./shaders/spritesheet.vert", "./shaders/spritesheet.frag");
         shaderSpriteSheet->use();
         shaderSpriteSheet->setInt("txUnit", 0);
-        // shaderSpriteSheet->setMat4("scrProjection", scrProjection);
-
-
-        // glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), glm::radians(60.0f), glm::vec3(0.0, 0.0, 1.0));
-        // shaderSpriteSheet->setMat4("r", rotate);
-        // std::cout<<glm::to_string(rotate)<<std::endl;
 
         glm::vec2 scrRes = glm::vec2((float)width_draw, (float)height_draw);
         shaderSpriteSheet->setVec2("res", scrRes);

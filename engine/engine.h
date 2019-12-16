@@ -10,8 +10,6 @@ namespace engine {
     void inputs();
     void close();
 
-    void setspritesheetfloat(float);
-
     // class Sprite {
     //     private:
     //         std::vector<float> *verts;
