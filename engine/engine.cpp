@@ -9,6 +9,11 @@ namespace engine {
     static gl::Shader *shaderSpriteSheet;
     // static gl::Shader *shaderSprite;
 
+    //  test function
+    void setspritesheetfloat(float val) {
+        shaderSpriteSheet->setFloat("distortion_amount", val);
+    }
+
     void SpriteSheet::load(const std::string &path, int numSprites) {
 
         vao = new gl::VAO();
@@ -47,6 +52,7 @@ namespace engine {
             sprites[num].y = (1.0f / (float)tex->srcHeight) * (float)y;
             sprites[num].z = (1.0f / (float)tex->srcWidth) * (float)(x + width);
             sprites[num].w = (1.0f / (float)tex->srcHeight) * (float)(y + height);
+            //  size in pixels, is normalized to screen size in shader
             sprites[num].width = (float)width;
             sprites[num].height = (float)height;
         }
@@ -60,10 +66,10 @@ namespace engine {
     void SpriteSheet::drawSprite(int num, float x, float y, float angle) {
         if(num > -1 && num < numSprites) {
             float v[] {
-                x, y, sprites[num].x, sprites[num].w, sprites[num].width / -2.f, sprites[num].height / -2.f, angle,
-                x, y, sprites[num].x, sprites[num].y, sprites[num].width / -2.f, sprites[num].height / 2.f, angle,
-                x, y, sprites[num].z, sprites[num].y, sprites[num].width / 2.f, sprites[num].height / 2.f, angle,
-                x, y, sprites[num].z, sprites[num].w, sprites[num].width / 2.f, sprites[num].height / -2.f, angle
+                x, y, sprites[num].x, sprites[num].w, -sprites[num].width, -sprites[num].height, angle,
+                x, y, sprites[num].x, sprites[num].y, -sprites[num].width, sprites[num].height, angle,
+                x, y, sprites[num].z, sprites[num].y, sprites[num].width, sprites[num].height, angle,
+                x, y, sprites[num].z, sprites[num].w, sprites[num].width, -sprites[num].height, angle
 
             };
 

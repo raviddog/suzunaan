@@ -22,6 +22,9 @@ namespace game::teststage {
 
     int last_added_bullet;
 
+    float test_distortion_amount;
+    float spin;
+
     int getFreeBullet() {
         int j = -1;
         for(int i = 0; i < BULLET_HALF; i++) {
@@ -56,20 +59,32 @@ namespace game::teststage {
         if(engine::keyState[engine::kbC]) key = key | 0x80;
         player.update(key);
 
-        for(int j = 0; j < 8; j++) {
-            int i = getFreeBullet();
-            if(i > -1) {
-                bullets[i].active = true;
-                bullet_draw_order->push_back(i);
-                // bullets[i].accel = 0.016f;
-                // bullets[i].speed = (float)rand() / (float)RAND_MAX * 2.f - 1.f;
-                bullets[i].speed = 40.f;
-                bullets[i].angle = j * 45.f;
-                bullets[i].x_pos = (float)(j * 80);
-                bullets[i].y_pos = 360.f;
-                bullets[i].instructions = nullptr;
-            }
+        if(engine::keyPressed[engine::kb0]) test_distortion_amount = 0.f;
+        if(engine::keyPressed[engine::kb1]) test_distortion_amount = 1.0f;
+        if(engine::keyPressed[engine::kb2]) {
+            test_distortion_amount  += 0.05f;
         }
+        if(engine::keyPressed[engine::kb3]) {
+            test_distortion_amount  -= 0.05f;
+        }
+
+        engine::setspritesheetfloat(test_distortion_amount);
+        
+
+        // for(int j = 0; j < 40; j++) {
+        //     int i = getFreeBullet();
+        //     if(i > -1) {
+        //         bullets[i].active = true;
+        //         bullet_draw_order->push_back(i);
+        //         // bullets[i].accel = 0.016f;
+        //         // bullets[i].speed = (float)rand() / (float)RAND_MAX * 2.f - 1.f;
+        //         bullets[i].speed = 16.f;
+        //         bullets[i].angle = j * 9.f;
+        //         bullets[i].x_pos = (float)(j * 16);
+        //         bullets[i].y_pos = 360.f;
+        //         bullets[i].instructions = nullptr;
+        //     }
+        // }
     }
     int frame = 0;
 
@@ -96,9 +111,28 @@ namespace game::teststage {
                 img_bullet->drawSprite(0, bullets[(*bullet_draw_order)[i]].x_pos, bullets[(*bullet_draw_order)[i]].y_pos, bullets[(*bullet_draw_order)[i]].angle);
             }
         }
+
+        //  testing
+        img_bullet->drawSprite(0, 320.f, 240.f);
+        img_bullet->drawSprite(0, 336.f, 240.f, 45.f);
+        img_bullet->drawSprite(0, 352.f, 240.f, 90.f);
+        img_bullet->drawSprite(0, 368.f, 240.f, 180.f);
+        img_bullet->drawSprite(0, 304.f, 240.f, spin);
+        img_bullet->drawSprite(0, 288.f, 240.f, spin * 2.f);
+        img_bullet->drawSprite(0, 272.f, 240.f, spin * 3.f);
+        img_bullet->drawSprite(1, 256.f, 240.f, spin);
+        img_bullet->drawSprite(1, 240.f, 240.f, spin * 2.f);
+        img_bullet->drawSprite(1, 224.f, 240.f, spin * 3.f);
+        img_bullet->drawSprite(1, 208.f, 240.f, 45.f);
+        img_bullet->drawSprite(1, 192.f, 240.f, 90.f);
+        spin += 1.f;
+        if(spin > 360.f) spin -= 360.f;
+
+
         if(frame >= 60) {
             frame = 0;
             printf("bullets: %d ", count);
+            printf("distortion value: %f ", test_distortion_amount);
         }
         
         img_bullet->buffer();
@@ -133,8 +167,10 @@ namespace game::teststage {
         player.init(608.f, 432.f);
 
         img_bullet = new SpriteSheet();
-        img_bullet->load("./data/bullet1.png", 1);
+        img_bullet->load("./data/bullet1.png", 2);
         img_bullet->setSprite(0, 64, 16, 16, 16);
+        img_bullet->setSprite(1, 64, 32, 16, 16);
+
 
         bullets = new bullet_s[BULLET_MAX];
         for(int i = 0; i < BULLET_MAX; i++) {
@@ -142,6 +178,9 @@ namespace game::teststage {
         }
         last_added_bullet = 0;
         bullet_draw_order = new std::vector<int>();
+
+        test_distortion_amount = 1.0f;
+        spin = 0.f;
     }
 
     void unload() {

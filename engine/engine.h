@@ -3,13 +3,14 @@
 
 #include "engine_gl.h"
 #include <vector>
-#include "math.h"
 
 namespace engine {
     void init(const char*, bool, int, int);
     void init(const char*, bool, int, int, int, int);
     void inputs();
     void close();
+
+    void setspritesheetfloat(float);
 
     // class Sprite {
     //     private:
