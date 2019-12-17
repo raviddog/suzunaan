@@ -14,7 +14,6 @@ out vec2 txCoord;
 
 uniform mat4 scrProjection;
 uniform vec2 res;
-uniform float distortion_amount;
 
 void main()
 {

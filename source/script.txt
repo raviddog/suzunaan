@@ -1,0 +1,13 @@
+frame : instructions
+
+instruction: speed(float speed);
+set speed
+
+instruction: accel(float speed);
+set acceleration
+
+instruction: speedTo(float speed, int frames);
+speed goes to target over specified number of frames
+
+instruction: move(float angle, float speed);
+set movement direction and speed.
