@@ -9,6 +9,7 @@ namespace engine {
     static gl::Shader *shaderSpriteSheet;
 
     void SpriteSheet::load(const std::string &path, int numSprites) {
+        realloc = true;
 
         vao = new gl::VAO();
         vbo = new gl::VBO();
@@ -36,6 +37,14 @@ namespace engine {
 
         verts = new std::vector<float>();
         indices = new std::vector<uint32_t>();
+    }
+
+    void SpriteSheet::load(const std::string &path, int numSprites, int maxDraws) {
+        load(path, numSprites);
+        vbo->bind();
+        vbo->createBuffer(sizeof(float) * 28 * maxDraws, sizeof(uint32_t) * 6 * maxDraws);
+        vbo->unbind();
+        realloc = false;
     }
 
     void SpriteSheet::setSprite(int num, int x, int y, int width, int height)
@@ -87,7 +96,11 @@ namespace engine {
     void SpriteSheet::buffer() {
         vao->bind();
         vbo->bind();
-        vbo->bufferVerts(sizeof(float) * verts->size(), verts->data(), sizeof(uint32_t) * indices->size(), indices->data());
+        if(realloc) {
+            vbo->bufferVerts(sizeof(float) * verts->size(), verts->data(), sizeof(uint32_t) * indices->size(), indices->data());
+        } else {
+            vbo->bufferSubVerts(sizeof(float) * verts->size(), verts->data(), sizeof(uint32_t) * indices->size(), indices->data());
+        }
         indices_stored_size = indices->size();
         vao->unbind();
         verts->clear();

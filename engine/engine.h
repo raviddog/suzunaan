@@ -46,10 +46,12 @@ namespace engine {
             gl::VAO *vao;
             gl::VBO *vbo;
             gl::Texture *tex;
+            bool realloc;
         public:
             int numSprites;
 
             void load(const std::string&, int);
+            void load(const std::string&, int, int);
             void setSprite(int, int, int, int, int);
             void unload();
 

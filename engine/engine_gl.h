@@ -49,13 +49,19 @@ namespace engine {
             public:
                 GLuint *ID_VBO, *ID_EBO;
                 int vertexAttribs;
+                int bufferSizeVert, bufferSizeInd;
                 void init();
                 void bind();
                 void remove();
                 static void unbind();
 
+                void createBuffer(int);
+                void createBuffer(int, int);
+
                 void bufferVerts(int, float*);
                 void bufferVerts(int, float*, int, uint32_t*);
+                void bufferSubVerts(int, float*);
+                void bufferSubVerts(int, float*, int, uint32_t*);
                 
                 void createVertexAttribPointer(int, GLenum, GLsizei, const void*);
                 void createVertexAttribPointerNormalized(int, GLenum, GLsizei, const void*);

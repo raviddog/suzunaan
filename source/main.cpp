@@ -8,8 +8,9 @@ const int scrHeight = 480;
 
 int main(int args, char** argv) {
     engine::init("test", false, 1280, 960, 640, 480);
+    // engine::init("test", false, 640, 480);
 
-    //freopen("./test.log", "w", stdout);
+    // freopen("./test.log", "w", stdout);
     
     uint32_t ticks[4] = {0};
     // 0 - frame counter
@@ -25,7 +26,10 @@ int main(int args, char** argv) {
         engine::inputs();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        game::logic();
+        if(engine::keyState[engine::kbO] || engine::keyPressed[engine::kbP]) {
+            game::logic();
+        }
+
         game::draw();
         
 
@@ -35,17 +39,16 @@ int main(int args, char** argv) {
         ticks[0] += 1;
         if(SDL_GetTicks() > ticks[2] + 1000) {
             // draw time
-            printf("frame time: %dms, ", SDL_GetTicks() - ticks[1]);
+            // printf("frame time: %dms, ", SDL_GetTicks() - ticks[1]);
             
             // fps
-            printf("fps: %d\n", ticks[0]);
+            // printf("fps: %d\n", ticks[0]);
             ticks[0] = 0;
             ticks[2] = SDL_GetTicks();
             
             // other debug messages
             // printf("sprites drawn: %d ", count);
-
-            printf("\n");
+            // printf("\n");
         }
     }
     engine::close();

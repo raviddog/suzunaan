@@ -346,6 +346,18 @@ namespace engine {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
 
+        void VBO::createBuffer(int vertsize) {
+            glBufferData(GL_ARRAY_BUFFER, vertsize, nullptr, GL_DYNAMIC_DRAW);
+            bufferSizeVert = vertsize;
+        }
+
+        void VBO::createBuffer(int vertsize, int indsize) {
+            glBufferData(GL_ARRAY_BUFFER, vertsize, nullptr, GL_DYNAMIC_DRAW);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indsize, nullptr, GL_DYNAMIC_DRAW);
+            bufferSizeVert = vertsize;
+            bufferSizeInd = indsize;
+        }        
+
         void VBO::bufferVerts(int vertsize, float *verts) {
             glBufferData(GL_ARRAY_BUFFER, vertsize, verts, GL_DYNAMIC_DRAW);
         }
@@ -353,6 +365,15 @@ namespace engine {
         void VBO::bufferVerts(int vertsize, float *verts, int indsize, uint32_t *indices) {
             glBufferData(GL_ARRAY_BUFFER, vertsize, verts, GL_DYNAMIC_DRAW);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indsize, indices, GL_DYNAMIC_DRAW);
+        }
+
+        void VBO::bufferSubVerts(int vertsize, float *verts) {
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vertsize, verts);
+        }
+
+        void VBO::bufferSubVerts(int vertsize, float *verts, int indsize, uint32_t *indices) {
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vertsize, verts);
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indsize, indices);
         }
 
         void VBO::createVertexAttribPointer(int size, GLenum type, GLsizei stride, const void *pointer) {
