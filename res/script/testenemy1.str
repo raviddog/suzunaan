@@ -1,2 +1,7 @@
 30:accel(-0.25);
 41:accel(0);
+90:accel(0.1);
+91:angle_change(5);
+107:accel(0);
+161:angle_change(0);
+162:type_change(112);

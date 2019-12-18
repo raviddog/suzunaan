@@ -17,6 +17,7 @@ namespace game::content {
         float draw_angle;
 
         std::unordered_map<int, std::string> *instructions;
+        void reset();
         void update();
     };
 }

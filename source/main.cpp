@@ -27,8 +27,8 @@ int main(int args, char** argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if(engine::keyState[engine::kbO] || engine::keyPressed[engine::kbP]) {
-            game::logic();
         }
+        game::logic();
 
         game::draw();
         
@@ -39,16 +39,16 @@ int main(int args, char** argv) {
         ticks[0] += 1;
         if(SDL_GetTicks() > ticks[2] + 1000) {
             // draw time
-            // printf("frame time: %dms, ", SDL_GetTicks() - ticks[1]);
+            printf("frame time: %dms, ", SDL_GetTicks() - ticks[1]);
             
             // fps
-            // printf("fps: %d\n", ticks[0]);
+            printf("fps: %d\n", ticks[0]);
             ticks[0] = 0;
             ticks[2] = SDL_GetTicks();
             
             // other debug messages
             // printf("sprites drawn: %d ", count);
-            // printf("\n");
+            printf("\n");
         }
     }
     engine::close();

@@ -14,14 +14,12 @@ using namespace game::content;
 
 namespace game::teststage {
     const int BULLET_MAX = 15000;
-    int frame = 0;
 
     SpriteSheet *img_player, *img_player_b, *img_bullet;
     player_s player;
 
     bullet_s *bullets;
     std::list<int> *bullet_draw_order;
-    int logged_bullet;
 
     int last_added_bullet;
     int frames;
@@ -79,22 +77,18 @@ namespace game::teststage {
         frames++;
 
         if(frames % 3 == 0) {
-            for(int j = 0; j < 8; j++) {
+            for(int j = 0; j < 24; j++) {
                 int i = getFreeBullet();
                 if(i > -1) {
-                    if(!bullets[logged_bullet].active) {
-                        logged_bullet = i;
-                        bullets[i].type = 56;
-                    } else {
-                        bullets[i].type = 52;
-                    }
-                    bullets[i].active = true;
+                    bullets[i].reset();
                     bullet_draw_order->push_front(i);
+                    bullets[i].type = 48 + j % 16;
+                    bullets[i].active = true;
                     bullets[i].frames = 0;
                     bullets[i].accel = 0.016f;
                     bullets[i].x_pos = 320.f;
                     bullets[i].y_pos = 360.f;
-                    bullets[i].angle = 360.f * sin((double)frames * 3.14159265/180) + j * 45.f;
+                    bullets[i].angle = 360.f * sin((double)frames * 3.14159265/180) + j * 15.f;
                     bullets[i].speed = 3.f;
                     bullets[i].instructions = test;
                 }
@@ -103,7 +97,6 @@ namespace game::teststage {
         //  should logic include updating new gpu data?
 
 
-        frame += 1;
         int count = 0;
         //  update and buffer all bullets
 
@@ -117,30 +110,11 @@ namespace game::teststage {
             }
         }
 
-
-        // printf("vector size: %d ", bullet_draw_order->size());
-        // for(int i = 0; i < bullet_draw_order->size(); i++) {
-        //     bullets[(*bullet_draw_order)[i]].update();
-        //     if((*bullet_draw_order)[i] == logged_bullet) {
-        //         printf("logged bullet: %d, %d, erased %d", logged_bullet, (*bullet_draw_order)[i], bullet_draw_order->begin() + i);
-        //     }
-        //     if(!bullets[(*bullet_draw_order)[i]].active) {
-        //         bullet_draw_order->erase(bullet_draw_order->begin() + i);
-        //     } else {
-        //         count += 1;
-        //         img_bullet->drawSprite(bullets[(*bullet_draw_order)[i]].type, bullets[(*bullet_draw_order)[i]].x_pos, bullets[(*bullet_draw_order)[i]].y_pos, bullets[(*bullet_draw_order)[i]].draw_angle);
-        //         if((*bullet_draw_order)[i] == logged_bullet) {
-        //             printf("drawn logged bullet ");
-        //         }
-        //     }
-        // }
         img_bullet->buffer();
 
-        if(frame >= 60) {
-            frame = 0;
+        if(frames % 60 == 0) {
             printf("bullets: %d ", count);
         }
-            printf("bullet data: %i x:%f y:%f speed:%f angle:%f draw:%f\n", bullets[logged_bullet].frames, bullets[logged_bullet].x_pos, bullets[logged_bullet].y_pos, bullets[logged_bullet].speed, bullets[logged_bullet].angle, bullets[logged_bullet].draw_angle);
     }
     
 
@@ -160,9 +134,6 @@ namespace game::teststage {
         img_player->buffer();
         img_player->draw();
 
-
-        
-        
         img_bullet->draw();
     }
 
@@ -207,7 +178,6 @@ namespace game::teststage {
         frames = 0;
 
         test = loadScript("./script/testenemy1.str");
-        logged_bullet = 1;
     }
 
     void unload() {
