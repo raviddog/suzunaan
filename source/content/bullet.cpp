@@ -5,6 +5,7 @@
 #define PI 3.14159265
 
 namespace game::content {
+    float bullet_bounds_x = 0.f, bullet_bounds_y = 0.f, bullet_bounds_xmax = 640.f, bullet_bounds_ymax = 480.f;
     
     void bullet_s::update() {
         if(active) {
@@ -63,16 +64,17 @@ namespace game::content {
 
 
             //  self disable, hardcoded for now
-            if(x_pos > 640.f) active = false;
-            if(x_pos < 0.f) active = false;
-            if(y_pos > 480.f) active = false;
-            if(y_pos < 0.f) active = false;
+            if(x_pos > bullet_bounds_xmax) active = false;
+            if(x_pos < bullet_bounds_x) active = false;
+            if(y_pos > bullet_bounds_ymax) active = false;
+            if(y_pos < bullet_bounds_y) active = false;
         }
     }
 
     void bullet_s::reset() {
         active = false;
         type = 0;
+        owner = -1;
         frames = 0;
         x_pos = 0.f;
         y_pos = 0.f;

@@ -4,9 +4,11 @@
 #include <unordered_map>
 
 namespace game::content {
+    extern float bullet_bounds_x, bullet_bounds_y, bullet_bounds_xmax, bullet_bounds_ymax;
+
     struct bullet_s {
         bool active;
-        int type, frames;
+        int type, frames, owner;
         float x_pos, y_pos;
         
         //  not sure which way to implement movement

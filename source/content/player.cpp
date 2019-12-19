@@ -1,19 +1,26 @@
 #include "player.h"
 
 namespace game::content {
-    void player_s::init(float width, float height) {
-        x_pos = width / 2.f;
-        y_pos = height / 4.f;
+    void player_s::init(float x, float y, float top, float right) {
+        x_pos = (top - x) / 2.f + x;
+        y_pos = (right - y) / 4.f + y;
         animFrame = 0;
         animDelay = 0;
 
-        x_max = width;
-        y_max = height;
+        x_max = top;
+        y_max = right;
+        x_min = x;
+        y_min = y;
 
         speed_unf_straight = 4.f;
         speed_unf_diag = 2.82843f;
         speed_foc_straight = 2.f;
         speed_foc_diag = 1.41421f;
+
+        focused = false;
+        focused_rotation = 0.f;
+
+        hitbox_radius = 0.5f;
 
         shoot_enabled = true;
         for(int i = 0; i < 42; i++) {
@@ -103,9 +110,16 @@ namespace game::content {
         if(keys[shift]) {
             str = speed_foc_straight;
             diag = speed_foc_diag;
+            focused = true;
         } else {
             str = speed_unf_straight;
             diag = speed_unf_diag;
+            focused = false;
+        }
+
+        if(focused) {
+            focused_rotation += 2.f;
+            if(focused_rotation > 360.f) focused_rotation -= 360.f;
         }
 
         //  apply movement
@@ -148,9 +162,9 @@ namespace game::content {
 
         //  clamp position
         if(x_pos > x_max) x_pos = x_max;
-        if(x_pos < 0.f) x_pos = 0.f;
+        if(x_pos < x_min) x_pos = x_min;
         if(y_pos > y_max) y_pos = y_max;
-        if(y_pos < 0.f) y_pos = 0.f;
+        if(y_pos < y_min) y_pos = y_min;
 
         
         //  shooting logic
@@ -183,13 +197,13 @@ namespace game::content {
                 //  spawn left bullet
                 int bullet_num;
                 for(bullet_num = 0; bullet[bullet_num].active_frame != 0 && bullet_num < 42; bullet_num++);
-                bullet[bullet_num].x_pos = x_pos + 8.f;
+                bullet[bullet_num].x_pos = x_pos - 8.f;
                 bullet[bullet_num].y_pos = y_pos + 24.f;
                 bullet[bullet_num].active_frame = 1;
 
                 //  spawn right bullet
                 for(bullet_num = 0; bullet[bullet_num].active_frame != 0 && bullet_num < 42; bullet_num++);
-                bullet[bullet_num].x_pos = x_pos + 24.f;
+                bullet[bullet_num].x_pos = x_pos + 8.f;
                 bullet[bullet_num].y_pos = y_pos + 24.f;
                 bullet[bullet_num].active_frame = 1;
             }

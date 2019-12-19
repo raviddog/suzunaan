@@ -24,22 +24,26 @@ namespace game::content {
 
         //  loop
         while(content[next] != '\0') {
-            //  instruction frame
-            int frame = std::stoi(content.substr(next), nullptr);
-            while(content[next] != '\0' && content[next] != ':') {
+            if(content[next] == '\n') {
+                next++; //  skip blank newlines
+            } else {
+                //  instruction frame
+                int frame = std::stoi(content.substr(next), nullptr);
+                while(content[next] != '\0' && content[next] != ':') {
+                    next++;
+                }
                 next++;
+                offset = 0;
+                while(content[next + offset] != '\0' && content[next + offset] != ';') {
+                    //  just go until either EOF or end of instruction
+                    offset++;
+                }
+                
+                script->insert({frame, content.substr(next, offset)});
+                printf("script instruction #%d: %s\n", frame, content.substr(next, offset).c_str());
+                next += offset;
+                while(content[next] != '\0' && content[next] != '\n') next++;
             }
-            next++;
-            offset = 0;
-            while(content[next + offset] != '\0' && content[next + offset] != ';') {
-                //  just go until either EOF or end of instruction
-                offset++;
-            }
-            
-            script->insert({frame, content.substr(next, offset)});
-            printf("script instruction #%d: %s\n", frame, content.substr(next, offset).c_str());
-            next += offset;
-            while(content[next] != '\0' && content[next] != '\n') next++;
         }
 
         return script;
