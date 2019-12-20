@@ -1,3 +1,5 @@
+#define SDL_MAIN_HANDLED
+
 #include "engine/engine.h"
 #include "game.h"
 #include "glm/gtx/string_cast.hpp"

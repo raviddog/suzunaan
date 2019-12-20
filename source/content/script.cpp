@@ -16,7 +16,7 @@ namespace game::content {
             file.close();
             content = filestream.str();
         } catch(std::ifstream::failure e) {
-            printf("failed to load script file %s\n", path);
+            printf("failed to load script file %s\n", path.c_str());
         }
 
         //  parse content string into mapped sections

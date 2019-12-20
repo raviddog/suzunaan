@@ -8,12 +8,16 @@ set(IN_RES_DIR ./res)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./bin)
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
+set(CMAKE_BUILD_TYPE Release)
+
 add_library(engine STATIC engine/engine_gl.cpp engine/engine.cpp engine/glad.c engine/stb_image.cpp)
 target_include_directories(engine PUBLIC ./engine)
 target_link_libraries(engine -lmingw32 -lSDL2main -lSDL2)
 
 add_library(game STATIC source/content/menu.cpp source/content/teststage.cpp source/content/player.cpp source/content/bullet.cpp source/content/enemy.cpp source/content/script.cpp)
 target_include_directories(game PUBLIC . ./engine ./source/content)
+set_property(TARGET game PROPERTY CXX_STANDARD 17)
+set_property(TARGET game PROPERTY CXX_STANDARD_REQUIRED ON)
 
 add_executable(test source/main.cpp source/game.cpp)
 target_include_directories(test PUBLIC .)
