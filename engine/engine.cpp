@@ -45,6 +45,8 @@ namespace engine {
         vbo->createBuffer(sizeof(float) * 28 * maxDraws, sizeof(uint32_t) * 6 * maxDraws);
         vbo->unbind();
         realloc = false;
+        verts->reserve(maxDraws * 28);
+        indices->reserve(maxDraws * 6);
     }
 
     void SpriteSheet::setSprite(int num, int x, int y, int width, int height)

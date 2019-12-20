@@ -15,35 +15,19 @@ namespace game::content {
             if(instructions != nullptr) {
                 //  check if instruction exists
                 if(instructions->count(frames) > 0) {
-                    std::string instr = instructions->at(frames);
-                    
-                    //  parse string
-                    size_t start = 0, offset = 0;
+                    script_instruction_bullet *instr = instructions->at(frames);
+                    for(int i = 0; i < instr->instruct->size(); i++) {
+                        (this->*(instr->instruct->at(i)))(instr->val->at(i));
+                    }
 
-                    while(start + offset < instr.length() && instr[start + offset] != '(') {
-                        offset++;
-                    }
-                    
-                    //  check instruction
-                    if(instr.substr(start, offset) == "accel") {
-                        offset++;
-                        float val = std::strtof(instr.substr(start + offset).c_str(), nullptr);
-                        accel = val;
-                    } else if(instr.substr(start, offset) == "angle_change") {
-                        offset++;
-                        float val = std::strtof(instr.substr(start + offset).c_str(), nullptr);
-                        angle_change = val;
-                    } else if(instr.substr(start, offset) == "type_change") {
-                        offset++;
-                        int val = (int)std::strtol(instr.substr(start + offset).c_str(), nullptr, 0);
-                        type += val;
-                    }
                 }
 
                 //  perform constant instructions
                 if(instructions->count(0) > 0) {
-                    std::string instr = instructions->at(0);
-                    //  parse string
+                    script_instruction_bullet *instr = instructions->at(0);
+                    for(int i = 0; i < instr->instruct->size(); i++) {
+                        (this->*(instr->instruct->at(i)))(instr->val->at(i));
+                    }
                 }
             }
 
@@ -69,6 +53,22 @@ namespace game::content {
             if(y_pos > bullet_bounds_ymax) active = false;
             if(y_pos < bullet_bounds_y) active = false;
         }
+    }
+
+    void bullet_s::instr_accel(float val) {
+        accel = val;
+    }
+
+    void bullet_s::instr_angle_change(float val) {
+        angle_change = val;
+    }
+
+    void bullet_s::instr_type_change(float val) {
+        type += (int)val;
+    }
+
+    void bullet_s::instr_speed(float val) {
+        speed = val;
     }
 
     void bullet_s::reset() {

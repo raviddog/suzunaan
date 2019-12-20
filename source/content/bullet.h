@@ -2,6 +2,7 @@
 #define _BULLET_H
 
 #include <unordered_map>
+#include "script.h"
 
 namespace game::content {
     extern float bullet_bounds_x, bullet_bounds_y, bullet_bounds_xmax, bullet_bounds_ymax;
@@ -18,9 +19,15 @@ namespace game::content {
         float accel, angle_change;
         float draw_angle;
 
-        std::unordered_map<int, std::string> *instructions;
+        std::unordered_map<int, script_instruction_bullet*> *instructions;
         void reset();
         void update();
+
+        //  bullet instruction functions
+        void instr_accel(float);
+        void instr_angle_change(float);
+        void instr_type_change(float);
+        void instr_speed(float);
     };
 }
 

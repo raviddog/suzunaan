@@ -15,7 +15,7 @@ using namespace engine;
 using namespace game::content;
 
 namespace game::teststage {
-    const int BULLET_MAX = 15000;
+    const int BULLET_MAX = 80000;
     float bullet_hitbox_radius_temp = 4.27f;
 
     SpriteSheet *img_player, *img_player_b, *img_player_eff, *img_bullet;
@@ -27,7 +27,7 @@ namespace game::teststage {
     int last_added_bullet;
     int frames;
 
-    std::unordered_map<int, std::string> *test;
+    std::unordered_map<int, script_instruction_bullet*> *test;
 
     int getFreeBullet() {
         int j = -1;
@@ -72,58 +72,65 @@ namespace game::teststage {
         if(engine::keyState[engine::kbX]) key = key | 0x20;
         if(engine::keyState[engine::kbLShift]) key = key | 0x40;
         if(engine::keyState[engine::kbC]) key = key | 0x80;
-        player.update(key);        
-
-        // for(int j = 0; j < 12; j++) {
-        //     int i = getFreeBullet();
-        //     if(i > -1) {
-        //         bullets[i].active = true;
-        //         bullet_draw_order->push_back(i);
-        //         bullets[i].type = (j * 16) + between(0, 15);
-        //         bullets[i].accel = 0.01f;
-        //         bullets[i].speed = between(-1.f, 1.f);
-        //         bullets[i].angle = between(0.f, 360.f);
-        //         // bullets[i].speed = 16.f;
-        //         bullets[i].x_pos = (float)(j * 53);
-        //         bullets[i].y_pos = 360.f;
-        //         bullets[i].instructions = nullptr;
-        //     }
-        // }
+        player.update(key);     
 
         frames++;
 
-        if(frames % 3 == 0) {
-            for(int j = 0; j < 24; j++) {
-                int i = getFreeBullet();
-                if(i > -1) {
-                    bullets[i].reset();
-                    bullet_draw_order->push_front(i);
-                    bullets[i].type = 48 + j % 16;
-                    bullets[i].active = true;
-                    bullets[i].frames = 0;
-                    bullets[i].accel = 0.016f;
-                    bullets[i].x_pos = 320.f;
-                    bullets[i].y_pos = 360.f;
-                    bullets[i].angle = 360.f * sin((double)frames * 3.14159265/180) + j * 15.f;
-                    bullets[i].speed = 3.f;
-                    bullets[i].instructions = test;
-                }
+        // if(frames % 3 == 0) {
+        //     for(int j = 0; j < 24; j++) {
+        //         int i = getFreeBullet();
+        //         if(i > -1) {
+        //             bullets[i].reset();
+        //             bullet_draw_order->push_front(i);
+        //             bullets[i].type = 48 + j % 16;
+        //             bullets[i].active = true;
+        //             bullets[i].frames = 0;
+        //             bullets[i].accel = 0.016f;
+        //             bullets[i].x_pos = 320.f;
+        //             bullets[i].y_pos = 360.f;
+        //             bullets[i].angle = 360.f * sin((double)frames * 3.14159265/180) + j * 15.f;
+        //             bullets[i].speed = 3.f;
+        //             bullets[i].instructions = test;
+        //         }
+        //     }
+        // }
+
+        for(int j = 0; j < 64; j++) {
+            int i = getFreeBullet();
+            if(i > -1) {
+                bullets[i].reset();
+                bullet_draw_order->push_front(i);
+                bullets[i].type = 48 + j % 16;
+                bullets[i].active = true;
+                bullets[i].frames = 0;
+                bullets[i].accel = 0.f;
+                bullets[i].x_pos = j * 10.f;
+                bullets[i].y_pos = 360.f;
+                bullets[i].angle = between(0.f, 360.f);
+                bullets[i].speed = 3.f;
+                bullets[i].instructions = test;
             }
         }
-        //  should logic include updating new gpu data?
 
 
         int count = 0;
         //  update and buffer all bullets
 
-        for(std::list<int>::const_iterator iterator = bullet_draw_order->begin(), end = bullet_draw_order->end(); iterator != end; iterator++) {
+        std::list<int>::const_iterator iterator, end;
+        iterator = bullet_draw_order->begin();
+        end = bullet_draw_order->end();
+
+        while(iterator != end) {
             bullets[*iterator].update();
 
             //  initial collision
             //  check if y-axis is near player
             if(std::abs(bullets[*iterator].y_pos - player.y_pos) < bullet_hitbox_radius_temp + player.hitbox_radius) {
                 //check distance between player and bullet
-                if(std::pow(bullets[*iterator].y_pos - player.y_pos, 2) + std::pow(bullets[*iterator].x_pos - player.x_pos, 2) < std::pow(bullet_hitbox_radius_temp + player.hitbox_radius, 2)) {
+                if((bullets[*iterator].y_pos - player.y_pos) * (bullets[*iterator].y_pos - player.y_pos)
+                     + (bullets[*iterator].x_pos - player.x_pos) * (bullets[*iterator].x_pos - player.x_pos)
+                     < (bullet_hitbox_radius_temp + player.hitbox_radius) * (bullet_hitbox_radius_temp + player.hitbox_radius))
+                {
                     //  collided
                     //  for now just remove bullet
                     bullets[*iterator].active = false;
@@ -132,14 +139,14 @@ namespace game::teststage {
 
 
             if(!bullets[*iterator].active) {
-                iterator-- = bullet_draw_order->erase(iterator);
+                iterator = bullet_draw_order->erase(iterator);
             } else {
                 count += 1;
                 img_bullet->drawSprite(bullets[*iterator].type, bullets[*iterator].x_pos, bullets[*iterator].y_pos, bullets[*iterator].draw_angle);
+                iterator++;
             }
         }
 
-        img_bullet->buffer();
 
         if(frames % 60 == 0) {
             printf("bullets: %d ", count);
@@ -163,6 +170,8 @@ namespace game::teststage {
         img_player->buffer();
         img_player->draw();
 
+
+        img_bullet->buffer();
         img_bullet->draw();
 
         if(player.focused) {
@@ -176,6 +185,7 @@ namespace game::teststage {
 
     void load() {
         srand(time(NULL));
+        script_init();
 
         img_player = new SpriteSheet();
         img_player->load("./data/pl00.png", 24);
@@ -202,6 +212,7 @@ namespace game::teststage {
 
         img_bullet = new SpriteSheet();
         img_bullet->load("./data/bullet1.png", 192, BULLET_MAX);
+        // img_bullet->load("./data/bullet1.png", 192);
         for(int y = 0; y < 12; y++) {
             for(int x = 0; x < 16; x++) {
                 img_bullet->setSprite(y * 16 + x, x * 16, y * 16, 16, 16);
@@ -218,7 +229,7 @@ namespace game::teststage {
         bullet_draw_order = new std::list<int>();
         frames = 0;
 
-        test = loadScript("./script/testenemy1.str");
+        test = loadScriptBullet("./script/testenemy1.str");
         getBullet = getFreeBulletPointer;
         bullet_bounds_x = -32.f;
         bullet_bounds_xmax = 672.f;

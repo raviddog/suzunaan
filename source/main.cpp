@@ -7,8 +7,7 @@
 const int scrWidth = 640;
 const int scrHeight = 480;
 
-
-int main(int args, char** argv) {
+int main(int argv, char** args) {
     engine::init("test", false, 1280, 960, 640, 480);
     // engine::init("test", false, 640, 480);
 
