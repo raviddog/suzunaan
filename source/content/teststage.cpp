@@ -1,10 +1,10 @@
 #include "engine/engine.h"
+#include "../game.h"
 #include "player.h"
 #include "bullet.h"
 #include "enemy.h"
 
 #include <vector>
-#include <list>
 #include <cstdlib>
 #include "math.h"
 #include "time.h"
@@ -22,37 +22,33 @@ namespace game::teststage {
     player_s player;
 
     bullet_s *bullets;
-    std::list<int> *bullet_draw_order;
+    std::vector<int> *bullet_draw_order;
 
+    std::vector<int> *freebullets;
     int last_added_bullet;
     int frames;
 
     std::unordered_map<int, script_instruction_bullet*> *test;
 
     int getFreeBullet() {
-        int j = -1;
-        for(int i = 0; i < BULLET_MAX; i++) {
-            if(i + last_added_bullet >= BULLET_MAX) last_added_bullet = 0;
-            if(!bullets[i + last_added_bullet].active) {
-                j = i + last_added_bullet;
-                break;
-            }
+        if(freebullets->empty()) {
+            return -1;
+        } else {
+            int j = freebullets->at(freebullets->size() - 1);
+            bullet_draw_order->push_back(j);
+            freebullets->pop_back();
+            bullets[j].reset();
+            return j;
         }
-        if(j != -1) last_added_bullet = j;
-        return j;
     }
 
     bullet_s* getFreeBulletPointer() {
-        int j = -1;
-        for(int i = 0; i < BULLET_MAX; i++) {
-            if(i + last_added_bullet >= BULLET_MAX) last_added_bullet = 0;
-            if(!bullets[i + last_added_bullet].active) {
-                j = i + last_added_bullet;
-                break;
-            }
+        int j = getFreeBullet();
+        if(j == -1) {
+            return nullptr;
+        } else {
+            return &bullets[j];
         }
-        if(j != -1) last_added_bullet = j;
-        return &bullets[j];
     }
 
     template <class T>
@@ -72,7 +68,9 @@ namespace game::teststage {
         if(engine::keyState[engine::kbX]) key = key | 0x20;
         if(engine::keyState[engine::kbLShift]) key = key | 0x40;
         if(engine::keyState[engine::kbC]) key = key | 0x80;
-        player.update(key);     
+        player.update(key);
+
+        if(engine::keyPressed[engine::kbEscape]) game::changeState(0);
 
         frames++;
 
@@ -81,7 +79,6 @@ namespace game::teststage {
         //         int i = getFreeBullet();
         //         if(i > -1) {
         //             bullets[i].reset();
-        //             bullet_draw_order->push_front(i);
         //             bullets[i].type = 48 + j % 16;
         //             bullets[i].active = true;
         //             bullets[i].frames = 0;
@@ -98,8 +95,6 @@ namespace game::teststage {
         for(int j = 0; j < 64; j++) {
             int i = getFreeBullet();
             if(i > -1) {
-                bullets[i].reset();
-                bullet_draw_order->push_front(i);
                 bullets[i].type = 48 + j % 16;
                 bullets[i].active = true;
                 bullets[i].frames = 0;
@@ -116,11 +111,11 @@ namespace game::teststage {
         int count = 0;
         //  update and buffer all bullets
 
-        std::list<int>::const_iterator iterator, end;
+        std::vector<int>::const_iterator iterator, end;
         iterator = bullet_draw_order->begin();
-        end = bullet_draw_order->end();
 
-        while(iterator != end) {
+
+        while(iterator != bullet_draw_order->end()) {
             bullets[*iterator].update();
 
             //  initial collision
@@ -140,6 +135,7 @@ namespace game::teststage {
 
             if(!bullets[*iterator].active) {
                 iterator = bullet_draw_order->erase(iterator);
+                freebullets->push_back(iterator - bullet_draw_order->begin());
             } else {
                 count += 1;
                 img_bullet->drawSprite(bullets[*iterator].type, bullets[*iterator].x_pos, bullets[*iterator].y_pos, bullets[*iterator].draw_angle);
@@ -222,11 +218,14 @@ namespace game::teststage {
 
 
         bullets = new bullet_s[BULLET_MAX + 1];
+        freebullets = new std::vector<int>();
+        freebullets->reserve(BULLET_MAX);
         for(int i = 0; i < BULLET_MAX; i++) {
-            bullets[i].active = false;
+            bullets[i].reset();
+            freebullets->push_back(i);
         }
         last_added_bullet = 0;
-        bullet_draw_order = new std::list<int>();
+        bullet_draw_order = new std::vector<int>();
         frames = 0;
 
         test = loadScriptBullet("./script/testenemy1.str");
