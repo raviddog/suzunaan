@@ -15,7 +15,7 @@ using namespace engine;
 using namespace game::content;
 
 namespace game::teststage {
-    const int BULLET_MAX = 80000;
+    const int BULLET_MAX = 70000;
     float bullet_hitbox_radius_temp = 4.27f;
 
     SpriteSheet *img_player, *img_player_b, *img_player_eff, *img_bullet;
@@ -34,7 +34,7 @@ namespace game::teststage {
         if(freebullets->empty()) {
             return -1;
         } else {
-            int j = freebullets->at(freebullets->size() - 1);
+            int j = freebullets->back();
             bullet_draw_order->push_back(j);
             freebullets->pop_back();
             bullets[j].reset();
@@ -81,7 +81,6 @@ namespace game::teststage {
         //             bullets[i].reset();
         //             bullets[i].type = 48 + j % 16;
         //             bullets[i].active = true;
-        //             bullets[i].frames = 0;
         //             bullets[i].accel = 0.016f;
         //             bullets[i].x_pos = 320.f;
         //             bullets[i].y_pos = 360.f;
@@ -134,8 +133,8 @@ namespace game::teststage {
 
 
             if(!bullets[*iterator].active) {
+                freebullets->push_back(*iterator);
                 iterator = bullet_draw_order->erase(iterator);
-                freebullets->push_back(iterator - bullet_draw_order->begin());
             } else {
                 count += 1;
                 img_bullet->drawSprite(bullets[*iterator].type, bullets[*iterator].x_pos, bullets[*iterator].y_pos, bullets[*iterator].draw_angle);
