@@ -23,6 +23,7 @@ namespace game {
                 teststage::load();
                 break;
         }
+        logic();
     }
 
     void logic() {

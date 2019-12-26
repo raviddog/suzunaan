@@ -60,9 +60,11 @@ namespace engine {
             void drawSprite(int, float, float, float);
             void buffer();
             void draw();
+
+            //  more temp or game specific
+            static void useShaderInvert();
+            static void useShaderNormal();
     };
-
 }
-
 
 #endif

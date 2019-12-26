@@ -71,6 +71,8 @@ namespace game::teststage {
         player.update(key);
 
         if(engine::keyPressed[engine::kbEscape]) game::changeState(0);
+        if(engine::keyPressed[engine::kbP]) SpriteSheet::useShaderNormal();
+        if(engine::keyPressed[engine::kbO]) SpriteSheet::useShaderInvert();
 
         frames++;
 

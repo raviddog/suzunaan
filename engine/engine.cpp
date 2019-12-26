@@ -6,7 +6,7 @@ namespace engine {
     int scrWidth;
     int scrHeight;
 
-    static gl::Shader *shaderSpriteSheet;
+    static gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert;
 
     void SpriteSheet::load(const std::string &path, int numSprites) {
         realloc = true;
@@ -111,7 +111,6 @@ namespace engine {
 
     void SpriteSheet::draw() {
         vao->bind();
-        shaderSpriteSheet->use();
         tex->bind();
         glDrawElements(GL_TRIANGLES, indices_stored_size, GL_UNSIGNED_INT, (void*)0);
         vao->unbind();
@@ -127,6 +126,14 @@ namespace engine {
         delete verts;
         delete indices;
         delete sprites;
+    }
+
+    void SpriteSheet::useShaderInvert() {
+        shaderSpriteSheetInvert->use();
+    }
+
+    void SpriteSheet::useShaderNormal() {
+        shaderSpriteSheet->use();
     }
 
     void init(const char *title, bool fullscreen, int width, int height) {
@@ -159,13 +166,20 @@ namespace engine {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // stbi_set_flip_vertically_on_load(true);
+        glm::vec2 scrRes = glm::vec2((float)width_draw, (float)height_draw);
+        
+        shaderSpriteSheetInvert = new gl::Shader();
+        shaderSpriteSheetInvert->load("./shaders/spritesheet.vert", "./shaders/spritesheet_invert.frag");
+        shaderSpriteSheetInvert->use();
+        shaderSpriteSheetInvert->setInt("txUnit", 0);
+        shaderSpriteSheetInvert->setVec2("res", scrRes);
+
         shaderSpriteSheet = new gl::Shader();
         shaderSpriteSheet->load("./shaders/spritesheet.vert", "./shaders/spritesheet.frag");
         shaderSpriteSheet->use();
         shaderSpriteSheet->setInt("txUnit", 0);
-
-        glm::vec2 scrRes = glm::vec2((float)width_draw, (float)height_draw);
         shaderSpriteSheet->setVec2("res", scrRes);
+
 
         // shaderSprite = new gl::Shader();
         // shaderSprite->load("./shaders/sprite.vert", "./shaders/sprite.frag");

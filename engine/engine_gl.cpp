@@ -494,8 +494,8 @@ namespace engine {
 
             glGetProgramiv(ID, GL_LINK_STATUS, &success);
             if(!success) {
-                //glGetProgramInfoLog(ID, 512, NULL, infoLog)
-                //report error
+                // glGetProgramInfoLog(ID, 512, NULL, infoLog);
+                // printf("%s ", infoLog);
             }
 
             printf("loaded shaders %s %s\n", vertexPath, fragmentPath);
@@ -509,6 +509,7 @@ namespace engine {
             if(currentShader != this) {
                 glUseProgram(ID);
                 currentShader = this;
+                printf("switched to shader %d\n", ID);
             }
         }
 
