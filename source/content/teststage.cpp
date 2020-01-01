@@ -18,17 +18,17 @@ namespace game::teststage {
     const int BULLET_MAX = 70000;
     float bullet_hitbox_radius_temp = 4.27f;
 
-    SpriteSheet *img_player, *img_player_b, *img_player_eff, *img_bullet;
+    SpriteSheet *img_player, *img_player_b, *img_player_eff, *img_bullet, *img_enemy;
     player_s player;
 
     bullet_s *bullets;
     std::vector<int> *bullet_draw_order;
-
     std::vector<int> *freebullets;
     int last_added_bullet;
     int frames;
 
-    std::unordered_map<int, script_instruction_bullet*> *test;
+    
+    std::unordered_map<int, script_instruction*> *test;
 
     int getFreeBullet() {
         if(freebullets->empty()) {
@@ -58,6 +58,7 @@ namespace game::teststage {
 
     
     void logic() {
+		bool quitToMenu = false;
         //  c shift x z right left down up
         unsigned char key = 0x00;
         if(engine::keyState[engine::kbUp]) key = key | 0x01;
@@ -70,7 +71,7 @@ namespace game::teststage {
         if(engine::keyState[engine::kbC]) key = key | 0x80;
         player.update(key);
 
-        if(engine::keyPressed[engine::kbEscape]) game::changeState(0);
+		if(engine::keyPressed[engine::kbEscape]) quitToMenu = true;
         if(engine::keyPressed[engine::kbP]) SpriteSheet::useShaderNormal();
         if(engine::keyPressed[engine::kbO]) SpriteSheet::useShaderInvert();
 
@@ -148,6 +149,8 @@ namespace game::teststage {
         if(frames % 60 == 0) {
             printf("bullets: %d ", count);
         }
+
+		if(quitToMenu) game::changeState(0);
     }
     
 
@@ -202,6 +205,17 @@ namespace game::teststage {
         img_player_eff = new SpriteSheet();
         img_player_eff->load("./data/eff_base.png", 1);
         img_player_eff->setSprite(0, 0, 16, 64, 64);
+
+        img_enemy = new SpriteSheet();
+        img_enemy->load("./data/enemy.png", 60);
+        for(int y = 0; y < 4; y++) {
+            for(int x = 0; x < 12; x++) {
+                img_enemy->setSprite(y * 12 + x, x * 32, 256 + y * 32, 32, 32);
+            }
+        }
+        for(int i = 0; i < 8; i++) {
+            img_enemy->setSprite(48 + i, i * 64, 384, 64, 64);
+        }
         
         //  center at 0,0 sprite is 32x48
         player.init(16.f, 24.f, 624.f, 456.f);
@@ -229,7 +243,7 @@ namespace game::teststage {
         bullet_draw_order = new std::vector<int>();
         frames = 0;
 
-        test = loadScriptBullet("./script/testenemy1.str");
+        test = loadScript("./script/testenemy1.str");
         getBullet = getFreeBulletPointer;
         bullet_bounds_x = -32.f;
         bullet_bounds_xmax = 672.f;

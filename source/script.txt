@@ -1,10 +1,31 @@
-frame : instructions
+frame:instructions
+
+enemy
+==============
+
+instruction: speed(float speed);
+set speed
+
+bullets
+==============
 
 instruction: speed(float speed);
 set speed
 
 instruction: accel(float speed);
 set acceleration
+
+instruction: angle_change(float speed);
+set an amount to change the angle per frame
+
+instruction: type_set(int value);
+change the bullet type to the specified value
+
+instruction: type_set_relative(int value);
+change the bullet type by a relative amount
+
+
+
 
 instruction: speedTo(float speed, int frames);
 speed goes to target over specified number of frames

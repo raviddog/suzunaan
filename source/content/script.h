@@ -3,25 +3,28 @@
 
 #include <unordered_map>
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
 #include <vector>
 
 //  loads a script file into an std::unordered_map
 
 namespace game::content {
-    struct bullet_s;
-    
-    class script_instruction_bullet {
+    union script_args{
+        float type_1;
+        int type_2;
+        std::tuple<float, int> *type_3;
+    };
+
+    class script_instruction {
         public:
-            script_instruction_bullet();
-            ~script_instruction_bullet();
-            std::vector<void (bullet_s::*)(float)> *instruct;
-            std::vector<float> *val;
+            script_instruction();
+            ~script_instruction();
+            std::vector<int> *instruct;
+            std::vector<script_args> *val;
     };
     
-    std::unordered_map<int, script_instruction_bullet*>* loadScriptBullet(const std::string &path);
+    //  frame, instruction data
+    std::unordered_map<int, script_instruction*>* loadScript(const std::string&);
+
     void script_init();
 
 }

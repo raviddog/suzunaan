@@ -2,24 +2,33 @@
 #define _ENEMY_H
 
 #include <unordered_map>
-// #include <cstdlib>
+#include "script.h"
 #include "bullet.h"
 
 namespace game::content {
 
     extern bullet_s* (*getBullet)();
 
-    class enemy {
+    class enemy_s {
         private:
 
         public:
             bool active;
             int type, frames, hp;
             float x_pos, y_pos;
-            std::string current_instr;
-            std::unordered_map<int, std::string> *instructions;
+
+            float speed, angle;
+            float accel, angle_change;
+            float draw_angle;
+
+
+            int current_instr = -1;
+            std::unordered_map<int, script_instruction*> *instructions;
 
             void update();
+            
+            //  no need for a reset, don't need to recycle enemy objects
+            enemy_s();
 
 
     };
