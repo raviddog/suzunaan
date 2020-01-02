@@ -39,9 +39,9 @@ namespace engine {
         class VAO {
             public:
                 GLuint *ID;
-                void init();
+                VAO();
+                ~VAO();
                 void bind();
-                void remove();
                 static void unbind();
         };
 
@@ -50,9 +50,9 @@ namespace engine {
                 GLuint *ID_VBO, *ID_EBO;
                 int vertexAttribs;
                 int bufferSizeVert, bufferSizeInd;
-                void init();
+                VBO();
+                ~VBO();
                 void bind();
-                void remove();
                 static void unbind();
 
                 void createBuffer(int);
@@ -72,10 +72,10 @@ namespace engine {
             public:
                 GLuint *ID;
                 int srcWidth, srcHeight, srcChanels;
-                void init();
+                Texture();
+                ~Texture();
                 void bind();
                 void load(const std::string&);
-                void remove();
                 static void unbind();
         };
 

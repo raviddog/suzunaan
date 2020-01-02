@@ -47,13 +47,17 @@ namespace engine {
             gl::VBO *vbo;
             gl::Texture *tex;
             bool realloc;
-        public:
-            int numSprites;
 
             void load(const std::string&, int);
             void load(const std::string&, int, int);
+        public:
+            int numSprites;
+
+            SpriteSheet(const std::string&, int);
+            SpriteSheet(const std::string&, int, int);
+            ~SpriteSheet();
+
             void setSprite(int, int, int, int, int);
-            void unload();
 
             // temp
             void drawSprite(int, float, float);

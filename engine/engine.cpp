@@ -8,16 +8,30 @@ namespace engine {
 
     static gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert;
 
+    SpriteSheet::SpriteSheet(const std::string &path, int numSprites) {
+        load(path, numSprites);
+    }
+
+    SpriteSheet::SpriteSheet(const std::string &path, int numSprites, int maxDraws) {
+        load(path, numSprites, maxDraws);
+    }
+
+    SpriteSheet::~SpriteSheet() {
+        delete tex;
+        delete vbo;
+        delete vao;
+        delete verts;
+        delete indices;
+        delete sprites;
+    }
+
     void SpriteSheet::load(const std::string &path, int numSprites) {
         realloc = true;
 
         vao = new gl::VAO();
         vbo = new gl::VBO();
         
-        vao->init();
         vao->bind();
-
-        vbo->init();
         vbo->bind();
         vbo->createVertexAttribPointer(2, GL_FLOAT, 7*sizeof(float), (void*)0);
         vbo->createVertexAttribPointer(2, GL_FLOAT, 7*sizeof(float), (void*)(2*sizeof(float)));
@@ -28,7 +42,6 @@ namespace engine {
         this->numSprites = numSprites;
         sprites = new Sprite[numSprites];
         tex = new gl::Texture();
-        tex->init();
         tex->bind();
         tex->load(path);
         tex->unbind();
@@ -116,18 +129,6 @@ namespace engine {
         vao->unbind();
     }
 
-    void SpriteSheet::unload() {
-        tex->remove();
-        vbo->remove();
-        vao->remove();
-        delete tex;
-        delete vbo;
-        delete vao;
-        delete verts;
-        delete indices;
-        delete sprites;
-    }
-
     void SpriteSheet::useShaderInvert() {
         shaderSpriteSheetInvert->use();
     }
@@ -179,12 +180,6 @@ namespace engine {
         shaderSpriteSheet->use();
         shaderSpriteSheet->setInt("txUnit", 0);
         shaderSpriteSheet->setVec2("res", scrRes);
-
-
-        // shaderSprite = new gl::Shader();
-        // shaderSprite->load("./shaders/sprite.vert", "./shaders/sprite.frag");
-        // shaderSprite->use();
-        // shaderSprite->setInt("txUnit", 0);
     }
 
     void close() {

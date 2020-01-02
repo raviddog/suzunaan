@@ -187,27 +187,23 @@ namespace game::teststage {
         srand(time(NULL));
         script_init();
 
-        img_player = new SpriteSheet();
-        img_player->load("./data/pl00.png", 24);
+        img_player = new SpriteSheet("./data/pl00.png", 24);
         for(int i = 0; i < 8; i++) {
             img_player->setSprite(i, i * 32, 0, 32, 48);
             img_player->setSprite(i + 8, i * 32, 48, 32, 48);
             img_player->setSprite(i + 16, i * 32, 96, 32, 48);
         }
 
-        img_player_b = new SpriteSheet();
-        img_player_b->load("./data/pl00.png", 4);
+        img_player_b = new SpriteSheet("./data/pl00.png", 4);
         img_player_b->setSprite(0, 0, 146, 16, 12);
         img_player_b->setSprite(1, 16, 146, 16, 12);
         img_player_b->setSprite(2, 32, 146, 16, 12);
         img_player_b->setSprite(3, 48, 146, 16, 12);
 
-        img_player_eff = new SpriteSheet();
-        img_player_eff->load("./data/eff_base.png", 1);
+        img_player_eff = new SpriteSheet("./data/eff_base.png", 1);
         img_player_eff->setSprite(0, 0, 16, 64, 64);
 
-        img_enemy = new SpriteSheet();
-        img_enemy->load("./data/enemy.png", 60);
+        img_enemy = new SpriteSheet("./data/enemy.png", 60);
         for(int y = 0; y < 4; y++) {
             for(int x = 0; x < 12; x++) {
                 img_enemy->setSprite(y * 12 + x, x * 32, 256 + y * 32, 32, 32);
@@ -221,9 +217,7 @@ namespace game::teststage {
         player.init(16.f, 24.f, 624.f, 456.f);
         player.hitbox_radius = 1.f;
 
-        img_bullet = new SpriteSheet();
-        img_bullet->load("./data/bullet1.png", 192, BULLET_MAX);
-        // img_bullet->load("./data/bullet1.png", 192);
+        img_bullet = new SpriteSheet("./data/bullet1.png", 192, BULLET_MAX);
         for(int y = 0; y < 12; y++) {
             for(int x = 0; x < 16; x++) {
                 img_bullet->setSprite(y * 16 + x, x * 16, y * 16, 16, 16);
@@ -253,10 +247,6 @@ namespace game::teststage {
     }
 
     void unload() {
-        img_player->unload();
-        img_player_b->unload();
-        img_player_eff->unload();
-        img_bullet->unload();
         delete img_player;
         delete img_player_b;
         delete img_player_eff;

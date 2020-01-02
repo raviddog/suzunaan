@@ -53,12 +53,10 @@ namespace game::menu {
             img_base_options->draw();
         }
     }
-
     
 
     void load() {
-        img_base_options = new engine::SpriteSheet();
-        img_base_options->load("./data/menu.png", 4);
+        img_base_options = new engine::SpriteSheet("./data/menu.png", 4);
         img_base_options->setSprite(0, 0, 0, 160, 64);
         img_base_options->setSprite(1, 0, 64, 160, 64);
         img_base_options->setSprite(2, 160, 0, 160, 64);
@@ -70,7 +68,6 @@ namespace game::menu {
     }
 
     void unload() {
-        img_base_options->unload();
         delete img_base_options;
     }
 }

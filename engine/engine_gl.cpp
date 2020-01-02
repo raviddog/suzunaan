@@ -303,25 +303,25 @@ namespace engine {
         SDL_Window *window;
         SDL_GLContext maincontext;
 
-        void VAO::init() {
+        VAO::VAO() {
             ID = new GLuint();
             glGenVertexArrays(1, ID);
+        }
+
+        VAO::~VAO() {
+            glDeleteVertexArrays(1, ID);
+            delete ID;
         }
 
         void VAO::bind() {
             glBindVertexArray(*ID);
         }
 
-        void VAO::remove() {
-            glDeleteVertexArrays(1, ID);
-            delete ID;
-        }
-
         void VAO::unbind() {
             glBindVertexArray(0);
         }
 
-        void VBO::init() {
+        VBO::VBO() {
             ID_VBO = new GLuint();
             ID_EBO = new GLuint();
             glGenBuffers(1, ID_VBO);
@@ -329,16 +329,16 @@ namespace engine {
             vertexAttribs = -1;            
         }
 
-        void VBO::bind() {
-            glBindBuffer(GL_ARRAY_BUFFER, *ID_VBO);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ID_EBO);
-        }
-
-        void VBO::remove() {
+        VBO::~VBO() {
             glDeleteBuffers(1, ID_VBO);
             glDeleteBuffers(1, ID_EBO);
             delete ID_VBO;
             delete ID_EBO;
+        }
+
+        void VBO::bind() {
+            glBindBuffer(GL_ARRAY_BUFFER, *ID_VBO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ID_EBO);
         }
 
         void VBO::unbind() {
@@ -388,9 +388,14 @@ namespace engine {
             glEnableVertexAttribArray(vertexAttribs);
         }
 
-        void Texture::init() {
+        Texture::Texture() {
             ID = new GLuint();
             glGenTextures(1, ID);
+        }
+
+        Texture::~Texture() {
+            glDeleteTextures(1, ID);
+            delete ID;
         }
 
         void Texture::bind() {
@@ -399,11 +404,6 @@ namespace engine {
 
         void Texture::unbind() {
             glBindTexture(GL_TEXTURE_2D, 0);
-        }
-
-        void Texture::remove() {
-            glDeleteTextures(1, ID);
-            delete ID;
         }
 
         void Texture::load(const std::string &path) {
@@ -420,7 +420,7 @@ namespace engine {
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
                 printf("loaded texture %s\n", path.c_str());
             } else {
-                printf("failed to load %s\n", path.c_str());
+                printf("failed to load texture %s\n", path.c_str());
             }
         }
 
