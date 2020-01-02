@@ -1,10 +1,7 @@
 type:bullet
-
+1:angle(180);
 30:accel(-0.25);
 41:accel(0);
-90:accel(0.1);
-90:angle_change(5);
+90:accel(0.1) angle_change(5);
 107:accel(0);
-160:angle_change(0);
-160:type_set_relative(112);
-160:speed(0);
+160:angle_change(0) type_set_relative(112) speed(0);

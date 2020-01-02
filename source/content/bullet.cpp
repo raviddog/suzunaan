@@ -88,6 +88,12 @@ namespace game::content {
                 break;
             case 4:
                 instr_type_set_relative(args.type_2);
+                break;
+            case 5:
+                instr_angle(args.type_1);
+                break;
+            default:
+                break;
         }
     }
 
@@ -105,6 +111,10 @@ namespace game::content {
 
     void bullet_s::instr_type_set_relative(int val) {
         type += val;
+    }
+
+    void bullet_s::instr_angle(float val) {
+        angle = val;
     }
 
 

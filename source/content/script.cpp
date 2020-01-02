@@ -17,6 +17,7 @@ namespace game::content {
             bullet_instr->insert({"accel", std::make_pair(2, 1)});
             bullet_instr->insert({"angle_change", std::make_pair(3, 1)});
             bullet_instr->insert({"type_set_relative", std::make_pair(4, 2)});
+            bullet_instr->insert({"angle", std::make_pair(5, 1)});
         }
 
         if(enemy_instr == nullptr) {
@@ -27,6 +28,7 @@ namespace game::content {
     }
 
     std::unordered_map<int, script_instruction*> *loadScript(const std::string &path) {
+        printf("loading script file %s\n", path.c_str());
         //  load the entire file into 1 string, or read it while loading?
         std::string content;
         size_t next = 0, offset = 0;
@@ -58,17 +60,29 @@ namespace game::content {
         std::string script_type = content.substr(next, offset);
         if(script_type == "type:bullet") {
             instr = bullet_instr;
+            printf("script type: bullet\n");
         } else if(script_type == "type:enemy") {
             instr = enemy_instr;
+            printf("script type: enemy\n");
+        } else {
+            //  unable to determine script type
+            printf("unable to determine script type, aborting\n");
+            delete script;
+            return nullptr;
         }
 
         next = offset + 1;
+        offset = 0;
 
         while(content[next] != '\0') {
-            if(content[next] == '\n') {
-                //  skip blank newlines
+            //  skip spaces
+            while(content[next] == ' ') {
                 next++;
-            } else if(content[next] == '/' && content[next + 1] != '\0' && content[next + 1] == '/') {
+            }
+            if(content[next] == '\n') {
+                //  skip newlines
+                next++;
+            } else if(content[next] == '/' && content[next + 1] == '/') {
                 //  skip lines starting with //
                 while(content[next] != '\n') next++;
             } else {
@@ -79,8 +93,6 @@ namespace game::content {
                 }
                 int frame = std::stoi(content.substr(next, offset), nullptr);
                 next += offset;
-                //  if EOF, bail
-                if(content[next] == '\0') break;
 
                 script_instruction *i;
 
@@ -93,65 +105,105 @@ namespace game::content {
                     i = new script_instruction();
                     script->insert({frame, i});
                 }
-
-                //  get function
+                //  skip colon
                 next++;
-                offset = 0;
-                while(content[next + offset] != '\0' && content[next + offset] != '(') {
-                    //  set offset to end of function name
-                    offset++;
-                }
 
-                //  get function string
-                std::string function_name = content.substr(next, offset);
-                //  set next to beginning of arguments
-                next += offset + 1;
-                offset = 0;
-
-                //  set offset to end of function
-                while(content[next + offset] != '\0' && content[next + offset] != ';') {
-                    offset++;
-                }
-
-                //  load function info
-                std::pair<int, int> function_info;
-                if(instr->count(function_name) > 0) {
-                    //  load function info and insert
-                    printf("loading function %s\n", function_name.c_str());
-                    function_info = instr->at(function_name);
-                    i->instruct->push_back(function_info.first);
-
-                    //  get arguments
-                    if(function_info.second == 1) {
-                        //  single float
-                        float arg_1 = std::stof(content.substr(next, offset), nullptr);
-                        while(content[next] != ',' && next < offset) next++;
-                        script_args args;
-                        args.type_1 = arg_1;
-                        i->val->push_back(args);
-                    } else if(function_info.second == 2) {
-                        //  single int
-                        int arg_1 = std::stoi(content.substr(next, offset), nullptr);
-                        while(content[next] != ',' && next < offset) next++;
-                        script_args args;
-                        args.type_2 = arg_1;
-                        i->val->push_back(args);
-                    } else if(function_info.second == 3) {
-                        //  float, int
-                        float arg_1 = std::stof(content.substr(next, offset), nullptr);
-                        while(content[next] != ',' && next < offset) next++;
-                        int arg_2 = std::stoi(content.substr(next, offset), nullptr);
-                        while(content[next] != ',' && next < offset) next++;
-                        script_args args;
-                        args.type_3 = new std::tuple<float, int>(arg_1, arg_2);
-                        i->val->push_back(args);
+                //  read functions until semicolon terminator
+                while(content[next] != '\0' && content[next] != ';') {
+                    //  skip spaces and newlines
+                    while(content[next] == ' ' || content[next] == '\n') next++;
+                    
+                    offset = 0;
+                    //  set offset to end of function name, or semicolon/newline in case of improperly written script
+                    while(content[next + offset] != '\0' && content[next + offset] != '(' && content[next + offset] != ';') {
+                        offset++;
                     }
 
-                } else {
-                    printf("unable to locate instruction %s\n", function_name.c_str());
+                    //  get function string
+                    std::string function_name = content.substr(next, offset);
+                    //  set next to beginning of arguments
+                    next += offset + 1;
+                    offset = 0;
+                    //  set offset to end of function
+                    while(content[next + offset] != '\0' && content[next + offset] != ')'
+                        && content[next + offset] != ';' && content[next + offset] != '\n') offset++;
+
+                    //  load function info
+                    std::pair<int, int> function_info;
+
+                    if(instr->count(function_name) > 0) {
+                        //  load function info and insert
+                        printf("frame: %d function %s", frame, function_name.c_str());
+                        function_info = instr->at(function_name);
+                        //  only insert function if arguments are successfully inserted
+                        bool success = true;
+                                
+
+                        //  get arguments
+                        if(function_info.second == 1) {
+                            //  single float
+                            try {
+                                float arg_1 = std::stof(content.substr(next, offset), nullptr);
+                                while(content[next] != ',' && offset > 0) {
+                                    next++;
+                                    offset--;   
+                                }
+                                script_args args;
+                                args.type_1 = arg_1;
+                                i->val->push_back(args);
+                                printf(" (float %f)\n", arg_1);
+                            } catch (std::invalid_argument ex) {
+                                success = false;
+                                printf(", unable to load arguments, error: %s\n", ex.what());
+                            }
+                        } else if(function_info.second == 2) {
+                            //  single int
+                            try {
+                                int arg_1 = std::stoi(content.substr(next, offset), nullptr);
+                                while(content[next] != ',' && offset > 0) {
+                                    next++;
+                                    offset--;   
+                                }
+                                script_args args;
+                                args.type_2 = arg_1;
+                                i->val->push_back(args);
+                                printf(" (int %d)\n", arg_1);
+                            } catch (std::invalid_argument ex) {
+                                success = false;
+                                printf(", unable to load arguments, error: %s\n", ex.what());
+                            }
+                        } else if(function_info.second == 3) {
+                            //  float, int
+                            try {
+                                float arg_1 = std::stof(content.substr(next, offset), nullptr);
+                                while(content[next] != ',' && offset > 0) {
+                                    next++;
+                                    offset--;   
+                                }
+                                int arg_2 = std::stoi(content.substr(next, offset), nullptr);
+                                while(content[next] != ',' && offset > 0) {
+                                    next++;
+                                    offset--;   
+                                }
+                                script_args args;
+                                args.type_3 = new std::tuple<float, int>(arg_1, arg_2);
+                                i->val->push_back(args);
+                                printf(" (float %f, int %d)\n", arg_1, arg_2);
+                            } catch (std::invalid_argument ex) {
+                                success = false;
+                                printf(", unable to load arguments, error: %s\n", ex.what());
+                            }
+                        }
+
+                        if(success) i->instruct->push_back(function_info.first);
+
+                    } else {
+                        printf("unable to locate instruction %s\n", function_name.c_str());
+                    }
+                    
+                    next += offset + 1;
                 }
 
-                next += offset;
                 while(content[next] != '\0' && content[next] != '\n') next++;
 
             }

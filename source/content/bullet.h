@@ -15,6 +15,7 @@ namespace game::content {
             void instr_accel(float);
             void instr_angle_change(float);
             void instr_type_set_relative(int);
+            void instr_angle(float);
 
         public:
             bool active;
