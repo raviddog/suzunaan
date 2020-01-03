@@ -5,6 +5,7 @@
 #define PI 3.14159265
 
 namespace game::content {
+    //  #FIX 1
     float   bullet_bounds_x = 0.f,
             bullet_bounds_y = 0.f,
             bullet_bounds_xmax = 640.f,
@@ -65,7 +66,7 @@ namespace game::content {
             }
 
 
-            //  self disable, hardcoded for now
+            //  disable when out of bounds
             if(x_pos > bullet_bounds_xmax) active = false;
             if(x_pos < bullet_bounds_x) active = false;
             if(y_pos > bullet_bounds_ymax) active = false;

@@ -1,5 +1,6 @@
 type:bullet
-1:angle(180);
+
+//1:angle(180);
 30:accel(-0.25);
 41:accel(0);
 90:accel(0.1) angle_change(5);

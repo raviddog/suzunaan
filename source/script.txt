@@ -9,20 +9,23 @@ set speed
 bullets
 ==============
 
-instruction: speed(float speed);
+instruction: speed(float);
 set speed
 
-instruction: accel(float speed);
+instruction: accel(float);
 set acceleration
 
-instruction: angle_change(float speed);
+instruction: angle_change(float);
 set an amount to change the angle per frame
 
-instruction: type_set(int value);
+instruction: type_set(int);
 change the bullet type to the specified value
 
-instruction: type_set_relative(int value);
+instruction: type_set_relative(int);
 change the bullet type by a relative amount
+
+instruction: angle(float);
+set bullet angle
 
 
 

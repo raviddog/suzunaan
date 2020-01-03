@@ -15,7 +15,7 @@ using namespace engine;
 using namespace game::content;
 
 namespace game::teststage {
-    const int BULLET_MAX = 70000;
+    const int BULLET_MAX = 10000;
     float bullet_hitbox_radius_temp = 4.27f;
 
     SpriteSheet *img_player, *img_player_b, *img_player_eff, *img_bullet, *img_enemy;
@@ -147,7 +147,7 @@ namespace game::teststage {
 
 
         if(frames % 60 == 0) {
-            printf("bullets: %d ", count);
+            // printf("bullets: %d ", count);
         }
 
 		if(quitToMenu) game::changeState(0);
@@ -189,26 +189,31 @@ namespace game::teststage {
 
         img_player = new SpriteSheet("./data/pl00.png", 24);
         for(int i = 0; i < 8; i++) {
+            //  reimu
             img_player->setSprite(i, i * 32, 0, 32, 48);
             img_player->setSprite(i + 8, i * 32, 48, 32, 48);
             img_player->setSprite(i + 16, i * 32, 96, 32, 48);
         }
 
         img_player_b = new SpriteSheet("./data/pl00.png", 4);
+        //  reimu's shots
         img_player_b->setSprite(0, 0, 146, 16, 12);
         img_player_b->setSprite(1, 16, 146, 16, 12);
         img_player_b->setSprite(2, 32, 146, 16, 12);
         img_player_b->setSprite(3, 48, 146, 16, 12);
 
         img_player_eff = new SpriteSheet("./data/eff_base.png", 1);
+        //  hitbox
         img_player_eff->setSprite(0, 0, 16, 64, 64);
 
         img_enemy = new SpriteSheet("./data/enemy.png", 60);
+        //  small fairies
         for(int y = 0; y < 4; y++) {
             for(int x = 0; x < 12; x++) {
                 img_enemy->setSprite(y * 12 + x, x * 32, 256 + y * 32, 32, 32);
             }
         }
+        //  sunflower fairy
         for(int i = 0; i < 8; i++) {
             img_enemy->setSprite(48 + i, i * 64, 384, 64, 64);
         }
@@ -237,12 +242,14 @@ namespace game::teststage {
         bullet_draw_order = new std::vector<int>();
         frames = 0;
 
-        test = loadScript("./script/testenemy1.str");
         getBullet = getFreeBulletPointer;
         bullet_bounds_x = -32.f;
         bullet_bounds_xmax = 672.f;
         bullet_bounds_y = -32.f;
         bullet_bounds_ymax = 512.f;
+
+        
+        test = loadScript("./script/testbullet.txt");
 
     }
 
@@ -251,7 +258,7 @@ namespace game::teststage {
         delete img_player_b;
         delete img_player_eff;
         delete img_bullet;
-        delete bullets;
+        delete[] bullets;
         delete bullet_draw_order;
         delete test;
     }

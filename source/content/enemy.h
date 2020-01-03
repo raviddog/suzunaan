@@ -11,6 +11,10 @@ namespace game::content {
 
     class enemy_s {
         private:
+            void run_instruction(script_instruction*, int);
+
+            //  script instructions
+            void instr_speed(float);
 
         public:
             bool active;
@@ -22,12 +26,14 @@ namespace game::content {
             float draw_angle;
 
 
-            int current_instr = -1;
+            script_instruction* current_instr;
             std::unordered_map<int, script_instruction*> *instructions;
 
             void update();
             
             //  no need for a reset, don't need to recycle enemy objects
+            //  use a constructor instead to set default values
+            //  dont need a destructor
             enemy_s();
 
 

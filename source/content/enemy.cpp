@@ -6,6 +6,7 @@
 namespace game::content {
     bullet_s* (*getBullet)();
 
+    //  #FIX 1
     float   enem_bounds_x = -20.f,
             enem_bounds_y = -20.f,
             enem_bounds_xmax = 660.f,
@@ -19,14 +20,14 @@ namespace game::content {
                 if(instructions != nullptr) {
                     //  update current instruction
                     if(instructions->count(frames) > 0) {
-                        current_instr = frames;
+                        current_instr = instructions->at(frames);
                     }
                 }
 
                 //  run current instruction
-                if(current_instr != -1) {
-                    for(int i = 0; i < instructions->at(current_instr)->instruct->size(); i++) {
-                        
+                if(current_instr != nullptr) {
+                    for(int i = 0; i < current_instr->instruct->size(); i++) {
+                        run_instruction(current_instr, i);
                     }
                 }
             }
@@ -52,6 +53,34 @@ namespace game::content {
     }
 
     enemy_s::enemy_s() {
-        
+        current_instr = nullptr;
+        active = false;
+        type = 0;
+        frames = 0;
+        hp = 0;
+        x_pos = 0.f;
+        y_pos = 0.f;
+        speed = 0.f;
+        angle = 0.f;
+        accel = 0.f;
+        angle_change = 0.f;
+        draw_angle = 0.f;
+        instructions = nullptr;
+    }
+
+    void enemy_s::run_instruction(script_instruction* instr, int i) {
+        int type = instr->instruct->at(i);
+        script_args args = instr->val->at(i);
+        switch(type) {
+            case 1:
+                instr_speed(args.type_1);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void enemy_s::instr_speed(float val) {
+        speed = val;
     }
 }
