@@ -137,11 +137,11 @@ namespace engine {
         shaderSpriteSheet->use();
     }
 
-    void init(const char *title, bool fullscreen, int width, int height) {
-        init(title, fullscreen, width, height, width, height);
+    void init(const char *title, int screenMode, int width, int height) {
+        init(title, screenMode, width, height, width, height);
     }
 
-    void init(const char *title, bool fullscreen, int width_win, int height_win, int width_draw, int height_draw) {
+    void init(const char *title, int screenMode, int width_win, int height_win, int width_draw, int height_draw) {
         scrWidth = width_win;
         scrHeight = height_win;
 
@@ -151,20 +151,63 @@ namespace engine {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
-        if(fullscreen) {
-            gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
-        } else {
-            gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL);
+        //  for borderless fullscreen calculation
+        SDL_DisplayMode *dmode = new SDL_DisplayMode();
+        SDL_GetCurrentDisplayMode(0, dmode);
+        switch(screenMode) {
+            case 1:
+                //  borderless fullscreen
+                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, dmode->w, dmode->h, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED);
+                break;
+            case 2:
+                //  fullscreen
+                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+                break;
+            case 0:
+            default:
+                //  normal windowed
+                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL);
+                break;
         }
-        //  #PROG 17
-        // gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED);
+
+        
         gl::maincontext = SDL_GL_CreateContext(gl::window);
         gladLoadGLLoader(SDL_GL_GetProcAddress);
 
-        // SDL_SetWindowBordered(gl::window, SDL_FALSE);
+        switch(screenMode) {
+            case 1:
+            {
+                float draw_ratio = (float)width_draw / (float)height_draw;
+                float screen_ratio = (float)dmode->w / (float)dmode->h;
+                if(draw_ratio > screen_ratio) {
+                    //  wider screen
+                    float y_scale = (float)dmode->w / (float)width_draw;
+                    float height = (float)height_draw * y_scale;
+                    int offset = (dmode->h - (int)height) / 2;
+                    glViewport(0, offset, dmode->w, (int)height);
+                    break;
+                } else if(draw_ratio < screen_ratio) {
+                    //  taller screen
+                    float x_scale = (float)dmode->h / (float)height_draw;
+                    float width = (float)width_draw * x_scale;
+                    int offset = (dmode->w - (int)width) / 2;
+                    glViewport(offset, 0, (int)width, dmode->h);
+                    break;
+                } else {
+                    //  matches aspect ratio, although i probably need a way better way to check this
+                }
+            }
+            case 2:
+                glViewport(0, 0, dmode->w, dmode->h);
+            case 0:
+            default:
+                glViewport(0, 0, width_win, height_win);
+                break;
+        }
+
+        delete dmode;
 
         SDL_GL_SetSwapInterval(1);
-        glViewport(0, 0, width_win, height_win);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glEnable(GL_BLEND);
         //glEnable(GL_DEPTH_TEST);
