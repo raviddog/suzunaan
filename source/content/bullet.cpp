@@ -32,9 +32,12 @@ namespace game::content {
 
             //  apply instructions
             if(instructions != nullptr) {
-                //  check if instruction exists
-                if(instructions->count(frames) > 0) {
-                    script_instruction *instr = instructions->at(frames);
+                //  check frame unstruction
+                script_trigger trigger;
+                trigger.type = 1;
+                trigger.value = frames;
+                if(instructions->count(trigger.pack()) > 0) {
+                    script_instruction *instr = instructions->at(trigger.pack());
                     for(int i = 0; i < instr->instruct->size(); i++) {
                         run_instruction(instr, i);
                     }
@@ -42,12 +45,12 @@ namespace game::content {
                 }
 
                 //  perform constant instructions
-                if(instructions->count(0) > 0) {
-                    script_instruction *instr = instructions->at(0);
-                    for(int i = 0; i < instr->instruct->size(); i++) {
-                        run_instruction(instr, i);
-                    }
-                }
+                // if(instructions->count(0) > 0) {
+                //     script_instruction *instr = instructions->at(0);
+                //     for(int i = 0; i < instr->instruct->size(); i++) {
+                //         run_instruction(instr, i);
+                //     }
+                // }
             }
 
 

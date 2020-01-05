@@ -28,7 +28,7 @@ namespace game::teststage {
     int frames;
 
     
-    std::unordered_map<int, script_instruction*> *test;
+    std::unordered_map<uint32_t, script_instruction*> *test;
 
     int getFreeBullet() {
         if(freebullets->empty()) {
@@ -77,37 +77,37 @@ namespace game::teststage {
 
         frames++;
 
-        // if(frames % 3 == 0) {
-        //     for(int j = 0; j < 24; j++) {
-        //         int i = getFreeBullet();
-        //         if(i > -1) {
-        //             bullets[i].reset();
-        //             bullets[i].type = 48 + j % 16;
-        //             bullets[i].active = true;
-        //             bullets[i].accel = 0.016f;
-        //             bullets[i].x_pos = 320.f;
-        //             bullets[i].y_pos = 360.f;
-        //             bullets[i].angle = 360.f * sin((double)frames * 3.14159265/180) + j * 15.f;
-        //             bullets[i].speed = 3.f;
-        //             bullets[i].instructions = test;
-        //         }
-        //     }
-        // }
-
-        for(int j = 0; j < 64; j++) {
-            int i = getFreeBullet();
-            if(i > -1) {
-                bullets[i].type = 48 + j % 16;
-                bullets[i].active = true;
-                bullets[i].frames = 0;
-                bullets[i].accel = 0.f;
-                bullets[i].x_pos = j * 10.f;
-                bullets[i].y_pos = 360.f;
-                bullets[i].angle = between(0.f, 360.f);
-                bullets[i].speed = 3.f;
-                bullets[i].instructions = test;
+        if(frames % 3 == 0) {
+            for(int j = 0; j < 8; j++) {
+                int i = getFreeBullet();
+                if(i > -1) {
+                    bullets[i].reset();
+                    bullets[i].type = 48 + j % 16;
+                    bullets[i].active = true;
+                    bullets[i].accel = 0.016f;
+                    bullets[i].x_pos = 320.f;
+                    bullets[i].y_pos = 360.f;
+                    bullets[i].angle = 1080.f * sin((double)frames * 3.14159265/180) + j * 45.f;
+                    bullets[i].speed = 3.f;
+                    bullets[i].instructions = test;
+                }
             }
         }
+
+        // for(int j = 0; j < 64; j++) {
+        //     int i = getFreeBullet();
+        //     if(i > -1) {
+        //         bullets[i].type = 48 + j % 16;
+        //         bullets[i].active = true;
+        //         bullets[i].frames = 0;
+        //         bullets[i].accel = 0.f;
+        //         bullets[i].x_pos = j * 10.f;
+        //         bullets[i].y_pos = 360.f;
+        //         bullets[i].angle = between(0.f, 360.f);
+        //         bullets[i].speed = 3.f;
+        //         bullets[i].instructions = test;
+        //     }
+        // }
 
 
         int count = 0;
@@ -249,7 +249,7 @@ namespace game::teststage {
         bullet_bounds_ymax = 512.f;
 
         
-        test = loadScript("./script/testbullet.txt");
+        test = loadScriptBullet("./script/testbullet.txt");
 
     }
 

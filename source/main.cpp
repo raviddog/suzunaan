@@ -8,8 +8,9 @@ const int scrWidth = 640;
 const int scrHeight = 480;
 
 int main(int argv, char** args) {
-    engine::init("test", false, 1280, 960, 640, 480);
-    // engine::init("test", false, 640, 480);
+    //  #PROG 17
+    // engine::init("test", false, 1600, 900, 640, 480);
+    engine::init("test", false, 640, 480);
 
     // freopen("./test.log", "w", stdout);
     
@@ -39,17 +40,14 @@ int main(int argv, char** args) {
         // fps
         ticks[0] += 1;
         if(SDL_GetTicks() > ticks[2] + 1000) {
-            // draw time
-            printf("frame time: %dms, ", SDL_GetTicks() - ticks[1]);
-            
-            // fps
-            printf("fps: %d\n", ticks[0]);
+            // printf("frame time: %dms, ", SDL_GetTicks() - ticks[1]);
+            // printf("fps: %d\n", ticks[0]);
             ticks[0] = 0;
             ticks[2] = SDL_GetTicks();
             
             // other debug messages
             // printf("sprites drawn: %d ", count);
-            printf("\n");
+            // printf("\n");
         }
     }
     engine::close();

@@ -74,7 +74,7 @@ namespace engine {
             sprites[num].width = (float)width;
             sprites[num].height = (float)height;
         }
-        printf("sprite #%d: %f %f %f %f\n", num, sprites[num].x, sprites[num].y, sprites[num].z, sprites[num].w);
+        // printf("sprite #%d: %f %f %f %f\n", num, sprites[num].x, sprites[num].y, sprites[num].z, sprites[num].w);
     }
 
     void SpriteSheet::drawSprite(int num, float x, float y) {
@@ -156,8 +156,12 @@ namespace engine {
         } else {
             gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL);
         }
+        //  #PROG 17
+        // gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED);
         gl::maincontext = SDL_GL_CreateContext(gl::window);
         gladLoadGLLoader(SDL_GL_GetProcAddress);
+
+        // SDL_SetWindowBordered(gl::window, SDL_FALSE);
 
         SDL_GL_SetSwapInterval(1);
         glViewport(0, 0, width_win, height_win);

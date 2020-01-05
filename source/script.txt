@@ -1,4 +1,4 @@
-frame:instructions
+trigger:instructions
 
 enemy
 ==============
@@ -6,8 +6,19 @@ enemy
 instruction: speed(float speed);
 set speed
 
+
 bullets
 ==============
+
+triggers
+----------------
+
+frame(int val):
+happens on specified frame
+
+
+instructions
+----------------
 
 instruction: speed(float);
 set speed
