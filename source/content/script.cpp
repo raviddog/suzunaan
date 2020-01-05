@@ -46,32 +46,49 @@ namespace game::content {
             printf("failed to load script file %s\n", path.c_str());
         }
 
-        //  first time using auto lol
-        //  honestly i should just use it for every 'new' statement
-        //  i dont like using it on function returns and most things in general though
-        auto script = new std::unordered_map<int, script_instruction*>();
 
         //  read script type, should be in first line
+        while(content[next + offset] != ':' && content[next + offset] != '\0') {
+            offset++;
+        }
+        if(content.substr(next, offset) != "type") {
+            //  no type header in script file
+            printf("no type header in script, aborting\n");
+            return nullptr;
+        }
+
+        //  skip past colon and spaces
+        offset++;
+        while(content[next + offset] == ' ') {
+            offset++;
+        }
+        next += offset;
+        offset = 0;
+
         while(content[next + offset] != '\n' && content[next + offset] != '\0') {
             offset++;
         }
 
         std::unordered_map<std::string, std::pair<int, int>> *instr;
         std::string script_type = content.substr(next, offset);
-        if(script_type == "type:bullet") {
+        if(script_type == "bullet") {
             instr = bullet_instr;
             printf("script type: bullet\n");
-        } else if(script_type == "type:enemy") {
+        } else if(script_type == "enemy") {
             instr = enemy_instr;
             printf("script type: enemy\n");
         } else {
             //  unable to determine script type
-            printf("unable to determine script type, aborting\n");
-            delete script;
+            printf("unsupported script type for this operation, aborting\n");
             return nullptr;
         }
 
-        next = offset + 1;
+        //  first time using auto lol
+        //  honestly i should just use it for every 'new' statement
+        //  i dont like using it on function returns and most things in general though
+        auto script = new std::unordered_map<int, script_instruction*>();
+
+        next += offset + 1;
         offset = 0;
 
         while(content[next] != '\0') {
@@ -208,7 +225,7 @@ namespace game::content {
 
             }
         }
-
+        printf("loaded script %s\n", path.c_str());
         return script;
     }
    
