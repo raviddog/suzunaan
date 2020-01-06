@@ -38,24 +38,32 @@ namespace game::content {
             std::vector<script_args> *val;
     };
 
-    struct script_trigger {
-        uint8_t type;
-            //  1 = frame
-            //  2 = external
-        uint16_t value;
-        // union {
-        //     uint16_t frame;  //  frame number
-        //     uint16_t external;   //  called by parent enemy or stage or something
-        // } value;
+    //  script trigger helper functions
+    uint8_t trigger_getType(uint64_t);
+    uint64_t trigger_setType(uint8_t);
+    //  1 = frame (frame)
+    //  2 = external (id)
+    //  3 = fromFrame (frame)
+    //  4 = fromFrameCancel (frame, id)
+    //  5 = betweenFrames (frameStart, frameEnd)
 
-        uint32_t pack();
-        static script_trigger unpack(uint32_t);
+    //  all data structures must be 7 bytes or less
+    struct trigger_int_int {
+        uint16_t frame;
+        uint16_t id;
     };
+
+    uint64_t trigger_setInt(uint64_t, uint16_t);
+    uint64_t trigger_setFloat(uint64_t, float);
+    uint64_t trigger_setIntInt(uint64_t, trigger_int_int);
+
+    uint16_t trigger_getInt(uint64_t);
+    float trigger_getFloat(uint64_t);
+    trigger_int_int trigger_getIntInt(uint64_t);
     
-    //  frame, instruction data
-    std::unordered_map<int, script_instruction*>* loadScript(const std::string&);
-    
-    std::unordered_map<uint32_t, script_instruction*> *loadScriptBullet(const std::string&);
+
+    //  load instructions  
+    std::unordered_map<uint64_t, script_instruction*> *loadScriptBullet(const std::string&);
     stage_scripts loadStage(const std::string&);
 
     void script_init();

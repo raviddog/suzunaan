@@ -28,7 +28,7 @@ namespace game::teststage {
     int frames;
 
     
-    std::unordered_map<uint32_t, script_instruction*> *test;
+    std::unordered_map<uint64_t, script_instruction*> *test;
 
     int getFreeBullet() {
         if(freebullets->empty()) {

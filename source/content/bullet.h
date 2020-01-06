@@ -29,7 +29,7 @@ namespace game::content {
             float accel, angle_change;
             float draw_angle;
 
-            std::unordered_map<uint32_t, script_instruction*> *instructions;
+            std::unordered_map<uint64_t, script_instruction*> *instructions;
             void reset();
             void update();
 

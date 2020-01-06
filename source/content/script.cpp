@@ -27,7 +27,7 @@ namespace game::content {
 
     }
 
-    std::unordered_map<uint32_t, script_instruction*> *loadScriptBullet(const std::string &path) {
+    std::unordered_map<uint64_t, script_instruction*> *loadScriptBullet(const std::string &path) {
         printf("loading bullet script file %s\n", path.c_str());
         std::string content;
         size_t next = 0, offset = 0, length;
@@ -77,7 +77,7 @@ namespace game::content {
         //  first time using auto lol
         //  honestly i should just use it for every 'new' statement
         //  i dont like using it on function returns and most things in general though
-        auto script = new std::unordered_map<uint32_t, script_instruction*>();
+        auto script = new std::unordered_map<uint64_t, script_instruction*>();
 
         next += offset + 1;
         line++;
@@ -93,44 +93,49 @@ namespace game::content {
                 while(content[next] != '\n' && next < length) next++;
             } else {
                 //  process instruction
-                //  first get trigger
-                //  position offset past trigger
+                //  first get trigger function name
                 offset = 0;
-                while(content[next + offset] != ' ' && next + offset < length) offset++;
-                
-                //  get trigger type
-                std::string trigger_type = content.substr(next, offset);
-                next += offset;
-                offset = 0;
-                while(content[next] == ' ') next++;
-                while(content[next + offset] != ':' && next + offset < length) offset++;
+                while(content[next + offset] != '(' && content[next + offset] != '\n'
+                    && content[next + offset] != ':' && next + offset < length) offset++;
 
+                std::string trigger_type = content.substr(next, offset);
+                //  next get trigger argument string
+                next += offset + 1;
+                offset = 0;
+                while(content[next + offset] != ')' && content[next + offset] != '\n'
+                    && content[next + offset] != ':' && next + offset < length) offset++;
                 //  check trigger type and create/load instructions
                 script_instruction *instruction;
-                script_trigger trigger;
+                uint64_t trigger;
                 bool abort = false;
                 if(trigger_type == "frame") {
                     try {
-                        trigger.type = 1;
-                        trigger.value = (uint16_t)std::stoul(content.substr(next, offset), nullptr);
-                        printf("frame %d:", trigger.value);
+                        trigger = 1;
+                        //  one int
+                        uint64_t frame = std::stoul(content.substr(next, offset), nullptr);
+                        trigger += frame << 8;
+                        printf("frame %d:", frame);
                         //  check if frame data exists
-                        uint32_t id = trigger.pack();
-                        if(script->count(id) > 0) {
+                        if(script->count(trigger) > 0) {
                             //  exists
-                            instruction = script->at(id);
+                            instruction = script->at(trigger);
                         } else {
                             //  doesn't exist
                             instruction = new script_instruction();
-                            script->insert({id, instruction});
+                            script->insert({trigger, instruction});
                         }
                     } catch (std::invalid_argument ex) {
-                        printf("invalid frame trigger in line %d, skipping", line);
+                        printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
                     }
+                } else {
+                    printf("unknown trigger in line %d, skipping line", line);
+                    abort = true;
                 }
+                //  skip closing bracket, spaces and colon to functions
                 next += offset + 1;
                 offset = 0;
+                while(next + offset < length && (content[next + offset] == ' ' || content[next + offset] == ':')) next++;
                 //  no other trigger types for now
                 if(!abort) {
                     //  read functions until semicolon terminator
@@ -143,7 +148,7 @@ namespace game::content {
                         
                         offset = 0;
                         //  set offset to end of function name, or semicolon/newline in case of improperly written script
-                        while(content[next + offset] != '\0' && content[next + offset] != '(' && content[next + offset] != ';') {
+                        while(next + offset < length && content[next + offset] != '(' && content[next + offset] != ';') {
                             offset++;
                         }
 
@@ -236,7 +241,7 @@ namespace game::content {
                 printf("\n");
             }
         }
-        printf("finished loading %s\n", path.c_str());
+        printf("finished loading");
         return script;
     }
    
@@ -262,17 +267,49 @@ namespace game::content {
         delete val;
     }
 
-    uint32_t script_trigger::pack() {
-        //  store type in upper
-        uint32_t result = (uint32_t)type << 16;
-        result += value;
-        return result;
+    
+    uint64_t trigger_eraseType(uint64_t storage) {
+        storage = storage >> 8;
+        return storage;
+    }
+    uint8_t trigger_getType(uint64_t storage) {
+        //  probably not even needed
+        return storage;
+    }
+    uint64_t trigger_setType(uint8_t type) {
+        //  might not need this either
+        return (uint64_t)type;
+    }
+    uint64_t trigger_setInt(uint64_t storage, uint16_t data) {
+        return storage += (uint64_t)(data << 8);
+    }
+    uint64_t trigger_setFloat(uint64_t storage, float data) {
+        char *bytes = reinterpret_cast<char*>(&data);
+        for(int i = 0; i < sizeof(float); i++) {
+            storage += (uint32_t)*bytes << (i + 1) * 8;
+        }
+        return storage;
+    }
+    uint64_t trigger_setData(uint64_t storage, trigger_int_int data) {
+        storage += (uint64_t)data.frame << 8;
+        storage += (uint64_t)data.id << 24;
+        return storage;
     }
 
-    script_trigger script_trigger::unpack(uint32_t packed) {
-        script_trigger trigger;
-        trigger.type = (uint8_t)(packed >> 16);
-        trigger.value = (uint16_t)packed;
-        return trigger;
+    uint16_t trigger_getInt(uint64_t storage) {
+        return trigger_eraseType(storage);
     }
+    float trigger_getFloat(uint64_t storage) {
+        uint32_t data = trigger_eraseType(storage);
+        float *f = reinterpret_cast<float*>(&data);
+        return *f;
+    }
+    trigger_int_int trigger_getIntInt(uint64_t storage) {
+        storage = trigger_eraseType(storage);
+        trigger_int_int data;
+        data.frame = (uint16_t)storage;
+        data.id = (uint16_t)(storage >> 16);
+        return data;
+    }
+
 }
