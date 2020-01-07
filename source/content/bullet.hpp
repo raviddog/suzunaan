@@ -1,7 +1,7 @@
 #ifndef _BULLET_H
 #define _BULLET_H
 
-#include "script.h"
+#include "script.hpp"
 
 namespace game::content {
     extern float bullet_bounds_x, bullet_bounds_y, bullet_bounds_xmax, bullet_bounds_ymax;

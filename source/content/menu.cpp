@@ -1,5 +1,5 @@
-#include "source/game.h"
-#include "engine/engine.h"
+#include "source/game.hpp"
+#include "engine/engine.hpp"
 
 namespace game::menu {
     engine::SpriteSheet *img_base_options;

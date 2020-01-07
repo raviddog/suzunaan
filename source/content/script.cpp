@@ -1,4 +1,4 @@
-#include "script.h"
+#include "script.hpp"
 
 #include <fstream>
 #include <sstream>

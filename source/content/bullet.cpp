@@ -1,6 +1,6 @@
-#include "bullet.h"
+#include "bullet.hpp"
 #include "math.h"
-#include "script.h"
+#include "script.hpp"
 
 #define PI 3.14159265
 

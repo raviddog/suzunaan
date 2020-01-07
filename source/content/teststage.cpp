@@ -1,14 +1,14 @@
-#include "engine/engine.h"
-#include "../game.h"
-#include "player.h"
-#include "bullet.h"
-#include "enemy.h"
+#include "engine/engine.hpp"
+#include "../game.hpp"
+#include "player.hpp"
+#include "bullet.hpp"
+#include "enemy.hpp"
+#include "script.hpp"
 
 #include <vector>
 #include <cstdlib>
-#include "math.h"
-#include "time.h"
-#include "script.h"
+#include <cmath>
+#include <ctime>
 
 
 using namespace engine;

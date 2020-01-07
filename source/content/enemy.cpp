@@ -1,5 +1,5 @@
-#include "enemy.h"
-#include "math.h"
+#include "enemy.hpp"
+#include <cmath>
 
 #define PI 3.14159265
 
@@ -68,7 +68,7 @@ namespace game::content {
         instructions = nullptr;
     }
 
-    void enemy_s::run_instruction(script_instruction* instr, int i) {
+    void enemy_s::run_instruction(script_instruction *instr, int i) {
         int type = instr->instruct->at(i);
         script_args args = instr->val->at(i);
         switch(type) {

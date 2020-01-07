@@ -1,7 +1,7 @@
 #ifndef _ENGINE_H
 #define _ENGINE_H
 
-#include "engine_gl.h"
+#include "engine_gl.hpp"
 #include <vector>
 
 namespace engine {

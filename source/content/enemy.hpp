@@ -2,8 +2,8 @@
 #define _ENEMY_H
 
 #include <unordered_map>
-#include "script.h"
-#include "bullet.h"
+#include "script.hpp"
+#include "bullet.hpp"
 
 namespace game::content {
 
@@ -26,7 +26,7 @@ namespace game::content {
             float draw_angle;
 
 
-            script_instruction* current_instr;
+            script_instruction *current_instr;
             std::unordered_map<int, script_instruction*> *instructions;
 
             void update();
