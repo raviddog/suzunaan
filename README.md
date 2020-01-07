@@ -13,6 +13,8 @@ Short fangame of the final part of the Forbidden Scrollery manga. A feet-wetting
 - ❌ Boss scripting
 - ❌ Stage scripting
 - ❌ Actual game mechanics
+- ❌ Sprites
+- ❌ Art that's not shit
 - ❌ Backgrounds
 - ❌ SFX
 - ❌ Story/dialogue
