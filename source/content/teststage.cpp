@@ -28,7 +28,7 @@ namespace game::teststage {
     int frames;
 
     
-    std::unordered_map<uint64_t, script_instruction*> *test;
+    bullet_script *test;
 
     int getFreeBullet() {
         if(freebullets->empty()) {
@@ -81,7 +81,6 @@ namespace game::teststage {
             for(int j = 0; j < 8; j++) {
                 int i = getFreeBullet();
                 if(i > -1) {
-                    bullets[i].reset();
                     bullets[i].type = 48 + j % 16;
                     bullets[i].active = true;
                     bullets[i].accel = 0.016f;
@@ -235,7 +234,6 @@ namespace game::teststage {
         freebullets = new std::vector<int>();
         freebullets->reserve(BULLET_MAX);
         for(int i = 0; i < BULLET_MAX; i++) {
-            bullets[i].reset();
             freebullets->push_back(i);
         }
         last_added_bullet = 0;

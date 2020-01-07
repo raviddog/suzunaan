@@ -1,5 +1,6 @@
 trigger:instructions
 
+
 enemy
 ==============
 
@@ -13,36 +14,66 @@ bullets
 triggers
 ----------------
 
-frame(int val):
-happens on specified frame
+# implemented
+
+frame(int frame):
+happens on specified frame, 1 time
+implemented as a self-destruct instruction
+
+# not implemented
+
+external(int id):
+externally triggered, eg. by parent enemy or stage
+
+fromFrame(int frame):
+run every frame starting at specified frame
+this instruction cannot be cancelled
+not sure whether i need this
+
+fromFrameCancel(int frame, int id):
+run every frame starting at specified frame, can be cancelled with another instruction or externally by id
+
+betweenFrame(int frameStart, int frameEnd):
+run every frame starting at specified frame and ending at specified frame
+the function is called on the start frame but not on the end frame
+
+distanceToPlayer(float distance):
+activates when bullet is less than a certain distance from the player
+
+distanceFromPlayer(float distance):
+activates when bullet is more than a certain distance from the player
 
 
 instructions
 ----------------
 
-instruction: speed(float);
+# implemented
+
+speed(float);
 set speed
 
-instruction: accel(float);
+accel(float);
 set acceleration
 
-instruction: angle_change(float);
+angle_change(float);
 set an amount to change the angle per frame
 
-instruction: type_set(int);
+type_set(int);
 change the bullet type to the specified value
 
-instruction: type_set_relative(int);
+type_set_relative(int);
 change the bullet type by a relative amount
 
-instruction: angle(float);
+angle(float);
 set bullet angle
 
+# not implemented
 
+cancel(int id);
+cancel instruction with specified id
 
-
-instruction: speedTo(float speed, int frames);
+speedTo(float speed, int frames);
 speed goes to target over specified number of frames
 
-instruction: move(float angle, float speed);
+move(float angle, float speed);
 set movement direction and speed.

@@ -1,7 +1,6 @@
 #ifndef _BULLET_H
 #define _BULLET_H
 
-#include <unordered_map>
 #include "script.h"
 
 namespace game::content {
@@ -9,7 +8,7 @@ namespace game::content {
 
     class bullet_s {
         private:
-            void run_instruction(script_instruction*, int);
+            void run_instructions();
             //  bullet instruction functions
             void instr_speed(float);
             void instr_accel(float);
@@ -18,8 +17,10 @@ namespace game::content {
             void instr_angle(float);
 
         public:
+            bullet_s();
             bool active;
-            int type, frames, owner;
+            uint32_t type, frames;
+            int owner;
             float x_pos, y_pos;
             
             //  not sure which way to implement movement
@@ -29,7 +30,9 @@ namespace game::content {
             float accel, angle_change;
             float draw_angle;
 
-            std::unordered_map<uint64_t, script_instruction*> *instructions;
+            bullet_script *instructions = nullptr;
+            std::vector<uint32_t> *active_instructions = nullptr;
+
             void reset();
             void update();
 

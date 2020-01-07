@@ -27,7 +27,7 @@ namespace game::content {
 
     }
 
-    std::unordered_map<uint64_t, script_instruction*> *loadScriptBullet(const std::string &path) {
+    bullet_script *loadScriptBullet(const std::string &path) {
         printf("loading bullet script file %s\n", path.c_str());
         std::string content;
         size_t next = 0, offset = 0, length;
@@ -74,10 +74,8 @@ namespace game::content {
             return nullptr;
         }
 
-        //  first time using auto lol
-        //  honestly i should just use it for every 'new' statement
-        //  i dont like using it on function returns and most things in general though
-        auto script = new std::unordered_map<uint64_t, script_instruction*>();
+        bullet_script *script = new bullet_script();
+        uint32_t nextId = 0;
 
         next += offset + 1;
         line++;
@@ -106,24 +104,38 @@ namespace game::content {
                     && content[next + offset] != ':' && next + offset < length) offset++;
                 //  check trigger type and create/load instructions
                 script_instruction *instruction;
-                uint64_t trigger;
                 bool abort = false;
                 if(trigger_type == "frame") {
+                    //  add to frame triggers
                     try {
-                        trigger = 1;
-                        //  one int
-                        uint64_t frame = std::stoul(content.substr(next, offset), nullptr);
-                        trigger += frame << 8;
+                        //  get frame number
+                        uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
                         printf("frame %d:", frame);
                         //  check if frame data exists
-                        if(script->count(trigger) > 0) {
-                            //  exists
-                            instruction = script->at(trigger);
-                        } else {
-                            //  doesn't exist
-                            instruction = new script_instruction();
-                            script->insert({trigger, instruction});
+                        if(script->frame_triggers->count(frame) == 0) {
+                            //  doesn't exist, create the vector
+                            std::vector<uint32_t> *v = new std::vector<uint32_t>();
+                            script->frame_triggers->insert({frame, v});
                         }
+                        //  insert instruction ID into vector
+                        //  sanity check that current instruction ID doesn't exist
+                        bool exists = true;
+                        while(exists) {
+                            exists = false;
+                            //  check id map
+                            if(script->id_map->count(nextId) > 0) exists = true;
+                            //  check instruction list
+                            if(script->instructions->count(nextId) > 0) exists = true;
+                            //  incrememnt ID if exists
+                            if(exists) nextId++;
+                        }
+                        //  if this throws an excecption after inserting, things will break
+                        script->frame_triggers->at(frame)->push_back(nextId);
+                        instruction = new script_instruction();
+                        instruction->selfdestruct = true;
+                        script->instructions->insert({nextId, instruction});
+                        //  increment next id
+                        nextId++;
                     } catch (std::invalid_argument ex) {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
@@ -137,6 +149,7 @@ namespace game::content {
                 offset = 0;
                 while(next + offset < length && (content[next + offset] == ' ' || content[next + offset] == ':')) next++;
                 //  no other trigger types for now
+
                 if(!abort) {
                     //  read functions until semicolon terminator
                     while(content[next] != ';' && next < length) {
@@ -204,28 +217,31 @@ namespace game::content {
                                     success = false;
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);
                                 }
-                            } else if(function_info.second == 3) {
-                                //  float, int
-                                try {
-                                    float arg_1 = std::stof(content.substr(next, offset), nullptr);
-                                    while(content[next] != ',' && offset > 0) {
-                                        next++;
-                                        offset--;   
-                                    }
-                                    int arg_2 = std::stoi(content.substr(next, offset), nullptr);
-                                    while(content[next] != ',' && offset > 0) {
-                                        next++;
-                                        offset--;   
-                                    }
-                                    script_args args;
-                                    args.type_3 = new std::tuple<float, int>(arg_1, arg_2);
-                                    instruction->val->push_back(args);
-                                    printf("(float %f, int %d)", arg_1, arg_2);
-                                } catch (std::invalid_argument ex) {
-                                    success = false;
-                                    printf(", can't read argument in function %s, line %d", ex.what(), line);
-                                }
                             }
+                            //  ignore type 3 for the moment
+                            // } else if(function_info.second == 3) {
+                            //     //  float, int
+                            //     try {
+                            //         float arg_1 = std::stof(content.substr(next, offset), nullptr);
+                            //         while(content[next] != ',' && offset > 0) {
+                            //             next++;
+                            //             offset--;   
+                            //         }
+                            //         int arg_2 = std::stoi(content.substr(next, offset), nullptr);
+                            //         while(content[next] != ',' && offset > 0) {
+                            //             next++;
+                            //             offset--;   
+                            //         }
+                            //         script_args args;
+                            //         uint64_t arg = 
+                            //         args.type_3 = new std::tuple<float, int>(arg_1, arg_2);
+                            //         instruction->val->push_back(args);
+                            //         printf("(float %f, int %d)", arg_1, arg_2);
+                            //     } catch (std::invalid_argument ex) {
+                            //         success = false;
+                            //         printf(", can't read argument in function %s, line %d", ex.what(), line);
+                            //     }
+                            // }
 
                             if(success) instruction->instruct->push_back(function_info.first);
 
@@ -244,72 +260,41 @@ namespace game::content {
         printf("finished loading");
         return script;
     }
-   
+
+    bullet_script::bullet_script() {
+        id_map = new std::unordered_map<uint32_t, uint32_t>();
+        frame_triggers = new std::unordered_map<uint32_t, std::vector<uint32_t>*>();
+        instructions = new std::unordered_map<uint32_t, script_instruction*>();
+    }
+
+    bullet_script::~bullet_script() {
+        //  iterators, not sure what format these are
+        auto fit_begin = frame_triggers->begin();
+        auto fit_end = frame_triggers->end();
+        while(fit_begin != fit_end) {
+            delete fit_begin->second;
+            fit_begin++;
+        }
+        delete frame_triggers;
+        auto iit_begin = instructions->begin();
+        auto iit_end = instructions->end();
+        while(iit_begin != iit_end) {
+            delete iit_begin->second;
+            iit_begin++;
+        }
+        delete instructions;
+        delete id_map;
+    }
 
 
     script_instruction::script_instruction() {
-        instruct = new std::vector<int>();
+        instruct = new std::vector<uint32_t>();
         val = new std::vector<script_args>();
     }
 
     script_instruction::~script_instruction() {
-        for(int i = 0; i < instruct->size(); i++) {
-            switch(instruct->at(i)) {
-                //  add a case for every function that uses a tuple as its arguments
-                //  and just let them drop through to the delete
-                //  #FIX 18
-                case 3:
-                    delete val->at(i).type_3;
-                    break;
-            }
-        }
         delete instruct;
         delete val;
-    }
-
-    
-    uint64_t trigger_eraseType(uint64_t storage) {
-        storage = storage >> 8;
-        return storage;
-    }
-    uint8_t trigger_getType(uint64_t storage) {
-        //  probably not even needed
-        return storage;
-    }
-    uint64_t trigger_setType(uint8_t type) {
-        //  might not need this either
-        return (uint64_t)type;
-    }
-    uint64_t trigger_setInt(uint64_t storage, uint16_t data) {
-        return storage += (uint64_t)(data << 8);
-    }
-    uint64_t trigger_setFloat(uint64_t storage, float data) {
-        char *bytes = reinterpret_cast<char*>(&data);
-        for(int i = 0; i < sizeof(float); i++) {
-            storage += (uint32_t)*bytes << (i + 1) * 8;
-        }
-        return storage;
-    }
-    uint64_t trigger_setData(uint64_t storage, trigger_int_int data) {
-        storage += (uint64_t)data.frame << 8;
-        storage += (uint64_t)data.id << 24;
-        return storage;
-    }
-
-    uint16_t trigger_getInt(uint64_t storage) {
-        return trigger_eraseType(storage);
-    }
-    float trigger_getFloat(uint64_t storage) {
-        uint32_t data = trigger_eraseType(storage);
-        float *f = reinterpret_cast<float*>(&data);
-        return *f;
-    }
-    trigger_int_int trigger_getIntInt(uint64_t storage) {
-        storage = trigger_eraseType(storage);
-        trigger_int_int data;
-        data.frame = (uint16_t)storage;
-        data.id = (uint16_t)(storage >> 16);
-        return data;
     }
 
 }

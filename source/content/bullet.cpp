@@ -11,6 +11,10 @@ namespace game::content {
             bullet_bounds_xmax = 640.f,
             bullet_bounds_ymax = 480.f;
 
+    bullet_s::bullet_s() {
+        active_instructions = new std::vector<uint32_t>();
+    }
+
     void bullet_s::reset() {
         active = false;
         type = 0;
@@ -24,6 +28,7 @@ namespace game::content {
         angle_change = 0.f;
         draw_angle = 0.f;
         instructions = nullptr;
+        active_instructions->clear();
     }
     
     void bullet_s::update() {
@@ -32,30 +37,23 @@ namespace game::content {
 
             //  apply instructions
             if(instructions != nullptr) {
-                //  check frame unstruction
-                uint64_t trigger = 1;
-                trigger += (uint64_t)frames << 8;
-                if(instructions->count(trigger) > 0) {
-                    script_instruction *instr = instructions->at(trigger);
-                    for(int i = 0; i < instr->instruct->size(); i++) {
-                        run_instruction(instr, i);
+                //  check frame triggers
+                if(instructions->frame_triggers->count(frames) > 0) {
+                    //  add instructions from the vector to the active instructions
+                    std::vector<uint32_t> *ins = instructions->frame_triggers->at(frames);
+                    for(int i = 0; i < ins->size(); i++) {
+                        active_instructions->push_back(ins->at(i));
                     }
-
                 }
-
-                //  perform constant instructions
-                // if(instructions->count(0) > 0) {
-                //     script_instruction *instr = instructions->at(0);
-                //     for(int i = 0; i < instr->instruct->size(); i++) {
-                //         run_instruction(instr, i);
-                //     }
-                // }
             }
+
+            run_instructions();
 
 
             speed += accel;
             angle += angle_change;
             if(angle > 360.f) angle -= 360.f;
+            if(angle < -360.f) angle += 360.f;
             x_pos += std::sin(angle * PI / 180.f) * speed;
             y_pos += std::cos(angle * PI / 180.f) * speed;
 
@@ -76,27 +74,39 @@ namespace game::content {
         }
     }
 
-    void bullet_s::run_instruction(script_instruction *instr, int i) {
-        int type = instr->instruct->at(i);
-        script_args args = instr->val->at(i);
-        switch(type) {
-            case 1:
-                instr_speed(args.type_1);
-                break;
-            case 2:
-                instr_accel(args.type_1);
-                break;
-            case 3:
-                instr_angle_change(args.type_1);
-                break;
-            case 4:
-                instr_type_set_relative(args.type_2);
-                break;
-            case 5:
-                instr_angle(args.type_1);
-                break;
-            default:
-                break;
+    void bullet_s::run_instructions() {
+        for(auto i = active_instructions->begin(); i != active_instructions->end();) {
+            //  get active script instruction from instruction list
+            script_instruction *current = instructions->instructions->at(*i);
+            //  run each instruction
+            for(int i = 0; i < current->instruct->size(); i++) {
+                script_args args = current->val->at(i);
+                switch(current->instruct->at(i)) {
+                    case 1:
+                        instr_speed(args.type_1);
+                        break;
+                    case 2:
+                        instr_accel(args.type_1);
+                        break;
+                    case 3:
+                        instr_angle_change(args.type_1);
+                        break;
+                    case 4:
+                        instr_type_set_relative(args.type_2);
+                        break;
+                    case 5:
+                        instr_angle(args.type_1);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            //  iterate i if the instruction isn't self destructing, else remove
+            if(current->selfdestruct) {
+                i = active_instructions->erase(i);
+            } else {
+                i++;
+            }
         }
     }
 
@@ -120,6 +130,4 @@ namespace game::content {
         angle = val;
     }
 
-
-    
 }
