@@ -78,6 +78,7 @@ namespace game::content {
         uint32_t nextId = 0;
 
         next += offset + 1;
+        offset = 0;
         line++;
 
         while(next < length) {
@@ -91,6 +92,46 @@ namespace game::content {
                 while(content[next] != '\n' && next < length) next++;
             } else {
                 //  process instruction
+                //  check if the line has an id in it by counting colons
+                //  this is a really shitty jank way of doing it
+                int colons = 0;
+                uint32_t instruct_id = 0;
+                while(next + offset < length && content[next + offset] != '\n') {
+                    if(content[next + offset] == ':') colons++;
+                    offset++;
+                }
+                //  2 colons, has id
+                if(colons == 2) {
+                    //  read id
+                    try {
+                        uint32_t tempid = std::stoul(content.substr(next, offset), nullptr);
+                        //  check if it already exists
+                        if(script->id_map->count(tempid) > 0) {
+                            //  just assume the user knows what they're doing, duplicating an id
+                            //  maybe you can do some cool tricks with this
+                            instruct_id = script->id_map->at(tempid);
+                        } else {
+                            //  insert into user id map
+                            script->id_map->insert({tempid, nextId});
+                            instruct_id = nextId;
+                            nextId++;
+                        }
+                    } catch (std::invalid_argument ex) {
+                        //  invalid id, use nextId
+                        printf("invalid id, ignoring. ");
+                        instruct_id = nextId;
+                        nextId++;
+                    }
+                    //  position next at the trigger function name
+                    while(next < length && content[next] != ':') next++;
+                    next++;
+                } else {
+                    //  no id given, just use nextId
+                    instruct_id = nextId;
+                    nextId++;
+                }
+
+
                 //  first get trigger function name
                 offset = 0;
                 while(content[next + offset] != '(' && content[next + offset] != '\n'
@@ -118,24 +159,21 @@ namespace game::content {
                             script->frame_triggers->insert({frame, v});
                         }
                         //  insert instruction ID into vector
-                        //  sanity check that current instruction ID doesn't exist
-                        bool exists = true;
-                        while(exists) {
-                            exists = false;
-                            //  check id map
-                            if(script->id_map->count(nextId) > 0) exists = true;
-                            //  check instruction list
-                            if(script->instructions->count(nextId) > 0) exists = true;
-                            //  incrememnt ID if exists
-                            if(exists) nextId++;
-                        }
+                        //  do it now after a valid trigger has been determined
                         //  if this throws an excecption after inserting, things will break
-                        script->frame_triggers->at(frame)->push_back(nextId);
-                        instruction = new script_instruction();
+                        //  have to do this on every trigger because some of them dont use frames as triggers,
+                        //      so i need for them to be able to insert the id into whatever new structure they use
+                        script->frame_triggers->at(frame)->push_back(instruct_id);
+                        //  i dont know why im supporting setting multiple things to the same id
+                        //  but i am for some reason
+                        //  "supporting", since i can't guarantee what happens, but ill make it so the functions at least activate
+                        if(script->instructions->count(instruct_id) > 0) {
+                            instruction = script->instructions->at(instruct_id);
+                        } else {
+                            instruction = new script_instruction();
+                            script->instructions->insert({instruct_id, instruction});
+                        }
                         instruction->selfdestruct = true;
-                        script->instructions->insert({nextId, instruction});
-                        //  increment next id
-                        nextId++;
                     } catch (std::invalid_argument ex) {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
@@ -144,11 +182,11 @@ namespace game::content {
                     printf("unknown trigger in line %d, skipping line", line);
                     abort = true;
                 }
+                //  no other trigger types for now
                 //  skip closing bracket, spaces and colon to functions
                 next += offset + 1;
                 offset = 0;
                 while(next + offset < length && (content[next + offset] == ' ' || content[next + offset] == ':')) next++;
-                //  no other trigger types for now
 
                 if(!abort) {
                     //  read functions until semicolon terminator
@@ -257,7 +295,7 @@ namespace game::content {
                 printf("\n");
             }
         }
-        printf("finished loading");
+        printf("finished loading script\n");
         return script;
     }
 

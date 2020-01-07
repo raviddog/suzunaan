@@ -1,4 +1,10 @@
-trigger:instructions
+id:trigger:instructions
+
+id is an unsigned integer, so it must be non-negative
+the id is optional but some recurring triggers need it in order to stop their instructions
+instructions aren't restricted to one per line, or one line per trigger,
+    but your id and trigger must be on the same line, separated by colons.
+
 
 
 enemy
@@ -16,32 +22,34 @@ triggers
 
 # implemented
 
-frame(int frame):
-happens on specified frame, 1 time
-implemented as a self-destruct instruction
+frame(int frame)
+happens on specified frame
+single run instruction
 
 # not implemented
 
-external(int id):
-externally triggered, eg. by parent enemy or stage
+external()
+trigger by id only
 
-fromFrame(int frame):
+fromFrame(int frame)
 run every frame starting at specified frame
-this instruction cannot be cancelled
-not sure whether i need this
+cancellable by id
 
-fromFrameCancel(int frame, int id):
-run every frame starting at specified frame, can be cancelled with another instruction or externally by id
+interval(int start, int frames)
+starting from specified frame, run every x frames
+cancellable by id
 
-betweenFrame(int frameStart, int frameEnd):
+betweenFrame(int frameStart, int frameEnd)
 run every frame starting at specified frame and ending at specified frame
 the function is called on the start frame but not on the end frame
 
-distanceToPlayer(float distance):
+distanceToPlayer(float distance)
 activates when bullet is less than a certain distance from the player
+single run instruction
 
-distanceFromPlayer(float distance):
+distanceFromPlayer(float distance)
 activates when bullet is more than a certain distance from the player
+single run instruction
 
 
 instructions
@@ -69,7 +77,10 @@ set bullet angle
 
 # not implemented
 
-cancel(int id);
+start(int id);
+run instruction with id
+
+stop(int id);
 cancel instruction with specified id
 
 speedTo(float speed, int frames);

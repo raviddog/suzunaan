@@ -33,8 +33,6 @@ namespace game::content {
     
     void bullet_s::update() {
         if(active) {
-            frames++;
-
             //  apply instructions
             if(instructions != nullptr) {
                 //  check frame triggers
@@ -71,6 +69,9 @@ namespace game::content {
             if(x_pos < bullet_bounds_x) active = false;
             if(y_pos > bullet_bounds_ymax) active = false;
             if(y_pos < bullet_bounds_y) active = false;
+
+            
+            frames++;
         }
     }
 

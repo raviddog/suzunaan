@@ -48,8 +48,8 @@ namespace game::content {
         ~bullet_script();
 
         std::unordered_map<uint32_t, uint32_t> *id_map;
-        std::unordered_map<uint32_t, std::vector<uint32_t>*> *frame_triggers;
         std::unordered_map<uint32_t, script_instruction*> *instructions;
+        std::unordered_map<uint32_t, std::vector<uint32_t>*> *frame_triggers;
 
         //  list of listeners (non-frame based triggers)
 
