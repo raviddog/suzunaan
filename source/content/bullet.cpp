@@ -14,6 +14,7 @@ namespace game::content {
     bullet_s::bullet_s() {
         active_instructions = new std::vector<uint32_t>();
         cust_triggers = new std::unordered_multimap<uint32_t, uint32_t>();
+        cancel_cust_triggers = new std::unordered_set<uint32_t>();
     }
 
     void bullet_s::reset() {
@@ -30,6 +31,7 @@ namespace game::content {
         instructions = nullptr;
         active_instructions->clear();
         cust_triggers->clear();
+        cancel_cust_triggers->clear();
     }
     
     void bullet_s::update() {
@@ -51,7 +53,15 @@ namespace game::content {
                 std::pair<  std::unordered_multimap<uint32_t, uint32_t>::iterator,
                             std::unordered_multimap<uint32_t, uint32_t>::iterator> range = cust_triggers->equal_range(frames);
                 for(auto it = range.first; it != range.second; it++) {
-                    active_instructions->push_back(it->second);
+                    //  check if this trigger is to be canceled
+                    if(cancel_cust_triggers->count(it->second) > 0) {
+                        //  don't run it
+                        //  since it's a frame trigger, it can't be reached again, so there's no need to delete it
+                        //  remove the cancel though, so that this trigger can be created again if so
+                        cancel_cust_triggers->erase(it->second);
+                    } else {
+                        active_instructions->push_back(it->second);
+                    }
                 }
             }
 
@@ -143,6 +153,9 @@ namespace game::content {
                             instr_frameTriggerOffset(val.first, val.second);
                             break;
                         }
+                        case 10:
+                            instr_stopInterval(args.type_3);
+                            break;
                         default:
                             break;
                     }
@@ -228,6 +241,12 @@ namespace game::content {
             id = instructions->id_map->at(id);
         }
         cust_triggers->insert({frame + frames, id});
+    }
+
+    void bullet_s::instr_stopInterval(uint32_t id) {
+        if(cancel_cust_triggers->count(id) == 0) {
+            cancel_cust_triggers->insert(id);
+        }
     }
 
 

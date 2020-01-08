@@ -105,6 +105,10 @@ mostly used internally by functions that stop automatically
 
 frameTriggerOffset(int id, int frame);
 same as frameTrigger, but frame is an offset to the current instruction frame
+used internally by the interval triggers
+
+stopInterval(int id);
+same as stop but specifically for interval functions
 
 # not implemented
 

@@ -24,6 +24,7 @@ namespace game::content {
             bullet_instr->insert({"start", std::make_pair(7, 3)});
             bullet_instr->insert({"frameTrigger", std::make_pair(8, 4)});
             bullet_instr->insert({"frameTriggerOffset", std::make_pair(9, 4)});
+            bullet_instr->insert({"stopInterval", std::make_pair(10, 3)});
         }
 
         if(enemy_instr == nullptr) {
@@ -164,7 +165,7 @@ namespace game::content {
                             std::vector<uint32_t> *v = new std::vector<uint32_t>();
                             script->frame_triggers->insert({frame, v});
                         }
-                        //  insert instruction ID into vector
+                        //  insert instruction ID into frame triggers
                         //  do it now after a valid trigger has been determined
                         //  if this throws an excecption after inserting, things will break
                         //  have to do this on every trigger because some of them dont use frames as triggers,
@@ -213,8 +214,9 @@ namespace game::content {
                             std::vector<uint32_t> *v = new std::vector<uint32_t>();
                             script->frame_triggers->insert({frame, v});
                         }
-                        //  insert instruction ID into vector
+                        //  insert instruction ID into frame triggers
                         script->frame_triggers->at(frame)->push_back(instruct_id);
+                        //  insert instruction
                         if(script->instructions->count(instruct_id) > 0) {
                             instruction = script->instructions->at(instruct_id);
                         } else {
@@ -225,18 +227,66 @@ namespace game::content {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
                     }
-                // } else if(trigger_type == "interval") {
-                //     //  add an instruction to this instruction set frameTriggerOffset
-
-                //     try {
-
-                //     } catch (std::invalid_argument ex) {
-                //         printf("invalid frame trigger in line %d, skipping line", line);
-                //         abort = true;
-                //     }
-                // } else if(trigger_type == "intervalStart") {
-                //     //  same as interval 
-
+                } else if(trigger_type == "interval") {
+                    try {
+                        //  get arguments
+                        uint32_t interval = std::stoul(content.substr(next, offset), nullptr);
+                        //  no initial trigger, just insert instruction ID
+                        if(script->instructions->count(instruct_id) > 0) {
+                            instruction = script->instructions->at(instruct_id);
+                        } else {
+                            instruction = new script_instruction();
+                            script->instructions->insert({instruct_id, instruction});
+                        }
+                        //  instruction is self destructing, but calls itself later with frameTriggerOffset so it doesn't matter
+                        instruction->selfdestruct = true;
+                        //  create and insert frameTriggerOffset into the instructions
+                        script_args args;
+                        args.type_4 = script_setIntInt(instruct_id, interval);
+                        instruction->instruct->push_back(9);
+                        instruction->val->push_back(args);
+                    } catch (std::invalid_argument ex) {
+                        printf("invalid frame trigger in line %d, skipping line", line);
+                        abort = true;
+                    }
+                } else if(trigger_type == "intervalStart") {
+                    //  same as interval but with a frame trigger
+                    try {
+                        //  get arguments
+                        uint32_t interval = std::stoul(content.substr(next, offset), nullptr);
+                        while(content[next] != ',' && offset > 0) {
+                            next++;
+                            offset--;
+                        }
+                        next++;
+                        offset--;
+                        uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
+                        //  check if frame data exists
+                        if(script->frame_triggers->count(frame) == 0) {
+                            //  doesn't exist, create the vector
+                            std::vector<uint32_t> *v = new std::vector<uint32_t>();
+                            script->frame_triggers->insert({frame, v});
+                        }
+                        //  insert instruction ID into frame triggers
+                        script->frame_triggers->at(frame)->push_back(instruct_id);
+                        //  insert instruction
+                        if(script->instructions->count(instruct_id) > 0) {
+                            instruction = script->instructions->at(instruct_id);
+                        } else {
+                            instruction = new script_instruction();
+                            script->instructions->insert({instruct_id, instruction});
+                        }
+                        //  instruction is self destructing, but calls itself later with frameTriggerOffset so it doesn't matter
+                        instruction->selfdestruct = true;
+                        //  create and insert frameTriggerOffset into the instructions
+                        script_args args;
+                        args.type_4 = script_setIntInt(instruct_id, interval);
+                        instruction->instruct->push_back(9);
+                        instruction->val->push_back(args);
+                    } catch (std::invalid_argument ex) {
+                        printf("invalid frame trigger in line %d, skipping line", line);
+                        abort = true;
+                    }
                 } else {
                     printf("unknown trigger in line %d, skipping line", line);
                     abort = true;
@@ -324,7 +374,7 @@ namespace game::content {
                                         offset--;
                                     }
                                     //  additional logic for start and stop, gotta create an entry in the id map
-                                    if(function_name == "start" || function_name == "stop") {
+                                    if(function_name == "start" || function_name == "stop" || function_name == "stopInterval") {
                                         if(script->id_map->count(arg_1) > 0) {
                                             //  there's an entry already, switch the argument to the new id
                                             arg_1 = script->id_map->at(arg_1);
@@ -367,41 +417,13 @@ namespace game::content {
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);
                                 }
                             }
-                            //  ignore type 3 for the moment
-                            // } else if(function_info.second == 3) {
-                            //     //  float, int
-                            //     try {
-                            //         float arg_1 = std::stof(content.substr(next, offset), nullptr);
-                            //         while(content[next] != ',' && offset > 0) {
-                            //             next++;
-                            //             offset--;   
-                            //         }
-                            //         int arg_2 = std::stoi(content.substr(next, offset), nullptr);
-                            //         while(content[next] != ',' && offset > 0) {
-                            //             next++;
-                            //             offset--;   
-                            //         }
-                            //         script_args args;
-                            //         uint64_t arg = 
-                            //         args.type_3 = new std::tuple<float, int>(arg_1, arg_2);
-                            //         instruction->val->push_back(args);
-                            //         printf("(float %f, int %d)", arg_1, arg_2);
-                            //     } catch (std::invalid_argument ex) {
-                            //         success = false;
-                            //         printf(", can't read argument in function %s, line %d", ex.what(), line);
-                            //     }
-                            // }
-
                             if(success) instruction->instruct->push_back(function_info.first);
-
                         } else {
                             printf("unable to locate instruction %s\n", function_name.c_str());
                         }
-                        
                         next += offset + 1;
                     }
                 }
-
                 while(next < length && content[next] != '\n') next++;
                 printf("\n");
             }

@@ -1,20 +1,10 @@
 type: bullet
 
-//intervalStart(60, 0):accel(0.1);
-//intervalStart(60, 9):accel(0);
-//intervalStart(60, 19):accel(-0.1);
-//intervalStart(60, 29):accel(0) angle_change(-90);
-//intervalStart(60, 30):accel(0.1);
-//intervalStart(60, 39):accel(0);
-//intervalStart(60, 49):accel(-0.1);
-//intervalStart(60, 59):accel(0) angle_change(90);
-
-1:frame(0):accel(0.5) frameTriggerOffset(1, 60);
-2:frame(9):accel(0) frameTriggerOffset(2, 60);
-3:frame(20):accel(-0.5) frameTriggerOffset(3, 60);
-4:frame(29):accel(0) angle_change(-90) frameTriggerOffset(4, 60);
-5:frame(30):accel(0.5) frameTriggerOffset(5, 60);
-6:frame(39):accel(0) frameTriggerOffset(6, 60);
-7:frame(50):accel(-0.5) frameTriggerOffset(7, 60);
-8:frame(59):accel(0) angle_change(90) frameTriggerOffset(8, 60);
-
+1:intervalStart(60, 0):accel(0.5);
+2:intervalStart(60, 9):accel(0);
+3:intervalStart(60, 20):accel(-0.5);
+4:intervalStart(60, 29):accel(0) angle_change(-90);
+5:intervalStart(60, 30):accel(0.5);
+6:intervalStart(60, 39):accel(0);
+7:intervalStart(60, 50):accel(-0.5);
+8:intervalStart(60, 59):accel(0) angle_change(90);
