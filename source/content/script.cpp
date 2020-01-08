@@ -18,6 +18,8 @@ namespace game::content {
             bullet_instr->insert({"angle_change", std::make_pair(3, 1)});
             bullet_instr->insert({"type_set_relative", std::make_pair(4, 2)});
             bullet_instr->insert({"angle", std::make_pair(5, 1)});
+            bullet_instr->insert({"stop", std::make_pair(6, 3)});
+            bullet_instr->insert({"start", std::make_pair(7, 3)});
         }
 
         if(enemy_instr == nullptr) {
@@ -178,6 +180,23 @@ namespace game::content {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
                     }
+                } else if(trigger_type == "external") {
+                    //  this trigger shouldn't do shit
+                    //  just insert the instruction id
+                    if(script->instructions->count(instruct_id) > 0) {
+                        instruction = script->instructions->at(instruct_id);
+                    } else {
+                        instruction = new script_instruction();
+                        script->instructions->insert({instruct_id, instruction});
+                    }
+                    instruction->selfdestruct = true;
+                } else if(trigger_type == "externalCont") {
+                    if(script->instructions->count(instruct_id) > 0) {
+                        instruction = script->instructions->at(instruct_id);
+                    } else {
+                        instruction = new script_instruction();
+                        script->instructions->insert({instruct_id, instruction});
+                    }
                 } else {
                     printf("unknown trigger in line %d, skipping line", line);
                     abort = true;
@@ -245,12 +264,41 @@ namespace game::content {
                                     int arg_1 = std::stoi(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
-                                        offset--;   
+                                        offset--;
                                     }
                                     script_args args;
                                     args.type_2 = arg_1;
                                     instruction->val->push_back(args);
                                     printf("(int %d)", arg_1);
+                                } catch (std::invalid_argument ex) {
+                                    success = false;
+                                    printf(", can't read argument in function %s, line %d", ex.what(), line);
+                                }
+                            } else if(function_info.second == 3) {
+                                //  unsigned int, probably only used for start and stop because frame ids
+                                //  single int
+                                try {
+                                    uint32_t arg_1 = std::stoul(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    //  additional logic for start and stop, gotta create an entry in the id map
+                                    if(function_name == "start" || function_name == "stop") {
+                                        if(script->id_map->count(arg_1) > 0) {
+                                            //  there's an entry already, switch the argument to the new id
+                                            arg_1 = script->id_map->at(arg_1);
+                                        } else {
+                                            //  no entry, create one
+                                            script->id_map->insert({arg_1, nextId});
+                                            arg_1 = nextId;
+                                            nextId++;
+                                        }
+                                    }
+                                    script_args args;
+                                    args.type_3 = arg_1;
+                                    instruction->val->push_back(args);
+                                    printf("(uint %d)", arg_1);
                                 } catch (std::invalid_argument ex) {
                                     success = false;
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);

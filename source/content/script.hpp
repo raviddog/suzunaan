@@ -29,6 +29,7 @@ namespace game::content {
     union script_args{
         float type_1;
         int32_t type_2;
+        uint32_t type_3;
         // uint64_t type_3;
         // std::unique_ptr<std::tuple<float, int>> type_3;
         // std::tuple<float, int> *type_3;

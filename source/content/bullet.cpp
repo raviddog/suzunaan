@@ -76,37 +76,69 @@ namespace game::content {
     }
 
     void bullet_s::run_instructions() {
-        for(auto i = active_instructions->begin(); i != active_instructions->end();) {
+        for(int i = 0; i < active_instructions->size();) {
+            uint32_t num = active_instructions->at(i);
             //  get active script instruction from instruction list
-            script_instruction *current = instructions->instructions->at(*i);
-            //  run each instruction
-            for(int i = 0; i < current->instruct->size(); i++) {
-                script_args args = current->val->at(i);
-                switch(current->instruct->at(i)) {
-                    case 1:
-                        instr_speed(args.type_1);
-                        break;
-                    case 2:
-                        instr_accel(args.type_1);
-                        break;
-                    case 3:
-                        instr_angle_change(args.type_1);
-                        break;
-                    case 4:
-                        instr_type_set_relative(args.type_2);
-                        break;
-                    case 5:
-                        instr_angle(args.type_1);
-                        break;
-                    default:
-                        break;
+            if(instructions->instructions->count(num) > 0) {
+                //  instruction does exist
+                script_instruction *current = instructions->instructions->at(num);
+                //  in case the instruction deletes itself with stop()
+                bool deleted = false;
+                //  run each instruction
+                for(int j = 0; j < current->instruct->size(); j++) {
+                    script_args args = current->val->at(j);
+                    switch(current->instruct->at(j)) {
+                        case 1:
+                            instr_speed(args.type_1);
+                            break;
+                        case 2:
+                            instr_accel(args.type_1);
+                            break;
+                        case 3:
+                            instr_angle_change(args.type_1);
+                            break;
+                        case 4:
+                            instr_type_set_relative(args.type_2);
+                            break;
+                        case 5:
+                            instr_angle(args.type_1);
+                            break;
+                        case 6:
+                        {
+                            //  if this removes an element before the current instruction, need to decrement i
+                            int result = instr_stop(args.type_3);
+                            if(result > -1) {
+                                if(result < i) {
+                                    i--;
+                                } else if(result == i) {
+                                    //  removed the instruction we're currently dealing with
+                                    //  the instruction is already gone, so we can skip the selfdestruct check
+                                    //  we dont want to permanently modify the instruction though
+                                    deleted = true;
+                                }
+                            }
+                            break;   
+                        }
+                        case 7:
+                            instr_start(args.type_3);
+                            break;
+                        default:
+                            break;
+                    }
                 }
-            }
-            //  iterate i if the instruction isn't self destructing, else remove
-            if(current->selfdestruct) {
-                i = active_instructions->erase(i);
+                //  iterate i if the instruction isn't self destructing, else remove
+                if(!deleted) {
+                    if(current->selfdestruct) {
+                        auto loc = active_instructions->begin() + i;
+                        active_instructions->erase(loc);
+                    } else {
+                        i++;
+                    }
+                }
             } else {
-                i++;
+                //  instruction doesn't exist, remove it from active
+                auto loc = active_instructions->begin() + i;
+                active_instructions->erase(loc);
             }
         }
     }
@@ -130,5 +162,38 @@ namespace game::content {
     void bullet_s::instr_angle(float val) {
         angle = val;
     }
+
+    int bullet_s::instr_stop(uint32_t val) {
+        int i = 0;
+        for(;i < active_instructions->size(); i++) {
+            //  found instruction
+            if(active_instructions->at(i) == val) break;
+        }
+        if(i != active_instructions->size()) {
+            //  instruction is active, remove it
+            auto loc = active_instructions->begin() + i;
+            active_instructions->erase(loc);
+            return i;
+        } else {
+            return -1;
+        }
+    }
+
+    void bullet_s::instr_start(uint32_t val) {
+        //  first check if instruction is a real instruction
+        if(instructions->instructions->count(val) > 0) {
+            //  don't duplicate instructions, search active array to check if instruction is already running
+            auto i = active_instructions->begin();
+            for(; i != active_instructions->end(); i++) {
+                //  found instruction
+                if(*i == val) break;
+            }
+            if(i == active_instructions->end()) {
+                //  not found, activate
+                active_instructions->push_back(val);
+            }
+        }
+    }
+
 
 }

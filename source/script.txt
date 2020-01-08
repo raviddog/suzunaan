@@ -26,10 +26,17 @@ frame(int frame)
 happens on specified frame
 single run instruction
 
-# not implemented
-
 external()
 trigger by id only
+same as not having a normal trigger
+single run instruction
+
+externalCont()
+trigger by id only
+same as not having a normal trigger
+runs until stopped
+
+# not implemented
 
 fromFrame(int frame)
 run every frame starting at specified frame
@@ -75,13 +82,16 @@ change the bullet type by a relative amount
 angle(float);
 set bullet angle
 
-# not implemented
-
 start(int id);
 run instruction with id
+this doesn't make any guarantees about whether the instruction is single run or not
+it only adds it to back of the the active instruction queue, which means it does run on the same frame
 
 stop(int id);
 cancel instruction with specified id
+don't make an instruction cancel itself, or things will break
+
+# not implemented
 
 speedTo(float speed, int frames);
 speed goes to target over specified number of frames

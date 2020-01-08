@@ -15,6 +15,9 @@ namespace game::content {
             void instr_angle_change(float);
             void instr_type_set_relative(int);
             void instr_angle(float);
+            //  needs to inform the instruction loop that an element was removed
+            int instr_stop(uint32_t);  
+            void instr_start(uint32_t);
 
         public:
             bullet_s();
