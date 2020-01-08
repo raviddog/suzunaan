@@ -6,6 +6,8 @@
 
 namespace game::content {
 
+    uint64_t script_setIntInt(uint32_t, uint32_t);
+
     //  instructions
     std::unordered_map<std::string, std::pair<int, int>> *bullet_instr = nullptr;
     std::unordered_map<std::string, std::pair<int, int>> *enemy_instr = nullptr;
@@ -20,6 +22,8 @@ namespace game::content {
             bullet_instr->insert({"angle", std::make_pair(5, 1)});
             bullet_instr->insert({"stop", std::make_pair(6, 3)});
             bullet_instr->insert({"start", std::make_pair(7, 3)});
+            bullet_instr->insert({"frameTrigger", std::make_pair(8, 4)});
+            bullet_instr->insert({"frameTriggerOffset", std::make_pair(9, 4)});
         }
 
         if(enemy_instr == nullptr) {
@@ -180,7 +184,7 @@ namespace game::content {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
                     }
-                } else if(trigger_type == "external") {
+                } else if(trigger_type == "none") {
                     //  this trigger shouldn't do shit
                     //  just insert the instruction id
                     if(script->instructions->count(instruct_id) > 0) {
@@ -190,13 +194,49 @@ namespace game::content {
                         script->instructions->insert({instruct_id, instruction});
                     }
                     instruction->selfdestruct = true;
-                } else if(trigger_type == "externalCont") {
+                } else if(trigger_type == "noneCont") {
                     if(script->instructions->count(instruct_id) > 0) {
                         instruction = script->instructions->at(instruct_id);
                     } else {
                         instruction = new script_instruction();
                         script->instructions->insert({instruct_id, instruction});
                     }
+                } else if(trigger_type == "frameCont") {
+                    //  same as frame, but selfdestruct is false
+                    try {
+                        //  get frame number
+                        uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
+                        printf("frame %d:", frame);
+                        //  check if frame data exists
+                        if(script->frame_triggers->count(frame) == 0) {
+                            //  doesn't exist, create the vector
+                            std::vector<uint32_t> *v = new std::vector<uint32_t>();
+                            script->frame_triggers->insert({frame, v});
+                        }
+                        //  insert instruction ID into vector
+                        script->frame_triggers->at(frame)->push_back(instruct_id);
+                        if(script->instructions->count(instruct_id) > 0) {
+                            instruction = script->instructions->at(instruct_id);
+                        } else {
+                            instruction = new script_instruction();
+                            script->instructions->insert({instruct_id, instruction});
+                        }
+                    } catch (std::invalid_argument ex) {
+                        printf("invalid frame trigger in line %d, skipping line", line);
+                        abort = true;
+                    }
+                // } else if(trigger_type == "interval") {
+                //     //  add an instruction to this instruction set frameTriggerOffset
+
+                //     try {
+
+                //     } catch (std::invalid_argument ex) {
+                //         printf("invalid frame trigger in line %d, skipping line", line);
+                //         abort = true;
+                //     }
+                // } else if(trigger_type == "intervalStart") {
+                //     //  same as interval 
+
                 } else {
                     printf("unknown trigger in line %d, skipping line", line);
                     abort = true;
@@ -248,7 +288,7 @@ namespace game::content {
                                     float arg_1 = std::stof(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
-                                        offset--;   
+                                        offset--;
                                     }
                                     script_args args;
                                     args.type_1 = arg_1;
@@ -303,6 +343,29 @@ namespace game::content {
                                     success = false;
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);
                                 }
+                            } else if(function_info.second == 4) {
+                                //  two unsigned ints
+                                try {
+                                    uint32_t arg_1 = std::stoul(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    uint32_t arg_2 = std::stoul(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    script_args args;
+                                    args.type_4 = script_setIntInt(arg_1, arg_2);
+                                    instruction->val->push_back(args);
+                                    printf("(uint %d, uint %d)", arg_1, arg_2);
+                                } catch (std::invalid_argument ex) {
+                                    success = false;
+                                    printf(", can't read argument in function %s, line %d", ex.what(), line);
+                                }
                             }
                             //  ignore type 3 for the moment
                             // } else if(function_info.second == 3) {
@@ -345,6 +408,20 @@ namespace game::content {
         }
         printf("finished loading script\n");
         return script;
+    }
+
+    uint64_t script_setIntInt(uint32_t first, uint32_t second) {
+        uint64_t out = 0;
+        out += first;
+        out += ((uint64_t)second) << 32;
+        return out;
+    }
+
+    std::pair<uint32_t, uint32_t> script_getIntInt(uint64_t in) {
+        std::pair<uint32_t, uint32_t> out;
+        out.first = (uint32_t)in;
+        out.second = (uint32_t)(in >> 32);
+        return out;
     }
 
     bullet_script::bullet_script() {

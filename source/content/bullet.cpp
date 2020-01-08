@@ -13,6 +13,7 @@ namespace game::content {
 
     bullet_s::bullet_s() {
         active_instructions = new std::vector<uint32_t>();
+        cust_triggers = new std::unordered_multimap<uint32_t, uint32_t>();
     }
 
     void bullet_s::reset() {
@@ -25,10 +26,10 @@ namespace game::content {
         speed = 0.f;
         angle = 0.f;
         accel = 0.f;
-        angle_change = 0.f;
         draw_angle = 0.f;
         instructions = nullptr;
         active_instructions->clear();
+        cust_triggers->clear();
     }
     
     void bullet_s::update() {
@@ -44,12 +45,20 @@ namespace game::content {
                     }
                 }
             }
+            //  run custom frame triggers
+            if(cust_triggers->count(frames) > 0) {
+                //  could've used auto lol
+                std::pair<  std::unordered_multimap<uint32_t, uint32_t>::iterator,
+                            std::unordered_multimap<uint32_t, uint32_t>::iterator> range = cust_triggers->equal_range(frames);
+                for(auto it = range.first; it != range.second; it++) {
+                    active_instructions->push_back(it->second);
+                }
+            }
 
             run_instructions();
 
 
             speed += accel;
-            angle += angle_change;
             if(angle > 360.f) angle -= 360.f;
             if(angle < -360.f) angle += 360.f;
             x_pos += std::sin(angle * PI / 180.f) * speed;
@@ -122,6 +131,18 @@ namespace game::content {
                         case 7:
                             instr_start(args.type_3);
                             break;
+                        case 8:
+                        {
+                            std::pair<uint32_t, uint32_t> val = script_getIntInt(args.type_4);
+                            instr_frameTrigger(val.first, val.second);
+                            break;
+                        }
+                        case 9:
+                        {
+                            std::pair<uint32_t, uint32_t> val = script_getIntInt(args.type_4);
+                            instr_frameTriggerOffset(val.first, val.second);
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -152,7 +173,7 @@ namespace game::content {
     }
 
     void bullet_s::instr_angle_change(float val) {
-        angle_change = val;
+        angle += val;
     }
 
     void bullet_s::instr_type_set_relative(int val) {
@@ -193,6 +214,20 @@ namespace game::content {
                 active_instructions->push_back(val);
             }
         }
+    }
+
+    void bullet_s::instr_frameTrigger(uint32_t id, uint32_t frame) {
+        if(instructions->id_map->count(id) > 0) {
+            id = instructions->id_map->at(id);
+        }
+        cust_triggers->insert({frame, id});
+    }
+
+    void bullet_s::instr_frameTriggerOffset(uint32_t id, uint32_t frame) {
+        if(instructions->id_map->count(id) > 0) {
+            id = instructions->id_map->at(id);
+        }
+        cust_triggers->insert({frame + frames, id});
     }
 
 

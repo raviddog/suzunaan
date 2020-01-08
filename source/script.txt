@@ -1,6 +1,9 @@
 id:trigger:instructions
 
+bullets start on frame 0
+
 id is an unsigned integer, so it must be non-negative
+it'll probably work if you use negatives but dont
 the id is optional but some recurring triggers need it in order to stop their instructions
 instructions aren't restricted to one per line, or one line per trigger,
     but your id and trigger must be on the same line, separated by colons.
@@ -26,29 +29,34 @@ frame(int frame)
 happens on specified frame
 single run instruction
 
-external()
+none()
 trigger by id only
 same as not having a normal trigger
 single run instruction
 
-externalCont()
+noneCont()
 trigger by id only
 same as not having a normal trigger
 runs until stopped
 
-# not implemented
-
-fromFrame(int frame)
+frameCont(int frame)
 run every frame starting at specified frame
 cancellable by id
 
-interval(int start, int frames)
+interval(int frames)
+run every x frames
+triggered by id
+
+intervalStart(int start, int frames)
 starting from specified frame, run every x frames
 cancellable by id
 
+# not implemented
+
 betweenFrame(int frameStart, int frameEnd)
 run every frame starting at specified frame and ending at specified frame
-the function is called on the start frame but not on the end frame
+the function is called on both the start frame and the end frame
+implemented via creating a stop command on the specified frame
 
 distanceToPlayer(float distance)
 activates when bullet is less than a certain distance from the player
@@ -70,17 +78,17 @@ set speed
 accel(float);
 set acceleration
 
+angle(float);
+set bullet angle
+
 angle_change(float);
-set an amount to change the angle per frame
+set bullet angle relative to current angle 
 
 type_set(int);
 change the bullet type to the specified value
 
 type_set_relative(int);
 change the bullet type by a relative amount
-
-angle(float);
-set bullet angle
 
 start(int id);
 run instruction with id
@@ -90,6 +98,13 @@ it only adds it to back of the the active instruction queue, which means it does
 stop(int id);
 cancel instruction with specified id
 don't make an instruction cancel itself, or things will break
+
+frameTrigger(int id, int frame);
+create new frame trigger for specified instruction id
+mostly used internally by functions that stop automatically
+
+frameTriggerOffset(int id, int frame);
+same as frameTrigger, but frame is an offset to the current instruction frame
 
 # not implemented
 

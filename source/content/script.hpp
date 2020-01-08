@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
-#include <memory>
 
 //  loads a script file into an std::unordered_map
 
@@ -18,22 +17,21 @@ namespace game::content {
                 use a struct for triggers
                 enum/int + union
                 unordered map for frame triggers
-
-
         */
         // std::unordered_map<int, std::unordered_map<int, script_instruction*>*> *enemy, *bullet;
-        
-
     };
 
     union script_args{
         float type_1;
         int32_t type_2;
         uint32_t type_3;
-        // uint64_t type_3;
+        //  two unsigned ints
+        uint64_t type_4;
         // std::unique_ptr<std::tuple<float, int>> type_3;
         // std::tuple<float, int> *type_3;
     };
+
+    std::pair<uint32_t, uint32_t> script_getIntInt(uint64_t);
 
     class script_instruction {
         public:

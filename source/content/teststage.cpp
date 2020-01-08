@@ -77,17 +77,18 @@ namespace game::teststage {
 
         frames++;
 
-        if(frames % 3 == 0) {
-            for(int j = 0; j < 8; j++) {
+        if(frames % 6 == 0) {
+            for(int j = 0; j < 12; j++) {
                 int i = getFreeBullet();
                 if(i > -1) {
                     bullets[i].type = 48 + j % 16;
                     bullets[i].active = true;
-                    bullets[i].accel = 0.016f;
+                    bullets[i].accel = 0.f;
                     bullets[i].x_pos = 320.f;
                     bullets[i].y_pos = 360.f;
-                    bullets[i].angle = 1080.f * sin((double)frames * 3.14159265/180) + j * 45.f;
-                    bullets[i].speed = 3.f;
+                    // bullets[i].angle = 1080.f * sin((double)frames * 3.14159265/180) + j * 45.f;
+                    bullets[i].angle = -(float)frames / 10.f + j * 30.f;
+                    bullets[i].speed = 0.f;
                     bullets[i].instructions = test;
                 }
             }
@@ -247,7 +248,7 @@ namespace game::teststage {
         bullet_bounds_ymax = 512.f;
 
         
-        test = loadScriptBullet("./script/testbullet.txt");
+        test = loadScriptBullet("./script/toziko.txt");
 
     }
 

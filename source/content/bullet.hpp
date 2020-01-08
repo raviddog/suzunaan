@@ -18,6 +18,8 @@ namespace game::content {
             //  needs to inform the instruction loop that an element was removed
             int instr_stop(uint32_t);  
             void instr_start(uint32_t);
+            void instr_frameTrigger(uint32_t, uint32_t);
+            void instr_frameTriggerOffset(uint32_t, uint32_t);
 
         public:
             bullet_s();
@@ -30,11 +32,12 @@ namespace game::content {
             //  should accel be per second or per frame
             //  probably per frame, but then the values have to be super small
             float speed, angle;
-            float accel, angle_change;
+            float accel;
             float draw_angle;
 
             bullet_script *instructions = nullptr;
             std::vector<uint32_t> *active_instructions = nullptr;
+            std::unordered_multimap<uint32_t, uint32_t> *cust_triggers = nullptr;
 
             void reset();
             void update();

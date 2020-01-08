@@ -1,11 +1,8 @@
 type: bullet
 
-1:externalCont() : type_set_relative(16) accel(-0.25);
-frame(30) : start(1);
-frame(35) : stop(1);
+1:none() : type_set_relative(16) accel(-0.25);
+frame(1) : frameTrigger(1, 30);
 frame(41) : accel(0);
 frame(90) : accel(0.1) angle_change(5);
-frame(100) : start(1);
-frame(101) : stop(1);
 frame(107): accel(0);
 frame(160): angle_change(0) speed(1);
