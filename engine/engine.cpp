@@ -54,7 +54,7 @@ namespace engine {
         indices_stored_size = 0;
     }
 
-    void SpriteSheet::load(const std::string &path, int numSprites, int maxDraws) {
+    void SpriteSheet::load(const std::string &path, int numSprites, size_t maxDraws) {
         load(path, numSprites);
         vbo->bind();
         vbo->createBuffer(sizeof(float) * 28 * maxDraws, sizeof(uint32_t) * 6 * maxDraws);

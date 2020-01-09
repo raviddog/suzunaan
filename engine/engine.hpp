@@ -49,7 +49,7 @@ namespace engine {
             bool realloc;
 
             void load(const std::string&, int);
-            void load(const std::string&, int, int);
+            void load(const std::string&, int, size_t);
         public:
             int numSprites;
 
