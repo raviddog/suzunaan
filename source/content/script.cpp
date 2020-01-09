@@ -48,7 +48,7 @@ namespace game::content {
             filestream << file.rdbuf();
             file.close();
             content = filestream.str();
-        } catch(std::ifstream::failure ex) {
+        } catch(std::ifstream::failure &ex) {
             printf("failed to open file, %s\n", ex.what());
         }
 
@@ -123,7 +123,7 @@ namespace game::content {
                             instruct_id = nextId;
                             nextId++;
                         }
-                    } catch (std::invalid_argument ex) {
+                    } catch (std::invalid_argument &ex) {
                         //  invalid id, use nextId
                         printf("invalid id, ignoring. ");
                         instruct_id = nextId;
@@ -181,7 +181,7 @@ namespace game::content {
                             script->instructions->insert({instruct_id, instruction});
                         }
                         instruction->selfdestruct = true;
-                    } catch (std::invalid_argument ex) {
+                    } catch (std::invalid_argument &ex) {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
                     }
@@ -223,7 +223,7 @@ namespace game::content {
                             instruction = new script_instruction();
                             script->instructions->insert({instruct_id, instruction});
                         }
-                    } catch (std::invalid_argument ex) {
+                    } catch (std::invalid_argument &ex) {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
                     }
@@ -245,7 +245,7 @@ namespace game::content {
                         args.type_4 = script_setIntInt(instruct_id, interval);
                         instruction->instruct->push_back(9);
                         instruction->val->push_back(args);
-                    } catch (std::invalid_argument ex) {
+                    } catch (std::invalid_argument &ex) {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
                     }
@@ -283,7 +283,7 @@ namespace game::content {
                         args.type_4 = script_setIntInt(instruct_id, interval);
                         instruction->instruct->push_back(9);
                         instruction->val->push_back(args);
-                    } catch (std::invalid_argument ex) {
+                    } catch (std::invalid_argument &ex) {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
                     }
@@ -344,7 +344,7 @@ namespace game::content {
                                     args.type_1 = arg_1;
                                     instruction->val->push_back(args);
                                     printf("(float %f)", arg_1);
-                                } catch (std::invalid_argument ex) {
+                                } catch (std::invalid_argument &ex) {
                                     success = false;
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);
                                 }
@@ -360,7 +360,7 @@ namespace game::content {
                                     args.type_2 = arg_1;
                                     instruction->val->push_back(args);
                                     printf("(int %d)", arg_1);
-                                } catch (std::invalid_argument ex) {
+                                } catch (std::invalid_argument &ex) {
                                     success = false;
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);
                                 }
@@ -389,7 +389,7 @@ namespace game::content {
                                     args.type_3 = arg_1;
                                     instruction->val->push_back(args);
                                     printf("(uint %d)", arg_1);
-                                } catch (std::invalid_argument ex) {
+                                } catch (std::invalid_argument &ex) {
                                     success = false;
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);
                                 }
@@ -412,7 +412,7 @@ namespace game::content {
                                     args.type_4 = script_setIntInt(arg_1, arg_2);
                                     instruction->val->push_back(args);
                                     printf("(uint %d, uint %d)", arg_1, arg_2);
-                                } catch (std::invalid_argument ex) {
+                                } catch (std::invalid_argument &ex) {
                                     success = false;
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);
                                 }

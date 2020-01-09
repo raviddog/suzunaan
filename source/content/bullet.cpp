@@ -42,7 +42,7 @@ namespace game::content {
                 if(instructions->frame_triggers->count(frames) > 0) {
                     //  add instructions from the vector to the active instructions
                     std::vector<uint32_t> *ins = instructions->frame_triggers->at(frames);
-                    for(int i = 0; i < ins->size(); i++) {
+                    for(size_t i = 0; i < ins->size(); i++) {
                         active_instructions->push_back(ins->at(i));
                     }
                 }
@@ -95,7 +95,7 @@ namespace game::content {
     }
 
     void bullet_s::run_instructions() {
-        for(int i = 0; i < active_instructions->size();) {
+        for(size_t i = 0; i < active_instructions->size();) {
             uint32_t num = active_instructions->at(i);
             //  get active script instruction from instruction list
             if(instructions->instructions->count(num) > 0) {
@@ -104,7 +104,7 @@ namespace game::content {
                 //  in case the instruction deletes itself with stop()
                 bool deleted = false;
                 //  run each instruction
-                for(int j = 0; j < current->instruct->size(); j++) {
+                for(size_t j = 0; j < current->instruct->size(); j++) {
                     script_args args = current->val->at(j);
                     switch(current->instruct->at(j)) {
                         case 1:
@@ -125,8 +125,8 @@ namespace game::content {
                         case 6:
                         {
                             //  if this removes an element before the current instruction, need to decrement i
-                            int result = instr_stop(args.type_3);
-                            if(result > -1) {
+                            size_t result = instr_stop(args.type_3);
+                            if(result != active_instructions->size()) {
                                 if(result < i) {
                                     i--;
                                 } else if(result == i) {
@@ -197,8 +197,8 @@ namespace game::content {
         angle = val;
     }
 
-    int bullet_s::instr_stop(uint32_t val) {
-        int i = 0;
+    size_t bullet_s::instr_stop(uint32_t val) {
+        size_t i = 0;
         for(;i < active_instructions->size(); i++) {
             //  found instruction
             if(active_instructions->at(i) == val) break;
@@ -209,7 +209,8 @@ namespace game::content {
             active_instructions->erase(loc);
             return i;
         } else {
-            return -1;
+            //  return last element + 1
+            return active_instructions->size();
         }
     }
 

@@ -10,7 +10,7 @@ namespace engine {
     void inputs() {
         static SDL_Event e;
         
-        if(SDL_GetWindowFlags(gl::window) && SDL_WINDOW_INPUT_FOCUS) {
+        if(SDL_GetWindowFlags(gl::window) && SDL_WINDOW_INPUT_FOCUS != 0u) {
             while(SDL_PollEvent(&e) != 0)
             {
                 static bool curState = false;
@@ -454,7 +454,7 @@ namespace engine {
                 vertexCode = vShaderStream.str();
                 fragmentCode = fShaderStream.str();
             }
-            catch(std::ifstream::failure e)
+            catch(std::ifstream::failure &e)
             {
                 printf("failed to load shaders, unable to read files %s %s\n", vertexPath, fragmentPath);
             }
@@ -464,7 +464,7 @@ namespace engine {
 
             uint32_t vertex, fragment;
             int success;
-            char infoLog[512];
+            //  char infoLog[512];
 
             //vertex shader
             vertex = glCreateShader(GL_VERTEX_SHADER);

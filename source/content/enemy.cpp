@@ -24,12 +24,7 @@ namespace game::content {
                     }
                 }
 
-                //  run current instruction
-                if(current_instr != nullptr) {
-                    for(int i = 0; i < current_instr->instruct->size(); i++) {
-                        run_instruction(current_instr, i);
-                    }
-                }
+                
             }
         }
 

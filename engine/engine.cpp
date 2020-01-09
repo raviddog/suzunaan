@@ -79,7 +79,7 @@ namespace engine {
 
     void SpriteSheet::drawSprite(int num, float x, float y) {
         drawSprite(num, x, y, 0.0f);
-    };
+    }
 
     void SpriteSheet::drawSprite(int num, float x, float y, float angle) {
         if(num > -1 && num < numSprites) {
@@ -106,7 +106,7 @@ namespace engine {
                 indices->push_back(ind[i]);
             }
         }
-    };
+    }
 
     void SpriteSheet::buffer() {
         vao->bind();
@@ -185,20 +185,22 @@ namespace engine {
                     float height = (float)height_draw * y_scale;
                     int offset = (dmode->h - (int)height) / 2;
                     glViewport(0, offset, dmode->w, (int)height);
-                    break;
                 } else if(draw_ratio < screen_ratio) {
                     //  taller screen
                     float x_scale = (float)dmode->h / (float)height_draw;
                     float width = (float)width_draw * x_scale;
                     int offset = (dmode->w - (int)width) / 2;
                     glViewport(offset, 0, (int)width, dmode->h);
-                    break;
                 } else {
                     //  matches aspect ratio, although i probably need a way better way to check this
+                    //  could be fancy and let it fall through, but compiler warns against it so i'll just do this
+                    glViewport(0, 0, dmode->w, dmode->h);
                 }
+                break;
             }
             case 2:
                 glViewport(0, 0, dmode->w, dmode->h);
+                break;
             case 0:
             default:
                 glViewport(0, 0, width_win, height_win);
