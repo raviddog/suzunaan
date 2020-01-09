@@ -49,29 +49,29 @@ namespace engine {
             public:
                 GLuint *ID_VBO, *ID_EBO;
                 int vertexAttribs;
-                int bufferSizeVert, bufferSizeInd;
+                size_t bufferSizeVert, bufferSizeInd;
                 VBO();
                 ~VBO();
                 void bind();
                 static void unbind();
 
-                void createBuffer(int);
-                void createBuffer(int, int);
+                void createBuffer(size_t);
+                void createBuffer(size_t, size_t);
 
-                void bufferVerts(int, float*);
-                void bufferVerts(int, float*, int, uint32_t*);
-                void bufferSubVerts(int, float*);
-                void bufferSubVerts(int, float*, int, uint32_t*);
+                void bufferVerts(size_t, float*);
+                void bufferVerts(size_t, float*, size_t, uint32_t*);
+                void bufferSubVerts(size_t, float*);
+                void bufferSubVerts(size_t, float*, size_t, uint32_t*);
                 
-                void createVertexAttribPointer(int, GLenum, GLsizei, const void*);
-                void createVertexAttribPointerNormalized(int, GLenum, GLsizei, const void*);
+                void createVertexAttribPointer(size_t, GLenum, GLsizei, const void*);
+                void createVertexAttribPointerNormalized(size_t, GLenum, GLsizei, const void*);
 
         };
 
         class Texture {
             public:
                 GLuint *ID;
-                int srcWidth, srcHeight, srcChanels;
+                int srcWidth, srcHeight, srcChannels;
                 Texture();
                 ~Texture();
                 void bind();

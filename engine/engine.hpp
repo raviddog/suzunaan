@@ -41,7 +41,7 @@ namespace engine {
         private:
             std::vector<float> *verts;
             std::vector<uint32_t> *indices;
-            uint32_t indices_stored_size;
+            size_t indices_stored_size;
             Sprite *sprites;
             gl::VAO *vao;
             gl::VBO *vbo;

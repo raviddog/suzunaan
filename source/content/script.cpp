@@ -96,7 +96,7 @@ namespace game::content {
                 line++;
             } else if(content[next] == '/' && content[next + 1] == '/') {
                 //  skip comment lines starting with "//"
-                while(content[next] != '\n' && next < length) next++;
+                while(next < length && content[next] != '\n') next++;
             } else {
                 //  process instruction
                 //  check if the line has an id in it by counting colons
@@ -158,7 +158,7 @@ namespace game::content {
                     try {
                         //  get frame number
                         uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
-                        printf("frame %d:", frame);
+                        printf("frame %u:", frame);
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
                             //  doesn't exist, create the vector
@@ -207,7 +207,7 @@ namespace game::content {
                     try {
                         //  get frame number
                         uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
-                        printf("frame %d:", frame);
+                        printf("frame %u:", frame);
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
                             //  doesn't exist, create the vector
@@ -299,7 +299,7 @@ namespace game::content {
 
                 if(!abort) {
                     //  read functions until semicolon terminator
-                    while(content[next] != ';' && next < length) {
+                    while(next < length && content[next] != ';') {
                         //  skip spaces and newlines
                         while(content[next] == ' ' || content[next] == '\n') {
                             if(content[next] == '\n') line++;
@@ -388,7 +388,7 @@ namespace game::content {
                                     script_args args;
                                     args.type_3 = arg_1;
                                     instruction->val->push_back(args);
-                                    printf("(uint %d)", arg_1);
+                                    printf("(uint %u)", arg_1);
                                 } catch (std::invalid_argument &ex) {
                                     success = false;
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);
@@ -411,7 +411,7 @@ namespace game::content {
                                     script_args args;
                                     args.type_4 = script_setIntInt(arg_1, arg_2);
                                     instruction->val->push_back(args);
-                                    printf("(uint %d, uint %d)", arg_1, arg_2);
+                                    printf("(uint %u, uint %u)", arg_1, arg_2);
                                 } catch (std::invalid_argument &ex) {
                                     success = false;
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);

@@ -196,16 +196,20 @@ namespace game::content {
                 
                 //  spawn left bullet
                 int bullet_num;
-                for(bullet_num = 0; bullet[bullet_num].active_frame != 0 && bullet_num < 42; bullet_num++);
-                bullet[bullet_num].x_pos = x_pos - 8.f;
-                bullet[bullet_num].y_pos = y_pos + 24.f;
-                bullet[bullet_num].active_frame = 1;
+                for(bullet_num = 0; bullet_num < 42 && bullet[bullet_num].active_frame != 0; bullet_num++);
+                if(bullet_num < 42) {
+                    bullet[bullet_num].x_pos = x_pos - 8.f;
+                    bullet[bullet_num].y_pos = y_pos + 24.f;
+                    bullet[bullet_num].active_frame = 1;
+                }
 
                 //  spawn right bullet
-                for(bullet_num = 0; bullet[bullet_num].active_frame != 0 && bullet_num < 42; bullet_num++);
-                bullet[bullet_num].x_pos = x_pos + 8.f;
-                bullet[bullet_num].y_pos = y_pos + 24.f;
-                bullet[bullet_num].active_frame = 1;
+                for(bullet_num = 0; bullet_num < 42 && bullet[bullet_num].active_frame != 0; bullet_num++);
+                if(bullet_num < 42) {
+                    bullet[bullet_num].x_pos = x_pos + 8.f;
+                    bullet[bullet_num].y_pos = y_pos + 24.f;
+                    bullet[bullet_num].active_frame = 1;
+                }
             }
         }
     }

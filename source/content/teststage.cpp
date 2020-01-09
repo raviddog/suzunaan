@@ -113,7 +113,7 @@ namespace game::teststage {
         int count = 0;
         //  update and buffer all bullets
 
-        std::vector<int>::const_iterator iterator, end;
+        std::vector<int>::const_iterator iterator;
         iterator = bullet_draw_order->begin();
 
 
@@ -141,7 +141,7 @@ namespace game::teststage {
             } else {
                 count += 1;
                 img_bullet->drawSprite(bullets[*iterator].type, bullets[*iterator].x_pos, bullets[*iterator].y_pos, bullets[*iterator].draw_angle);
-                iterator++;
+                ++iterator;
             }
         }
 

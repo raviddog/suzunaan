@@ -50,6 +50,8 @@ namespace engine {
 
         verts = new std::vector<float>();
         indices = new std::vector<uint32_t>();
+
+        indices_stored_size = 0;
     }
 
     void SpriteSheet::load(const std::string &path, int numSprites, int maxDraws) {

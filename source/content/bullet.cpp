@@ -15,6 +15,7 @@ namespace game::content {
         active_instructions = new std::vector<uint32_t>();
         cust_triggers = new std::unordered_multimap<uint32_t, uint32_t>();
         cancel_cust_triggers = new std::unordered_set<uint32_t>();
+        reset();
     }
 
     void bullet_s::reset() {
@@ -245,9 +246,9 @@ namespace game::content {
     }
 
     void bullet_s::instr_stopInterval(uint32_t id) {
-        if(cancel_cust_triggers->count(id) == 0) {
+        // if(cancel_cust_triggers->count(id) == 0) {
             cancel_cust_triggers->insert(id);
-        }
+        // }
     }
 
 

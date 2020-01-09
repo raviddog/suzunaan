@@ -326,7 +326,9 @@ namespace engine {
             ID_EBO = new GLuint();
             glGenBuffers(1, ID_VBO);
             glGenBuffers(1, ID_EBO);
-            vertexAttribs = -1;            
+            vertexAttribs = -1;
+            bufferSizeVert = 0;
+            bufferSizeInd = 0;
         }
 
         VBO::~VBO() {
@@ -346,43 +348,43 @@ namespace engine {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
 
-        void VBO::createBuffer(int vertsize) {
+        void VBO::createBuffer(size_t vertsize) {
             glBufferData(GL_ARRAY_BUFFER, vertsize, nullptr, GL_DYNAMIC_DRAW);
             bufferSizeVert = vertsize;
         }
 
-        void VBO::createBuffer(int vertsize, int indsize) {
+        void VBO::createBuffer(size_t vertsize, size_t indsize) {
             glBufferData(GL_ARRAY_BUFFER, vertsize, nullptr, GL_DYNAMIC_DRAW);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indsize, nullptr, GL_DYNAMIC_DRAW);
             bufferSizeVert = vertsize;
             bufferSizeInd = indsize;
         }        
 
-        void VBO::bufferVerts(int vertsize, float *verts) {
+        void VBO::bufferVerts(size_t vertsize, float *verts) {
             glBufferData(GL_ARRAY_BUFFER, vertsize, verts, GL_DYNAMIC_DRAW);
         }
 
-        void VBO::bufferVerts(int vertsize, float *verts, int indsize, uint32_t *indices) {
+        void VBO::bufferVerts(size_t vertsize, float *verts, size_t indsize, uint32_t *indices) {
             glBufferData(GL_ARRAY_BUFFER, vertsize, verts, GL_DYNAMIC_DRAW);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indsize, indices, GL_DYNAMIC_DRAW);
         }
 
-        void VBO::bufferSubVerts(int vertsize, float *verts) {
+        void VBO::bufferSubVerts(size_t vertsize, float *verts) {
             glBufferSubData(GL_ARRAY_BUFFER, 0, vertsize, verts);
         }
 
-        void VBO::bufferSubVerts(int vertsize, float *verts, int indsize, uint32_t *indices) {
+        void VBO::bufferSubVerts(size_t vertsize, float *verts, size_t indsize, uint32_t *indices) {
             glBufferSubData(GL_ARRAY_BUFFER, 0, vertsize, verts);
             glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indsize, indices);
         }
 
-        void VBO::createVertexAttribPointer(int size, GLenum type, GLsizei stride, const void *pointer) {
+        void VBO::createVertexAttribPointer(size_t size, GLenum type, GLsizei stride, const void *pointer) {
             vertexAttribs += 1;
             glVertexAttribPointer(vertexAttribs, size, type, GL_FALSE, stride, pointer);
             glEnableVertexAttribArray(vertexAttribs);
         }
 
-        void VBO::createVertexAttribPointerNormalized(int size, GLenum type, GLsizei stride, const void *pointer) {
+        void VBO::createVertexAttribPointerNormalized(size_t size, GLenum type, GLsizei stride, const void *pointer) {
             vertexAttribs += 1;
             glVertexAttribPointer(vertexAttribs, size, type, GL_TRUE, stride, pointer);
             glEnableVertexAttribArray(vertexAttribs);
@@ -391,6 +393,9 @@ namespace engine {
         Texture::Texture() {
             ID = new GLuint();
             glGenTextures(1, ID);
+            srcWidth = 0;
+            srcHeight = 0;
+            srcChannels = 0;
         }
 
         Texture::~Texture() {
@@ -407,7 +412,7 @@ namespace engine {
         }
 
         void Texture::load(const std::string &path) {
-            unsigned char *data = stbi_load(path.c_str(), &srcWidth, &srcHeight, &srcChanels, 0);
+            unsigned char *data = stbi_load(path.c_str(), &srcWidth, &srcHeight, &srcChannels, 0);
             if(data) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, srcWidth, srcHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
                 glGenerateMipmap(GL_TEXTURE_2D);
@@ -509,7 +514,7 @@ namespace engine {
             if(currentShader != this) {
                 glUseProgram(ID);
                 currentShader = this;
-                printf("switched to shader %d\n", ID);
+                printf("switched to shader %u\n", ID);
             }
         }
 
