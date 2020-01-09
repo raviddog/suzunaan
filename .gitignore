@@ -44,3 +44,7 @@ compile_commands.json
 *.exe
 *.out
 *.app
+
+# cppcheck
+*.cppcheck
+/*-cppcheck-build-dir
