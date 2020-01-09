@@ -232,24 +232,16 @@ namespace game::content {
     }
 
     void bullet_s::instr_frameTrigger(uint32_t id, uint32_t frame) {
-        if(instructions->id_map->count(id) > 0) {
-            id = instructions->id_map->at(id);
-        }
         cust_triggers->insert({frame, id});
     }
 
     void bullet_s::instr_frameTriggerOffset(uint32_t id, uint32_t frame) {
-        if(instructions->id_map->count(id) > 0) {
-            id = instructions->id_map->at(id);
-        }
         cust_triggers->insert({frame + frames, id});
     }
 
     void bullet_s::instr_stopInterval(uint32_t id) {
-        // if(cancel_cust_triggers->count(id) == 0) {
-            cancel_cust_triggers->insert(id);
-        // }
+        //  can only have 1 of each element in a set, so no need to check if it already exists
+        cancel_cust_triggers->insert(id);
     }
-
 
 }
