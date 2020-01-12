@@ -1,6 +1,7 @@
 id:trigger:instructions
 
-bullets start on frame 0
+bullets start on frame 0, so frame 0 instructions can be used to set initial properties
+you can also skip this and implement them in enemy scripts if you want, in order to make the bullet script more flexible
 
 id is an unsigned integer, so it must be non-negative
 it'll probably work if you use negatives but dont
@@ -53,16 +54,25 @@ cancellable by id
 
 # not implemented
 
+random_interval(int min, int max)
+run randomly, interval is between specified frames
+
+random_frameCont(int min, int max)
+same as frameCont but start frame is random between specified frames, inclusive
+
+random_frame(int min, int max)
+happens on a random frame between the specified frames, inclusive
+
 betweenFrame(int frameStart, int frameEnd)
 run every frame starting at specified frame and ending at specified frame
 the function is called on both the start frame and the end frame
 implemented via creating a stop command on the specified frame
 
-distanceToPlayer(float distance)
+distToPlayer(float distance)
 activates when bullet is less than a certain distance from the player
 single run instruction
 
-distanceFromPlayer(float distance)
+distFromPlayer(float distance)
 activates when bullet is more than a certain distance from the player
 single run instruction
 
@@ -110,6 +120,9 @@ used internally by the interval triggers
 stopInterval(int id);
 same as stop but specifically for interval functions
 
+angle_atPlayer();
+change angle to aim at player's position
+
 # not implemented
 
 speedTo(float speed, int frames);
@@ -117,3 +130,20 @@ speed goes to target over specified number of frames
 
 move(float angle, float speed);
 set movement direction and speed.
+
+argument functions
+------------------------
+
+these functions can be used as instruction arguments instead of raw numbers
+i feel like i should implement this stuff but i REALLY dont want to
+
+# not implemented
+
+float playerAngle(float)
+returns the angle from the bullet to the player, plus the specified amount
+
+int rand(int min, int max)
+returns a random number between min and max
+
+float randf(float min, float max)
+returns a random float between min and max

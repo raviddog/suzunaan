@@ -52,7 +52,7 @@ namespace game::content {
         std::unordered_map<uint32_t, std::vector<uint32_t>*> *frame_triggers;
 
         //  list of listeners (non-frame based triggers)
-        //  listener type, pair<listener value, instruction id>
+        //  listener type, pair<listener type, value, instruction id>
         std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>> *listeners;
 
     };

@@ -28,7 +28,7 @@ namespace game::teststage {
     int frames;
 
     
-    bullet_script *test;
+    bullet_script *toziko, *miko;
 
     int getFreeBullet() {
         if(freebullets->empty()) {
@@ -82,7 +82,7 @@ namespace game::teststage {
             int i = getFreeBullet();
             if(i > -1) {
                 bullets[i].type = 24;
-                bullets[i].instructions = test;
+                bullets[i].instructions = miko;
                 bullets[i].y_pos = 360.f;
                 bullets[i].x_pos = between<float>(0.f, 640.f);
                 
@@ -91,20 +91,20 @@ namespace game::teststage {
             
             
             //  bowap
-            // for(int j = 0; j < 12; j++) {
-            //     int i = getFreeBullet();
-            //     if(i > -1) {
-            //         bullets[i].type = 48 + j % 16;
-            //         bullets[i].active = true;
-            //         bullets[i].accel = 0.f;
-            //         bullets[i].x_pos = 320.f;
-            //         bullets[i].y_pos = 360.f;
-            //         // bullets[i].angle = 1080.f * sin((double)frames * 3.14159265/180) + j * 45.f;
-            //         bullets[i].angle = -(float)frames / 10.f + j * 30.f;
-            //         bullets[i].speed = 0.f;
-            //         bullets[i].instructions = test;
-            //     }
-            // }
+            for(int j = 0; j < 12; j++) {
+                i = getFreeBullet();
+                if(i > -1) {
+                    bullets[i].type = 48 + j % 16;
+                    bullets[i].active = true;
+                    bullets[i].accel = 0.f;
+                    bullets[i].x_pos = 320.f;
+                    bullets[i].y_pos = 360.f;
+                    // bullets[i].angle = 1080.f * sin((double)frames * 3.14159265/180) + j * 45.f;
+                    bullets[i].angle = -(float)frames / 10.f + j * 30.f;
+                    bullets[i].speed = 0.f;
+                    bullets[i].instructions = toziko;
+                }
+            }
         }
 
         // for(int j = 0; j < 64; j++) {
@@ -261,7 +261,8 @@ namespace game::teststage {
         bullet_bounds_ymax = 512.f;
 
         
-        test = loadScriptBullet("./script/miko.txt");
+        toziko = loadScriptBullet("./script/toziko.txt");
+        miko = loadScriptBullet("./script/miko.txt");
 
     }
 
@@ -272,6 +273,7 @@ namespace game::teststage {
         delete img_bullet;
         delete[] bullets;
         delete bullet_draw_order;
-        delete test;
+        delete toziko;
+        delete miko;
     }
 }

@@ -42,6 +42,8 @@ namespace game::content {
             std::vector<uint32_t> *active_instructions = nullptr;
             std::unordered_multimap<uint32_t, uint32_t> *cust_triggers = nullptr;
             std::unordered_set<uint32_t> *cancel_cust_triggers = nullptr;
+            //  local version of non-frame trigger listeners
+            std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>> *listener_triggers;
 
             void reset();
             void update();

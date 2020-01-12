@@ -22,6 +22,7 @@ namespace game::content {
         active_instructions = new std::vector<uint32_t>();
         cust_triggers = new std::unordered_multimap<uint32_t, uint32_t>();
         cancel_cust_triggers = new std::unordered_set<uint32_t>();
+        listener_triggers = nullptr;
         reset();
     }
 
@@ -40,10 +41,18 @@ namespace game::content {
         active_instructions->clear();
         cust_triggers->clear();
         cancel_cust_triggers->clear();
+        if(listener_triggers != nullptr) {
+            delete listener_triggers;
+        }
     }
     
     void bullet_s::update() {
         if(active) {
+            if(frames == 0u) {
+                //  first frame, do some initial setup
+                //  make a copy of the non-frame trigger listeners
+                listener_triggers = new auto(*(instructions->listeners));
+            }
             //  apply instructions
             if(instructions != nullptr) {
                 //  check frame triggers
@@ -52,6 +61,29 @@ namespace game::content {
                     std::vector<uint32_t> *ins = instructions->frame_triggers->at(frames);
                     for(size_t i = 0; i < ins->size(); i++) {
                         active_instructions->push_back(ins->at(i));
+                    }
+                }
+                //  check listener triggers
+                if(listener_triggers != nullptr) {
+                    //  probably just do listeners manually here
+                    //  there won't be enough of them to justify making separate functions?
+                    
+                    //  get distance
+                    float distanceSQ = (y_pos - teststage::player.y_pos) * (y_pos - teststage::player.y_pos)
+                                        + (x_pos - teststage::player.x_pos) * (x_pos - teststage::player.x_pos);
+                    //  distanceToPlayer
+                    auto range = listener_triggers->equal_range(1u);
+                    auto it = range.first;
+                    while(it != range.second) {
+                        //  get value
+                        float val = it->second.first.type_1;
+                        if(distanceSQ < val * val) {
+                            //  activate and remove
+                            active_instructions->push_back(it->second.second);
+                            it = listener_triggers->erase(it);
+                        } else {
+                            it++;
+                        }                     
                     }
                 }
             }
@@ -245,10 +277,16 @@ namespace game::content {
     }
 
     void bullet_s::instr_frameTrigger(uint32_t id, uint32_t frame) {
+        if(instructions->id_map->count(id) > 0) {
+            id = instructions->id_map->at(id);
+        }
         cust_triggers->insert({frame, id});
     }
 
     void bullet_s::instr_frameTriggerOffset(uint32_t id, uint32_t frame) {
+        if(instructions->id_map->count(id) > 0) {
+            id = instructions->id_map->at(id);
+        }
         cust_triggers->insert({frame + frames, id});
     }
 

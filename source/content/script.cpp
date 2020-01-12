@@ -124,6 +124,7 @@ namespace game::content {
                             instruct_id = nextId;
                             nextId++;
                         }
+                        printf("id: %u ", instruct_id);
                     } catch (std::invalid_argument &ex) {
                         //  invalid id, use nextId
                         printf("invalid id, ignoring. ");
@@ -159,7 +160,6 @@ namespace game::content {
                     try {
                         //  get frame number
                         uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
-                        printf("frame %u:", frame);
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
                             //  doesn't exist, create the vector
@@ -182,6 +182,7 @@ namespace game::content {
                             script->instructions->insert({instruct_id, instruction});
                         }
                         instruction->selfdestruct = true;
+                        printf("trigger: frame %u ", frame);
                     } catch (std::invalid_argument &ex) {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
@@ -196,6 +197,7 @@ namespace game::content {
                         script->instructions->insert({instruct_id, instruction});
                     }
                     instruction->selfdestruct = true;
+                    printf("trigger: none ");
                 } else if(trigger_type == "noneCont") {
                     if(script->instructions->count(instruct_id) > 0) {
                         instruction = script->instructions->at(instruct_id);
@@ -203,6 +205,7 @@ namespace game::content {
                         instruction = new script_instruction();
                         script->instructions->insert({instruct_id, instruction});
                     }
+                    printf("trigger: none (continous) ");
                 } else if(trigger_type == "frameCont") {
                     //  same as frame, but selfdestruct is false
                     try {
@@ -224,6 +227,7 @@ namespace game::content {
                             instruction = new script_instruction();
                             script->instructions->insert({instruct_id, instruction});
                         }
+                        printf("trigger: frame %u (continuous) ", frame);
                     } catch (std::invalid_argument &ex) {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
@@ -246,6 +250,7 @@ namespace game::content {
                         args.type_4 = script_setIntInt(instruct_id, interval);
                         instruction->instruct->push_back(9);
                         instruction->val->push_back(args);
+                        printf("trigger: interval %u ", interval);
                     } catch (std::invalid_argument &ex) {
                         printf("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
@@ -284,8 +289,33 @@ namespace game::content {
                         args.type_4 = script_setIntInt(instruct_id, interval);
                         instruction->instruct->push_back(9);
                         instruction->val->push_back(args);
+                        printf("trigger: frame %u interval %u ", frame, interval);
                     } catch (std::invalid_argument &ex) {
                         printf("invalid frame trigger in line %d, skipping line", line);
+                        abort = true;
+                    }
+                } else if(trigger_type == "distToPlayer") {
+                    try {
+                        //  get distance
+                        float distance = std::stof(content.substr(next, offset), nullptr);
+                        //  prepare listener arguments
+                        std::pair<script_args, uint32_t> args;
+                        args.first.type_1 = distance;
+                        args.second = instruct_id;
+                        //  place into listeners
+                        script->listeners->insert({1u, args});
+                        //  create instruction
+                        if(script->instructions->count(instruct_id) > 0) {
+                            instruction = script->instructions->at(instruct_id);
+                        } else {
+                            instruction = new script_instruction();
+                            script->instructions->insert({instruct_id, instruction});
+                        }
+                        //  if you want it to be continuous, just make it call a continuous function
+                        instruction->selfdestruct = true;
+                        printf("trigger: distToPlayer %f ", distance);
+                    } catch (std::invalid_argument &ex) {
+                        printf("invalid distance in line %d, skipping line", line);
                         abort = true;
                     }
                 } else {
@@ -457,6 +487,7 @@ namespace game::content {
         id_map = new std::unordered_map<uint32_t, uint32_t>();
         frame_triggers = new std::unordered_map<uint32_t, std::vector<uint32_t>*>();
         instructions = new std::unordered_map<uint32_t, script_instruction*>();
+        listeners = new std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>>();
     }
 
     bullet_script::~bullet_script() {
@@ -476,6 +507,7 @@ namespace game::content {
         }
         delete instructions;
         delete id_map;
+        delete listeners;
     }
 
 
