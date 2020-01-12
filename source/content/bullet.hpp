@@ -23,6 +23,8 @@ namespace game::content {
             void instr_frameTriggerOffset(uint32_t, uint32_t);
             void instr_stopInterval(uint32_t);
             void instr_angle_atPlayer();
+            void instr_random_angle_change(float, float);
+            void instr_random_angle(float, float);
 
         public:
             bullet_s();

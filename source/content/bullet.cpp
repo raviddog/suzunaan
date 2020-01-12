@@ -16,6 +16,11 @@ namespace game::content {
             bullet_bounds_y = 0.f,
             bullet_bounds_xmax = 640.f,
             bullet_bounds_ymax = 480.f;
+    
+    template <class T>
+    T between(T min, T max) {
+        return (max - min) * (float)rand() / (float)RAND_MAX + min;
+    }
 
 
     bullet_s::bullet_s() {
@@ -202,6 +207,18 @@ namespace game::content {
                         case 11:
                             instr_angle_atPlayer();
                             break;
+                        case 12:
+                        {
+                            std::pair<float, float> val = script_getFloatFloat(args.type_5);
+                            instr_random_angle_change(val.first, val.second);
+                            break;
+                        }
+                        case 13:
+                        {
+                            std::pair<float, float> val = script_getFloatFloat(args.type_5);
+                            instr_random_angle(val.first, val.second);
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -315,6 +332,14 @@ namespace game::content {
             }
 
         }
+    }
+
+    void bullet_s::instr_random_angle_change(float min, float max) {
+        angle += between<float>(min, max);
+    }
+
+    void bullet_s::instr_random_angle(float min, float max) {
+        angle = between<float>(min, max);
     }
 
 }

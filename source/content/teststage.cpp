@@ -28,7 +28,7 @@ namespace game::teststage {
     int frames;
 
     
-    bullet_script *toziko, *miko;
+    bullet_script *toziko, *miko, *boot;
 
     int getFreeBullet() {
         if(freebullets->empty()) {
@@ -82,29 +82,30 @@ namespace game::teststage {
             int i = getFreeBullet();
             if(i > -1) {
                 bullets[i].type = 24;
-                bullets[i].instructions = miko;
+                bullets[i].instructions = boot;
                 bullets[i].y_pos = 360.f;
                 bullets[i].x_pos = between<float>(0.f, 640.f);
+                bullets[i].type = 168;
                 
             }
             
             
             
             //  bowap
-            for(int j = 0; j < 12; j++) {
-                i = getFreeBullet();
-                if(i > -1) {
-                    bullets[i].type = 48 + j % 16;
-                    bullets[i].active = true;
-                    bullets[i].accel = 0.f;
-                    bullets[i].x_pos = 320.f;
-                    bullets[i].y_pos = 360.f;
-                    // bullets[i].angle = 1080.f * sin((double)frames * 3.14159265/180) + j * 45.f;
-                    bullets[i].angle = -(float)frames / 10.f + j * 30.f;
-                    bullets[i].speed = 0.f;
-                    bullets[i].instructions = miko;
-                }
-            }
+            // for(int j = 0; j < 12; j++) {
+            //     i = getFreeBullet();
+            //     if(i > -1) {
+            //         bullets[i].type = 48 + j % 16;
+            //         bullets[i].active = true;
+            //         bullets[i].accel = 0.f;
+            //         bullets[i].x_pos = 320.f;
+            //         bullets[i].y_pos = 360.f;
+            //         // bullets[i].angle = 1080.f * sin((double)frames * 3.14159265/180) + j * 45.f;
+            //         bullets[i].angle = -(float)frames / 10.f + j * 30.f;
+            //         bullets[i].speed = 0.f;
+            //         bullets[i].instructions = miko;
+            //     }
+            // }
         }
 
         // for(int j = 0; j < 64; j++) {
@@ -263,6 +264,7 @@ namespace game::teststage {
         
         toziko = loadScriptBullet("./script/toziko.txt");
         miko = loadScriptBullet("./script/miko.txt");
+        boot = loadScriptBullet("./script/boot_on_head.txt");
 
     }
 

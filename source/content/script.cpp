@@ -7,6 +7,7 @@
 namespace game::content {
 
     uint64_t script_setIntInt(uint32_t, uint32_t);
+    uint64_t script_setFloatFloat(float, float);
 
     //  instructions
     std::unordered_map<std::string, std::pair<int, int>> *bullet_instr = nullptr;
@@ -26,6 +27,8 @@ namespace game::content {
             bullet_instr->insert({"frameTriggerOffset", std::make_pair(9, 4)});
             bullet_instr->insert({"stopInterval", std::make_pair(10, 3)});
             bullet_instr->insert({"angle_atPlayer", std::make_pair(11, 0)});
+            bullet_instr->insert({"random_angle_change", std::make_pair(12, 5)});
+            bullet_instr->insert({"random_angle", std::make_pair(13, 5)});
         }
 
         if(enemy_instr == nullptr) {
@@ -491,6 +494,29 @@ namespace game::content {
                                     success = false;
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);
                                 }
+                            } else if(function_info.second == 5) {
+                                //  two floats
+                                try {
+                                    float arg_1 = std::stof(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    float arg_2 = std::stof(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    script_args args;
+                                    args.type_5 = script_setFloatFloat(arg_1, arg_2);
+                                    instruction->val->push_back(args);
+                                    printf("(float %f, float %f)", arg_1, arg_2);
+                                } catch  (std::invalid_argument &ex) {
+                                    success = false;
+                                    printf(", can't read argument in function %s, line %d", ex.what(), line);
+                                }
                             }
                             if(success) instruction->instruct->push_back(function_info.first);
                         } else {
@@ -514,12 +540,46 @@ namespace game::content {
         return out;
     }
 
+    uint64_t script_setFloatFloat(float first, float second) {
+        uint32_t storage_1 = 0u, storage_2 = 0u;
+        //  convert the floats to uints
+        // char *bytes = reinterpret_cast<char*>(&first);
+        // for(size_t i = 0; i < sizeof(float); i++) {
+        //     storage_1 += (uint32_t)bytes[i] << i * 8;
+        // }
+        // bytes = reinterpret_cast<char*>(&second);
+        // for(size_t i = 0; i < sizeof(float); i++) {
+        //     storage_2 += (uint32_t)bytes[i] << i * 8;
+        // }
+        memcpy(&storage_1, &first, 4);
+        memcpy(&storage_2, &second, 4);
+        uint64_t val = storage_1;
+        val += ((uint64_t)storage_2) << 32;
+        return val;
+    }
+
+
+
     std::pair<uint32_t, uint32_t> script_getIntInt(uint64_t in) {
         std::pair<uint32_t, uint32_t> out;
         out.first = (uint32_t)in;
         out.second = (uint32_t)(in >> 32);
         return out;
     }
+
+    std::pair<float, float> script_getFloatFloat(uint64_t in) {
+        uint32_t data_1, data_2;
+        data_1 = in;
+        data_2 = in >> 32;
+        // float *f1 = reinterpret_cast<float*>(&data_1);
+        // float *f2 = reinterpret_cast<float*>(&data_2);
+        float f1, f2;
+        memcpy(&f1, &data_1, 4);
+        memcpy(&f2, &data_2, 4);
+        return std::make_pair(f1, f2);
+        
+    }
+
 
     bullet_script::bullet_script() {
         id_map = new std::unordered_map<uint32_t, uint32_t>();

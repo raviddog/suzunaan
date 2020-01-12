@@ -27,11 +27,13 @@ namespace game::content {
         int32_t type_2;
         uint32_t type_3;
         uint64_t type_4;    //  two unsigned ints
+        uint64_t type_5;    //  two floats
         // std::unique_ptr<std::tuple<float, int>> type_3;
         // std::tuple<float, int> *type_3;
     };
 
     std::pair<uint32_t, uint32_t> script_getIntInt(uint64_t);
+    std::pair<float, float> script_getFloatFloat(uint64_t);
 
     class script_instruction {
         public:
