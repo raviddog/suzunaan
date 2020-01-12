@@ -61,19 +61,19 @@ namespace game::teststage {
 		bool quitToMenu = false;
         //  c shift x z right left down up
         unsigned char key = 0x00;
-        if(engine::keyState[engine::kbUp]) key = key | 0x01;
-        if(engine::keyState[engine::kbDown]) key = key | 0x02;
-        if(engine::keyState[engine::kbLeft]) key = key | 0x04;
-        if(engine::keyState[engine::kbRight]) key = key | 0x08;
-        if(engine::keyState[engine::kbZ]) key = key | 0x10;
-        if(engine::keyState[engine::kbX]) key = key | 0x20;
-        if(engine::keyState[engine::kbLShift]) key = key | 0x40;
-        if(engine::keyState[engine::kbC]) key = key | 0x80;
+        if(keyState[kbUp]) key = key | 0x01;
+        if(keyState[kbDown]) key = key | 0x02;
+        if(keyState[kbLeft]) key = key | 0x04;
+        if(keyState[kbRight]) key = key | 0x08;
+        if(keyState[kbZ]) key = key | 0x10;
+        if(keyState[kbX]) key = key | 0x20;
+        if(keyState[kbLShift]) key = key | 0x40;
+        if(keyState[kbC]) key = key | 0x80;
         player.update(key);
 
-		if(engine::keyPressed[engine::kbEscape]) quitToMenu = true;
-        if(engine::keyPressed[engine::kbP]) SpriteSheet::useShaderNormal();
-        if(engine::keyPressed[engine::kbO]) SpriteSheet::useShaderInvert();
+		if(keyPressed[kbEscape]) quitToMenu = true;
+        if(keyPressed[kbP]) SpriteSheet::useShaderNormal();
+        if(keyPressed[kbO]) SpriteSheet::useShaderInvert();
 
         frames++;
 
@@ -248,7 +248,7 @@ namespace game::teststage {
         bullet_bounds_ymax = 512.f;
 
         
-        test = loadScriptBullet("./script/toziko.txt");
+        test = loadScriptBullet("./script/toziko.tsc");
 
     }
 
