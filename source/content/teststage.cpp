@@ -102,7 +102,7 @@ namespace game::teststage {
                     // bullets[i].angle = 1080.f * sin((double)frames * 3.14159265/180) + j * 45.f;
                     bullets[i].angle = -(float)frames / 10.f + j * 30.f;
                     bullets[i].speed = 0.f;
-                    bullets[i].instructions = toziko;
+                    bullets[i].instructions = miko;
                 }
             }
         }

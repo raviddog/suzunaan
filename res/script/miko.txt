@@ -1,8 +1,5 @@
 type: bullet
 
-//  miko final spell
-//  frame(0):angle_atPlayer() speed(4);
-// distToPlayer(100) : angle_atPlayer();
 frame(0)    : angle(180) speed(2);
 distToPlayer(100) : speed(0) frameTriggerOffset(1, 30);
 1:none()    : angle_atPlayer() accel(0.033) frameTriggerOffset(2, 60);

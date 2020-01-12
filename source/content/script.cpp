@@ -104,6 +104,9 @@ namespace game::content {
                 //  this is a really shitty jank way of doing it
                 int colons = 0;
                 uint32_t instruct_id = 0;
+                //  keep track of the old user provided id, so the interval triggers can create functions with the correct arguments
+                bool userId = false;
+                uint32_t old_id = 0;
                 while(next + offset < length && content[next + offset] != '\n') {
                     if(content[next + offset] == ':') colons++;
                     offset++;
@@ -124,6 +127,9 @@ namespace game::content {
                             instruct_id = nextId;
                             nextId++;
                         }
+                        //  user provided id
+                        userId = true;
+                        old_id = tempid;
                         printf("id: %u ", instruct_id);
                     } catch (std::invalid_argument &ex) {
                         //  invalid id, use nextId
@@ -247,7 +253,23 @@ namespace game::content {
                         instruction->selfdestruct = true;
                         //  create and insert frameTriggerOffset into the instructions
                         script_args args;
-                        args.type_4 = script_setIntInt(instruct_id, interval);
+                        //  get the supplied user id for the trigger id, or generate one if not supplied
+                        if(userId) {
+                            //  user provided id
+                            args.type_4 = script_setIntInt(old_id, interval);
+                        } else {
+                            //  no user id, generate one
+                            //  if this collides with a user id in the future it would be very bad
+                            //  start from uint_max, and just go down from there
+                            //  so its recommended users provide ids to any interval function
+                            //  good thing unsigned overflow/underflow is defined behaviour
+                            uint32_t tempid = 0u - 1u;
+                            //  search for an unmapped id
+                            while(script->id_map->count(tempid) > 0) tempid--;
+                            //  tempid now refers to an unmapped id
+                            script->id_map->insert({tempid, instruct_id});
+                            args.type_4 = script_setIntInt(tempid, interval);
+                        }
                         instruction->instruct->push_back(9);
                         instruction->val->push_back(args);
                         printf("trigger: interval %u ", interval);
@@ -286,7 +308,23 @@ namespace game::content {
                         instruction->selfdestruct = true;
                         //  create and insert frameTriggerOffset into the instructions
                         script_args args;
-                        args.type_4 = script_setIntInt(instruct_id, interval);
+                        //  get the supplied user id for the trigger id, or generate one if not supplied
+                        if(userId) {
+                            //  user provided id
+                            args.type_4 = script_setIntInt(old_id, interval);
+                        } else {
+                            //  no user id, generate one
+                            //  if this collides with a user id in the future it would be very bad
+                            //  start from uint_max, and just go down from there
+                            //  so its recommended users provide ids to any interval function
+                            //  good thing unsigned overflow/underflow is defined behaviour
+                            uint32_t tempid = 0u - 1u;
+                            //  search for an unmapped id
+                            while(script->id_map->count(tempid) > 0) tempid--;
+                            //  tempid now refers to an unmapped id
+                            script->id_map->insert({tempid, instruct_id});
+                            args.type_4 = script_setIntInt(tempid, interval);
+                        }
                         instruction->instruct->push_back(9);
                         instruction->val->push_back(args);
                         printf("trigger: frame %u interval %u ", frame, interval);

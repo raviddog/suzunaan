@@ -1,10 +1,10 @@
 type: bullet
 
-1:intervalStart(60, 0):accel(0.5);
-2:intervalStart(60, 9):accel(0);
-3:intervalStart(60, 20):accel(-0.5);
-4:intervalStart(60, 29):accel(0) angle_change(-90);
-5:intervalStart(60, 30):accel(0.5);
-6:intervalStart(60, 39):accel(0);
-7:intervalStart(60, 50):accel(-0.5);
-8:intervalStart(60, 59):accel(0) angle_change(90);
+intervalStart(60, 0):accel(0.5);
+intervalStart(60, 9):accel(0);
+intervalStart(60, 20):accel(-0.5);
+intervalStart(60, 29):accel(0) angle_change(-90);
+intervalStart(60, 30):accel(0.5);
+intervalStart(60, 39):accel(0);
+intervalStart(60, 50):accel(-0.5);
+intervalStart(60, 59):accel(0) angle_change(90);

@@ -47,10 +47,12 @@ cancellable by id
 interval(int frames)
 run every x frames
 triggered by id
+it is recommended you provide an instruction id for this trigger, even if you aren't using it
 
 intervalStart(int start, int frames)
 starting from specified frame, run every x frames
 cancellable by id
+it is recommended you provide an instruction id for this trigger, even if you aren't using it
 
 # not implemented
 
