@@ -25,6 +25,7 @@ namespace game::content {
             bullet_instr->insert({"frameTrigger", std::make_pair(8, 4)});
             bullet_instr->insert({"frameTriggerOffset", std::make_pair(9, 4)});
             bullet_instr->insert({"stopInterval", std::make_pair(10, 3)});
+            bullet_instr->insert({"angle_atPlayer", std::make_pair(11, 0)});
         }
 
         if(enemy_instr == nullptr) {
@@ -332,7 +333,13 @@ namespace game::content {
                             bool success = true;                                
 
                             //  get arguments
-                            if(function_info.second == 1) {
+                            if(function_info.second == 0) {
+                                //  no arguments, insert blank arg data
+                                script_args args;
+                                args.type_1 = 0.f;
+                                instruction->val->push_back(args);
+
+                            } else if(function_info.second == 1) {
                                 //  single float
                                 try {
                                     float arg_1 = std::stof(content.substr(next, offset), nullptr);

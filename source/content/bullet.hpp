@@ -22,6 +22,7 @@ namespace game::content {
             void instr_frameTrigger(uint32_t, uint32_t);
             void instr_frameTriggerOffset(uint32_t, uint32_t);
             void instr_stopInterval(uint32_t);
+            void instr_angle_atPlayer();
 
         public:
             bullet_s();

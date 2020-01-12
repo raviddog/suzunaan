@@ -22,11 +22,11 @@ namespace game::content {
     };
 
     union script_args{
+        //  type_0 is no argument
         float type_1;
         int32_t type_2;
         uint32_t type_3;
-        //  two unsigned ints
-        uint64_t type_4;
+        uint64_t type_4;    //  two unsigned ints
         // std::unique_ptr<std::tuple<float, int>> type_3;
         // std::tuple<float, int> *type_3;
     };
@@ -46,11 +46,14 @@ namespace game::content {
         bullet_script();
         ~bullet_script();
 
+        //  id map needs to be stored in script structure, in case other scripts need to interact with it
         std::unordered_map<uint32_t, uint32_t> *id_map;
         std::unordered_map<uint32_t, script_instruction*> *instructions;
         std::unordered_map<uint32_t, std::vector<uint32_t>*> *frame_triggers;
 
         //  list of listeners (non-frame based triggers)
+        //  listener type, pair<listener value, instruction id>
+        std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>> *listeners;
 
     };
 

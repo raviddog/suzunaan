@@ -1,8 +1,14 @@
 #include "bullet.hpp"
 #include "math.h"
 #include "script.hpp"
+#include "player.hpp"
 
 #define PI 3.14159265
+
+namespace game::teststage {
+    extern content::player_s player;
+
+}
 
 namespace game::content {
     //  #FIX 1
@@ -10,6 +16,7 @@ namespace game::content {
             bullet_bounds_y = 0.f,
             bullet_bounds_xmax = 640.f,
             bullet_bounds_ymax = 480.f;
+
 
     bullet_s::bullet_s() {
         active_instructions = new std::vector<uint32_t>();
@@ -65,6 +72,9 @@ namespace game::content {
                     }
                 }
             }
+            
+
+
 
             run_instructions();
 
@@ -157,6 +167,9 @@ namespace game::content {
                         case 10:
                             instr_stopInterval(args.type_3);
                             break;
+                        case 11:
+                            instr_angle_atPlayer();
+                            break;
                         default:
                             break;
                     }
@@ -242,6 +255,28 @@ namespace game::content {
     void bullet_s::instr_stopInterval(uint32_t id) {
         //  can only have 1 of each element in a set, so no need to check if it already exists
         cancel_cust_triggers->insert(id);
+    }
+
+    void bullet_s::instr_angle_atPlayer() {
+        //  get angle to player
+        //  the order is all messed up because my angles go clockwise and my Y-axis is flipped
+        float distWidth = x_pos - teststage::player.x_pos;
+        float distHeight = teststage::player.y_pos - y_pos;
+        float angle_rad;
+
+        if(distWidth != 0.f) {
+            angle_rad = (float)atan2(distHeight, distWidth);
+            angle = (angle_rad * 180.f / PI) - 90.f;
+        } else {
+            //  vertically lined up
+            if(y_pos > teststage::player.y_pos) {
+                //  underneath
+                angle = 90.f;
+            } else {
+                angle = 270.f;
+            }
+
+        }
     }
 
 }
