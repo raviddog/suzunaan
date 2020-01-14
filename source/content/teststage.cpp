@@ -83,7 +83,7 @@ namespace game::teststage {
             if(i > -1) {
                 bullets[i].type = 24;
                 bullets[i].instructions = boot;
-                bullets[i].y_pos = 360.f;
+                bullets[i].y_pos = 120.f;
                 bullets[i].x_pos = between<float>(0.f, 640.f);
                 bullets[i].type = 168;
                 
@@ -172,7 +172,7 @@ namespace game::teststage {
         //  draw player bullets
         for(int i = 0; i < 42; i++) {
             if(player.bullet[i].active_frame > 0) {
-                img_player_b->drawSprite(player.bullet[i].active_frame - 1, player.bullet[i].x_pos, player.bullet[i].y_pos, 90.f);
+                img_player_b->drawSprite(player.bullet[i].draw_frame, player.bullet[i].x_pos, player.bullet[i].y_pos, 90.f);
             }
         }
 

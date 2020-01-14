@@ -14,7 +14,7 @@ namespace game::content {
         //  0   disabled
         //  1   active
         //  2-4  fading out phase
-        int active_frame;
+        int active_frame, draw_frame;
         float x_pos, y_pos;
 
     };

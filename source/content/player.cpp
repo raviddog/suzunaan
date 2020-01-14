@@ -1,14 +1,14 @@
 #include "player.hpp"
 
 namespace game::content {
-    void player_s::init(float x, float y, float top, float right) {
-        x_pos = (top - x) / 2.f + x;
-        y_pos = (right - y) / 4.f + y;
+    void player_s::init(float x, float y, float right, float top) {
+        x_pos = (right - x) / 2.f + x;
+        y_pos = (top - y) / 4.f + 3.f * y;
         animFrame = 0;
         animDelay = 0;
 
-        x_max = top;
-        y_max = right;
+        x_max = right;
+        y_max = top;
         x_min = x;
         y_min = y;
 
@@ -25,6 +25,7 @@ namespace game::content {
         shoot_enabled = true;
         for(int i = 0; i < 42; i++) {
             bullet[i].active_frame = 0;
+            bullet[i].draw_frame = 0;
         }
     }
 
@@ -125,11 +126,11 @@ namespace game::content {
         //  apply movement
         if(keys[up] && !keys[right] && !keys[down] && !keys[left]) {
             //  up
-            y_pos += str;
+            y_pos -= str;
 
         } else if(keys[up] && keys[right] && !keys[down] && !keys[left]) {
             //  up right
-            y_pos += diag;
+            y_pos -= diag;
             x_pos += diag;
 
         } else if(!keys[up] && keys[right] && !keys[down] && !keys[left]) {
@@ -139,15 +140,15 @@ namespace game::content {
         } else if(!keys[up] && keys[right] && keys[down] && !keys[left]) {
             //  right down
             x_pos += diag;
-            y_pos -= diag;
+            y_pos += diag;
             
         } else if(!keys[up] && !keys[right] && keys[down] && !keys[left]) {
             //  down
-            y_pos -= str;
+            y_pos += str;
             
         } else if(!keys[up] && !keys[right] && keys[down] && keys[left]) {
             //  down left
-            y_pos -= diag;
+            y_pos += diag;
             x_pos -= diag;
             
         } else if(!keys[up] && !keys[right] && !keys[down] && keys[left]) {
@@ -157,7 +158,7 @@ namespace game::content {
         } else if(keys[up] && !keys[right] && !keys[down] && keys[left]) {
             //  left up
             x_pos -= diag;
-            y_pos += diag;
+            y_pos -= diag;
         }
 
         //  clamp position
@@ -172,16 +173,18 @@ namespace game::content {
         for(int i = 0; i < 42; i++) {
             if(bullet[i].active_frame > 1) {
                 bullet[i].active_frame += 1;
-                if(bullet[i].active_frame > 4) {
-                    bullet[i].active_frame = 0;
+                bullet[i].y_pos -= 4.f;
+                if(bullet[i].active_frame % 3 == 0) {
+                    bullet[i].draw_frame += 1;
+                    if(bullet[i].draw_frame > 4) {
+                        bullet[i].active_frame = 0;
+                    }
                 }
-            }
-
-            if(bullet[i].active_frame > 0) {
-                bullet[i].y_pos += 24.f;
+            } else if(bullet[i].active_frame > 0) {
+                bullet[i].y_pos -= 24.f;
 
                 //  testing fade out animation
-                if(bullet[i].y_pos > y_max - 40.f) {
+                if(bullet[i].y_pos < y_min + 40.f) {
                     bullet[i].active_frame += 1;
                 }
             }
@@ -199,16 +202,18 @@ namespace game::content {
                 for(bullet_num = 0; bullet_num < 42 && bullet[bullet_num].active_frame != 0; bullet_num++);
                 if(bullet_num < 42) {
                     bullet[bullet_num].x_pos = x_pos - 8.f;
-                    bullet[bullet_num].y_pos = y_pos + 24.f;
+                    bullet[bullet_num].y_pos = y_pos - 24.f;
                     bullet[bullet_num].active_frame = 1;
+                    bullet[bullet_num].draw_frame = 0;
                 }
 
                 //  spawn right bullet
                 for(bullet_num = 0; bullet_num < 42 && bullet[bullet_num].active_frame != 0; bullet_num++);
                 if(bullet_num < 42) {
                     bullet[bullet_num].x_pos = x_pos + 8.f;
-                    bullet[bullet_num].y_pos = y_pos + 24.f;
+                    bullet[bullet_num].y_pos = y_pos - 24.f;
                     bullet[bullet_num].active_frame = 1;
+                    bullet[bullet_num].draw_frame = 0;
                 }
             }
         }

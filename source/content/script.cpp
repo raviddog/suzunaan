@@ -542,15 +542,6 @@ namespace game::content {
 
     uint64_t script_setFloatFloat(float first, float second) {
         uint32_t storage_1 = 0u, storage_2 = 0u;
-        //  convert the floats to uints
-        // char *bytes = reinterpret_cast<char*>(&first);
-        // for(size_t i = 0; i < sizeof(float); i++) {
-        //     storage_1 += (uint32_t)bytes[i] << i * 8;
-        // }
-        // bytes = reinterpret_cast<char*>(&second);
-        // for(size_t i = 0; i < sizeof(float); i++) {
-        //     storage_2 += (uint32_t)bytes[i] << i * 8;
-        // }
         memcpy(&storage_1, &first, 4);
         memcpy(&storage_2, &second, 4);
         uint64_t val = storage_1;
@@ -571,8 +562,6 @@ namespace game::content {
         uint32_t data_1, data_2;
         data_1 = in;
         data_2 = in >> 32;
-        // float *f1 = reinterpret_cast<float*>(&data_1);
-        // float *f2 = reinterpret_cast<float*>(&data_2);
         float f1, f2;
         memcpy(&f1, &data_1, 4);
         memcpy(&f2, &data_2, 4);

@@ -1,6 +1,5 @@
 type: bullet
 
-
-1:intervalStart(30, 0):random_angle(105, 255) speed(2) frameTriggerOffset(2, 20);
+1:intervalStart(30, 0):random_angle(-75, 75) speed(2) frameTriggerOffset(2, 20);
 2:none():accel(-0.2) frameTriggerOffset(3, 10);
 3:none():accel(0);

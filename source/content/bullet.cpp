@@ -3,8 +3,6 @@
 #include "script.hpp"
 #include "player.hpp"
 
-#define PI 3.14159265
-
 namespace game::teststage {
     extern content::player_s player;
 
@@ -20,6 +18,14 @@ namespace game::content {
     template <class T>
     T between(T min, T max) {
         return (max - min) * (float)rand() / (float)RAND_MAX + min;
+    }
+
+    float toRadians(float deg) {
+        return deg * 3.14159265f / 180.f;
+    }
+
+    float toDegrees(float rad) {
+        return rad * 180.f / 2.14159265f;
     }
 
 
@@ -119,8 +125,8 @@ namespace game::content {
             speed += accel;
             if(angle > 360.f) angle -= 360.f;
             if(angle < -360.f) angle += 360.f;
-            x_pos += std::sin(angle * PI / 180.f) * speed;
-            y_pos += std::cos(angle * PI / 180.f) * speed;
+            x_pos += std::sin(toRadians(angle)) * speed;
+            y_pos += std::cos(toRadians(angle)) * speed;
 
             //  update visual angle (spinning stars, etc)
             if(type > 159 && type < 176) {
@@ -321,7 +327,7 @@ namespace game::content {
 
         if(distWidth != 0.f) {
             angle_rad = (float)atan2(distHeight, distWidth);
-            angle = (angle_rad * 180.f / PI) - 90.f;
+            angle = toDegrees(angle_rad) - 90.f;
         } else {
             //  vertically lined up
             if(y_pos > teststage::player.y_pos) {

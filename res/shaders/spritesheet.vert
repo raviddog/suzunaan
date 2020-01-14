@@ -30,6 +30,9 @@ void main()
     vec2 normalized_size = size / res.yy;
     vec2 normalized_coord = 2.0 * coord / res - 1.0;
 
+    //  set y=0 to the top instead of the bottom
+    normalized_coord.y = -normalized_coord.y;
+
     //  rotate to the right instead of the left, clockwise is more intuitive
     float cosa = cos(-radians(rotation));
     float sina = sin(-radians(rotation));
