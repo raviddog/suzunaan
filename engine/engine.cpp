@@ -113,10 +113,10 @@ namespace engine {
     void SpriteSheet::drawSprite(int num, float x, float y, float angle, float width, float height) {
         if(num > -1 && num < numSprites) {
             float v[] {
-                x, y, sprites[num].x, sprites[num].w, -width / 2.f, -height / 2.f, angle,
-                x, y, sprites[num].x, sprites[num].y, -width / 2.f, height / 2.f, angle,
-                x, y, sprites[num].z, sprites[num].y, width / 2.f, height / 2.f, angle,
-                x, y, sprites[num].z, sprites[num].w, width / 2.f, -height / 2.f, angle
+                x, y, sprites[num].x, sprites[num].w, -width, -height, angle,
+                x, y, sprites[num].x, sprites[num].y, -width, height, angle,
+                x, y, sprites[num].z, sprites[num].y, width, height, angle,
+                x, y, sprites[num].z, sprites[num].w, width, -height, angle
 
             };
 
