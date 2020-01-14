@@ -59,9 +59,11 @@ namespace engine {
 
             void setSprite(int, int, int, int, int);
 
-            // temp
+            //  temp
+            //  maybe not so temp after all
             void drawSprite(int, float, float);
             void drawSprite(int, float, float, float);
+            void drawSprite(int, float, float, float, float, float);
             void buffer();
             void draw();
 
