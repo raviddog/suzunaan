@@ -29,6 +29,9 @@ namespace game::teststage {
 
     
     bullet_script *toziko, *miko, *boot;
+    enemy_script *enemyscript;
+
+    enemy_s *testenemy;
 
     int getFreeBullet() {
         if(freebullets->empty()) {
@@ -48,7 +51,7 @@ namespace game::teststage {
         if(j == -1) {
             return nullptr;
         } else {
-            return &bullets[j];
+            return &(bullets[j]);
         }
     }
 
@@ -78,16 +81,24 @@ namespace game::teststage {
 
         frames++;
 
-        if(frames % 3 == 0) {
-            int i = getFreeBullet();
-            if(i > -1) {
-                bullets[i].type = 24;
-                bullets[i].instructions = boot;
-                bullets[i].y_pos = 120.f;
-                bullets[i].x_pos = between<float>(0.f, 640.f);
-                bullets[i].type = 168;
+        if(frames == 1) {
+            testenemy->activate();
+        }
+        testenemy->update();
+
+
+        
+
+        // if(frames % 3 == 0) {
+        //     int i = getFreeBullet();
+        //     if(i > -1) {
+        //         bullets[i].type = 24;
+        //         bullets[i].instructions = boot;
+        //         bullets[i].y_pos = 120.f;
+        //         bullets[i].x_pos = between<float>(0.f, 640.f);
+        //         bullets[i].type = 168;
                 
-            }
+        //     }
             
             
             
@@ -106,7 +117,7 @@ namespace game::teststage {
             //         bullets[i].instructions = miko;
             //     }
             // }
-        }
+        // }
 
         // for(int j = 0; j < 64; j++) {
         //     int i = getFreeBullet();
@@ -159,6 +170,10 @@ namespace game::teststage {
             }
         }
 
+        
+        //  update enemy
+        img_enemy->drawSprite(48, testenemy->x_pos, testenemy->y_pos);
+
 
         if(frames % 60 == 0) {
             // printf("bullets: %d ", count);
@@ -175,6 +190,9 @@ namespace game::teststage {
                 img_player_b->drawSprite(player.bullet[i].draw_frame, player.bullet[i].x_pos, player.bullet[i].y_pos, 90.f);
             }
         }
+
+        img_enemy->buffer();
+        img_enemy->draw();
 
         img_player_b->buffer();
         img_player_b->draw();
@@ -265,6 +283,12 @@ namespace game::teststage {
         toziko = loadScriptBullet("./script/toziko.txt");
         miko = loadScriptBullet("./script/miko.txt");
         boot = loadScriptBullet("./script/boot_on_head.txt");
+        enemyscript = loadScriptEnemy("./script/testenemy.txt");
+
+        testenemy = new enemy_s();
+        testenemy->x_pos = 320.f;
+        testenemy->y_pos = 20.f;
+        testenemy->instructions = enemyscript;
 
     }
 

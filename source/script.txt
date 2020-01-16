@@ -14,8 +14,76 @@ instructions aren't restricted to one per line, or one line per trigger,
 enemy
 ==============
 
-instruction: speed(float speed);
+triggers
+-------------------
+
+# implemented
+
+# not implemented
+
+init()
+a trigger that is called just before the enemy is activated
+you can use it to set things like initial position, hp, etc
+technically you can chain instructions off of this one
+
+none()
+trigger by id only
+single run instrucction
+
+noneCont()
+runs until stopped
+
+frame(int frame)
+happens on specified frame
+single run instruction
+
+frameCont(int frame)
+run every frame starting at specified frame
+cancellable by id
+
+interval(int frames)
+run every x frames
+triggered by id
+
+intervalStart(int start, int frames)
+starting from specified frame, run every x frames
+cancellable by id
+it is recommended you provide an instruction id for this trigger, even if you aren't using it
+
+
+
+instructions
+--------------------
+
+# implemented
+
+setHP(int)
+set hp
+
+speed(float)
 set speed
+
+angle(float)
+set angle
+
+accel(float)
+set accel
+
+bullet(uint type, uint scriptID, float speed, float angle)
+fire bullet from location at specified speed/angle
+if scriptID = 0, no script is attached
+
+# not implemented
+
+bulletXY(uint type, uint scriptID, float speed, float angle, float x_offset, float y_offset)
+spawns a bullet offset to this enemy's current position with specified speed/angle
+if scriptID = 0, no script is attached
+
+bulletAD(uint type, uint scriptID, float speed, float angle, float angle_spawn, float dist_spawn)
+spawns a bullet offset to this enemy's current position by specified distance at specified angle
+if scriptID = 0, no script is attached
+
+
 
 
 bullets

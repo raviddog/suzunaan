@@ -37,6 +37,16 @@ namespace game::content {
         reset();
     }
 
+    bullet_s::~bullet_s() {
+        delete active_instructions;
+        delete cust_triggers;
+        delete cancel_cust_triggers;
+        if(listener_triggers != nullptr) {
+            delete listener_triggers;
+            listener_triggers = nullptr;
+        }
+    }
+
     void bullet_s::reset() {
         active = false;
         type = 0;
@@ -46,6 +56,7 @@ namespace game::content {
         y_pos = 0.f;
         speed = 0.f;
         angle = 0.f;
+        angle_change = 0.f;
         accel = 0.f;
         draw_angle = 0.f;
         instructions = nullptr;
@@ -54,6 +65,7 @@ namespace game::content {
         cancel_cust_triggers->clear();
         if(listener_triggers != nullptr) {
             delete listener_triggers;
+            listener_triggers = nullptr;
         }
     }
     
@@ -62,10 +74,10 @@ namespace game::content {
             if(frames == 0u) {
                 //  first frame, do some initial setup
                 //  make a copy of the non-frame trigger listeners
-                listener_triggers = new auto(*(instructions->listeners));
+                if(instructions) listener_triggers = new auto(*(instructions->listeners));
             }
             //  apply instructions
-            if(instructions != nullptr) {
+            if(instructions) {
                 //  check frame triggers
                 if(instructions->frame_triggers->count(frames) > 0) {
                     //  add instructions from the vector to the active instructions
@@ -75,7 +87,7 @@ namespace game::content {
                     }
                 }
                 //  check listener triggers
-                if(listener_triggers != nullptr) {
+                if(listener_triggers) {
                     //  probably just do listeners manually here
                     //  there won't be enough of them to justify making separate functions?
                     
@@ -123,6 +135,7 @@ namespace game::content {
 
 
             speed += accel;
+            angle += angle_change;
             if(angle > 360.f) angle -= 360.f;
             if(angle < -360.f) angle += 360.f;
             x_pos += std::sin(toRadians(angle)) * speed;

@@ -11,32 +11,42 @@ namespace game::content {
 
     class enemy_s {
         private:
-            void run_instruction(script_instruction*, int);
+            void run_instructions();
 
             //  script instructions
             void instr_speed(float);
+            void instr_angle(float);
+            void instr_accel(float);
+            void instr_bullet(uint32_t);
+            void instr_setHP(int);
+            size_t instr_stop(uint32_t);
+            void instr_start(uint32_t);
+            void instr_frameTrigger(uint32_t, uint32_t);
+            void instr_frameTriggerOffset(uint32_t, uint32_t);
+            void instr_stopInterval(uint32_t);
+            
 
         public:
+            enemy_s();
+            ~enemy_s();
+            void activate();
+            void update();
+
             bool active;
-            int type, frames, hp;
+            int id, type, frames, hp;
             float x_pos, y_pos;
 
             float speed, angle;
             float accel, angle_change;
             float draw_angle;
 
-
-            script_instruction *current_instr;
-            std::unordered_map<int, script_instruction*> *instructions;
-
-            void update();
-            
-            //  no need for a reset, don't need to recycle enemy objects
-            //  use a constructor instead to set default values
-            //  dont need a destructor
-            enemy_s();
-
-
+            enemy_script *instructions = nullptr;
+            std::vector<uint32_t> *active_instructions = nullptr;
+            //  frame triggers that are created by instructions
+            std::unordered_multimap<uint32_t, uint32_t> *cust_triggers = nullptr;
+            std::unordered_set<uint32_t> *cancel_cust_triggers = nullptr;
+            //  local version of non-frame trigger listeners
+            std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>> *listener_triggers;
     };
 
 

@@ -9,7 +9,7 @@ Short fangame of the final part of the Forbidden Scrollery manga. A feet-wetting
 - ✔️ Program runs
 - ✔️ Player controls
 - 🛠️ Bullet scripting
-- ❌ Enemy scripting
+- 🛠️ Enemy scripting
 - ❌ Boss scripting
 - ❌ Stage scripting
 - ❌ Actual game mechanics

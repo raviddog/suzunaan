@@ -28,6 +28,7 @@ namespace game::content {
 
         public:
             bullet_s();
+            ~bullet_s();
             bool active;
             uint32_t type, frames;
             int owner;
@@ -37,11 +38,12 @@ namespace game::content {
             //  should accel be per second or per frame
             //  probably per frame, but then the values have to be super small
             float speed, angle;
-            float accel;
+            float accel, angle_change;
             float draw_angle;
 
             bullet_script *instructions = nullptr;
             std::vector<uint32_t> *active_instructions = nullptr;
+            //  frame triggers that are created by instructions
             std::unordered_multimap<uint32_t, uint32_t> *cust_triggers = nullptr;
             std::unordered_set<uint32_t> *cancel_cust_triggers = nullptr;
             //  local version of non-frame trigger listeners
