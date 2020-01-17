@@ -26,6 +26,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(thszn -Wl,-subsystem,console)
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT thszn)
+    set_property(TARGET thszn PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+endif()
+
 #target_link_libraries(thszn -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer)
 
 add_custom_command(TARGET thszn PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/res" $<TARGET_FILE_DIR:thszn>)
