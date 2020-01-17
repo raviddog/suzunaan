@@ -4,10 +4,12 @@
 #include <unordered_map>
 #include "script.hpp"
 #include "bullet.hpp"
+#include <memory>
 
 namespace game::content {
 
     extern bullet_s* (*getBullet)();
+    extern std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
 
     class enemy_s {
         private:

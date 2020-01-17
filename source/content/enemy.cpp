@@ -5,6 +5,7 @@
 
 namespace game::content {
     bullet_s* (*getBullet)();
+    std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
 
     //  #FIX 1
     float   enem_bounds_x = -20.f,
@@ -241,15 +242,15 @@ namespace game::content {
                 bullet->angle = bs.angle;
                 bullet->accel = bs.accel;
                 bullet->angle_change = bs.angle_change;
+                bullet->instructions = nullptr;
 
                 if(bs.scriptID > 0) {
-
-                } else {
-                    bullet->instructions = nullptr;
+                    if(bullet_scripts->count(bs.scriptID) > 0) {
+                        //  temp, replace with proper smart pointers later
+                        bullet->instructions = (bullet_scripts->at(bs.scriptID)).get();
+                    }
                 }
-                
             }
-
         }
     }
 

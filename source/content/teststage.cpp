@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <ctime>
+#include <memory>
 
 
 using namespace engine;
@@ -29,6 +30,8 @@ namespace game::teststage {
 
     
     bullet_script *toziko, *miko, *boot;
+
+    std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
     enemy_script *enemyscript;
 
     enemy_s *testenemy;
@@ -279,10 +282,15 @@ namespace game::teststage {
         bullet_bounds_y = -32.f;
         bullet_bounds_ymax = 512.f;
 
+        bullet_scripts = new std::unordered_map<uint32_t, std::shared_ptr<bullet_script>>();
+        std::shared_ptr<bullet_script> temp(loadScriptBullet("./script/miko.txt"));
+        bullet_scripts->insert({1, temp});
+
+        content::bullet_scripts = teststage::bullet_scripts;
         
-        toziko = loadScriptBullet("./script/toziko.txt");
-        miko = loadScriptBullet("./script/miko.txt");
-        boot = loadScriptBullet("./script/boot_on_head.txt");
+        // toziko = loadScriptBullet("./script/toziko.txt");
+        // miko = loadScriptBullet("./script/miko.txt");
+        // boot = loadScriptBullet("./script/boot_on_head.txt");
         enemyscript = loadScriptEnemy("./script/testenemy.txt");
 
         testenemy = new enemy_s();
