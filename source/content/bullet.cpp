@@ -25,7 +25,7 @@ namespace game::content {
     }
 
     float toDegrees(float rad) {
-        return rad * 180.f / 2.14159265f;
+        return rad * 180.f / 3.14159265f;
     }
 
 
@@ -343,11 +343,11 @@ namespace game::content {
             angle = toDegrees(angle_rad) - 90.f;
         } else {
             //  vertically lined up
-            if(y_pos > teststage::player.y_pos) {
+            if(y_pos < teststage::player.y_pos) {
                 //  underneath
-                angle = 90.f;
+                angle = 0.f;
             } else {
-                angle = 270.f;
+                angle = 180.f;
             }
 
         }

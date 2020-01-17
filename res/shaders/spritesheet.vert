@@ -35,7 +35,7 @@ void main()
 
     //  rotate to the right instead of the left, clockwise is more intuitive
     float cosa = cos(-radians(rotation));
-    float sina = sin(-radians(rotation));
+    float sina = sin(radians(rotation));
 
     //  rotate
     vec2 rotated_coord = vec2((cosa * normalized_size.x) - (sina * normalized_size.y), (sina * normalized_size.x) + (cosa * normalized_size.y));
