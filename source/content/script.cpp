@@ -188,7 +188,7 @@ namespace game::content {
                 while(content[next + offset] != ')' && content[next + offset] != '\n'
                     && content[next + offset] != ':' && next + offset < length) offset++;
                 //  check trigger type and create/load instructions
-                script_instruction *instruction;
+                script_instruction *instruction = nullptr;
                 bool abort = false;
                 if(trigger_type == "frame") {
                     //  add to frame triggers
@@ -544,7 +544,10 @@ namespace game::content {
                                     printf(", can't read argument in function %s, line %d", ex.what(), line);
                                 }
                             }
-                            if(success) instruction->instruct->push_back(function_info.first);
+                            if(success) {
+                                if(instruction) instruction->instruct->push_back(function_info.first);
+                            }
+
                         } else {
                             printf("unable to locate instruction %s\n", function_name.c_str());
                         }
@@ -688,7 +691,7 @@ namespace game::content {
                 while(content[next + offset] != ')' && content[next + offset] != '\n'
                     && content[next + offset] != ':' && next + offset < length) offset++;
                 //  check trigger type and create/load instructions
-                script_instruction *instruction;
+                script_instruction *instruction = nullptr;
                 bool abort = false;
 
                 if(trigger_type == "frame") {
@@ -1090,7 +1093,9 @@ namespace game::content {
                                 }
 
                             }
-                            if(success) instruction->instruct->push_back(function_info.first);
+                            if(success) {
+                                if(instruction) instruction->instruct->push_back(function_info.first);
+                            }
                         } else {
                             printf("unable to locate instruction %s\n", function_name.c_str());
                         }
