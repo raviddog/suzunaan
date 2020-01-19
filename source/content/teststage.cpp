@@ -85,42 +85,40 @@ namespace game::teststage {
         frames++;
 
         if(frames == 1) {
-            testenemy->activate();
+            // testenemy->activate();
         }
         testenemy->update();
 
 
         
 
-        // if(frames % 3 == 0) {
-        //     int i = getFreeBullet();
-        //     if(i > -1) {
-        //         bullets[i].type = 24;
-        //         bullets[i].instructions = boot;
-        //         bullets[i].y_pos = 120.f;
-        //         bullets[i].x_pos = between<float>(0.f, 640.f);
-        //         bullets[i].type = 168;
+        if(frames % 3 == 0) {
+            // int i = getFreeBullet();
+            // if(i > -1) {
+            //     bullets[i].type = 24;
+            //     bullets[i].instructions = boot;
+            //     bullets[i].y_pos = 120.f;
+            //     bullets[i].x_pos = between<float>(0.f, 640.f);
+            //     bullets[i].type = 168;
                 
-        //     }
-            
-            
-            
-            //  bowap
-            // for(int j = 0; j < 12; j++) {
-            //     i = getFreeBullet();
-            //     if(i > -1) {
-            //         bullets[i].type = 48 + j % 16;
-            //         bullets[i].active = true;
-            //         bullets[i].accel = 0.f;
-            //         bullets[i].x_pos = 320.f;
-            //         bullets[i].y_pos = 360.f;
-            //         // bullets[i].angle = 1080.f * sin((double)frames * 3.14159265/180) + j * 45.f;
-            //         bullets[i].angle = -(float)frames / 10.f + j * 30.f;
-            //         bullets[i].speed = 0.f;
-            //         bullets[i].instructions = miko;
-            //     }
             // }
-        // }
+
+            //  bowap
+            for(int j = 0; j < 12; j++) {
+                int i = getFreeBullet();
+                if(i > -1) {
+                    bullets[i].type = 48 + j % 16;
+                    bullets[i].active = true;
+                    bullets[i].accel = 0.f;
+                    bullets[i].x_pos = 320.f;
+                    bullets[i].y_pos = 120.f;
+                    bullets[i].angle = 1080.f * sin((double)frames * 3.14159265/180) + j * 45.f;
+                    bullets[i].angle = -(float)frames / 10.f + j * 30.f;
+                    bullets[i].speed = 0.f;
+                    bullets[i].instructions = toziko;
+                }
+            }
+        }
 
         // for(int j = 0; j < 64; j++) {
         //     int i = getFreeBullet();
@@ -175,7 +173,7 @@ namespace game::teststage {
 
         
         //  update enemy
-        img_enemy->drawSprite(48, testenemy->x_pos, testenemy->y_pos);
+        // img_enemy->drawSprite(48, testenemy->x_pos, testenemy->y_pos);
 
 
         if(frames % 60 == 0) {
@@ -288,9 +286,9 @@ namespace game::teststage {
 
         content::bullet_scripts = teststage::bullet_scripts;
         
-        // toziko = loadScriptBullet("./script/toziko.txt");
-        // miko = loadScriptBullet("./script/miko.txt");
-        // boot = loadScriptBullet("./script/boot_on_head.txt");
+        toziko = loadScriptBullet("./script/toziko.txt");
+        miko = loadScriptBullet("./script/miko.txt");
+        boot = loadScriptBullet("./script/boot_on_head.txt");
         enemyscript = loadScriptEnemy("./script/testenemy.txt");
 
         testenemy = new enemy_s();

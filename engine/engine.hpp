@@ -5,9 +5,10 @@
 #include <vector>
 
 namespace engine {
-    void init(const char*, int, int, int);
-    void init(const char*, int, int, int, int, int);
+    void init(const char*, int, bool, int, int);
+    void init(const char*, int, bool, int, int, int, int);
     void inputs();
+    void draw();
     void close();
 
     // class Sprite {

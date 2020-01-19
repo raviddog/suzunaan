@@ -1,10 +1,18 @@
 #include "engine.hpp"
 #include "glm/gtx/string_cast.hpp"
 
+#include <chrono>
+#include <thread>
+
 namespace engine {
 
     int scrWidth;
     int scrHeight;
+
+    //  framerate stuff
+    static bool _vsync;
+    std::chrono::steady_clock::time_point cur_time, next_time;
+    #define _ENGINE_NOVSYNC_DELAY_MICROSECONDS 16666
 
     static gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert;
 
@@ -166,11 +174,11 @@ namespace engine {
         shaderSpriteSheet->use();
     }
 
-    void init(const char *title, int screenMode, int width, int height) {
-        init(title, screenMode, width, height, width, height);
+    void init(const char *title, int screenMode, bool vsync, int width, int height) {
+        init(title, screenMode, vsync, width, height, width, height);
     }
 
-    void init(const char *title, int screenMode, int width_win, int height_win, int width_draw, int height_draw) {
+    void init(const char *title, int screenMode, bool vsync, int width_win, int height_win, int width_draw, int height_draw) {
         scrWidth = width_win;
         scrHeight = height_win;
 
@@ -198,7 +206,6 @@ namespace engine {
                 gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL);
                 break;
         }
-
         
         gl::maincontext = SDL_GL_CreateContext(gl::window);
         gladLoadGLLoader(SDL_GL_GetProcAddress);
@@ -239,7 +246,19 @@ namespace engine {
 
         delete dmode;
 
-        SDL_GL_SetSwapInterval(1);
+
+        if(vsync) {
+            _vsync = true;
+            SDL_GL_SetSwapInterval(1);
+        } else {
+            _vsync = false;
+            SDL_GL_SetSwapInterval(0);
+
+            // cur_time = std::chrono::steady_clock::now();
+            // next_time = cur_time + std::chrono::milliseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
+            next_time = std::chrono::steady_clock::now();
+        }
+
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glEnable(GL_BLEND);
         //glEnable(GL_DEPTH_TEST);
@@ -259,6 +278,44 @@ namespace engine {
         shaderSpriteSheet->use();
         shaderSpriteSheet->setInt("txUnit", 0);
         shaderSpriteSheet->setVec2("res", scrRes);
+    }
+
+    void draw() {
+        SDL_GL_SwapWindow(gl::window);
+        if(!_vsync) {
+            //  wait
+            // printf("before sleep %u ", SDL_GetTicks());
+            // cur_time = std::chrono::steady_clock::now();
+            uint32_t start = SDL_GetTicks();
+            while(std::chrono::steady_clock::now() < next_time + std::chrono::microseconds(9000)) {
+                std::this_thread::sleep_until(next_time + std::chrono::microseconds(10000));
+            }
+            // auto wake_time = std::chrono::steady_clock::now();
+            uint32_t wake = SDL_GetTicks();
+            int temp = 0;
+            while(std::chrono::steady_clock::now() < next_time + std::chrono::microseconds(16666)) {
+                temp++;
+            }
+            if(temp == 0) {
+                printf("spun 0 times ");
+                printf("slept for %u ms\n", wake - start);
+            } 
+            next_time += std::chrono::microseconds(16666);
+            
+            
+            //  spin
+            // next_time = cur_time + std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
+            
+            //  wait and spin
+            // std::this_thread::sleep_until(cur_time + std::chrono::microseconds(8000));
+            
+            // do {
+            //     cur_time = std::chrono::steady_clock::now();
+            //     // std::this_thread::yield();
+            // } while(cur_time < next_time);
+            // next_time += std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
+            
+        }
     }
 
     void close() {
