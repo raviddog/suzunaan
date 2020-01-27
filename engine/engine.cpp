@@ -1,5 +1,4 @@
 #include "engine.hpp"
-#include "glm/gtx/string_cast.hpp"
 
 #include <chrono>
 #include <thread>
@@ -8,6 +7,7 @@ namespace engine {
 
     int scrWidth;
     int scrHeight;
+    uint32_t ticks, fps, frameTimeTicks;
 
     //  framerate stuff
     static bool _vsync;
@@ -181,6 +181,9 @@ namespace engine {
     void init(const char *title, int screenMode, bool vsync, int width_win, int height_win, int width_draw, int height_draw) {
         scrWidth = width_win;
         scrHeight = height_win;
+        ticks = SDL_GetTicks();
+        frameTimeTicks = ticks;
+        fps = 0u;
 
         SDL_Init(SDL_INIT_EVERYTHING);
         SDL_GL_LoadLibrary(NULL);
@@ -280,8 +283,14 @@ namespace engine {
         shaderSpriteSheet->setVec2("res", scrRes);
     }
 
-    void draw() {
+    void flip() {
+        //  flip buffers
         SDL_GL_SwapWindow(gl::window);
+
+        //  clear new buffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        //  if vsync disabled, cap fps
         if(!_vsync) {
             //  wait
             // printf("before sleep %u ", SDL_GetTicks());
@@ -316,6 +325,17 @@ namespace engine {
             // next_time += std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
             
         }
+
+        //  print debug fps data
+        uint32_t temp_ticks = SDL_GetTicks();
+        if(temp_ticks > ticks + 1000) {
+            printf("frame time: %dms, ", temp_ticks - frameTimeTicks);
+            printf("fps: %d\n", fps);
+            fps = 0u;
+            ticks = temp_ticks;
+        }
+        ++fps;
+        frameTimeTicks = temp_ticks;
     }
 
     void close() {

@@ -8,7 +8,7 @@ namespace engine {
     void init(const char*, int, bool, int, int);
     void init(const char*, int, bool, int, int, int, int);
     void inputs();
-    void draw();
+    void flip();
     void close();
 
     // class Sprite {
