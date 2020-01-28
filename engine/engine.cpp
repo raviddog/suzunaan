@@ -329,8 +329,8 @@ namespace engine {
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {
-            printf("frame time: %dms, ", temp_ticks - frameTimeTicks);
-            printf("fps: %d\n", fps);
+            printf("frame time: %ums, ", temp_ticks - frameTimeTicks);
+            printf("fps: %u\n", fps);
             fps = 0u;
             ticks = temp_ticks;
         }

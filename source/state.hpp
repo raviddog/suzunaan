@@ -17,8 +17,8 @@ class Menu : public State {
     public:
     Menu();
     ~Menu();
-    void logic();
-    void draw();
+    void logic() override;
+    void draw() override;
 };
 
 //  should i put all states here or just include a bunch of files
@@ -28,8 +28,8 @@ class teststage : public State {
     public:
         teststage();
         ~teststage();
-        void logic();
-        void draw();
+        void logic() override;
+        void draw() override;
 };
 
 
