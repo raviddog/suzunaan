@@ -1,13 +1,8 @@
 #include "bullet.hpp"
-#include "math.h"
+#include <cmath>
 #include "player.hpp"
 
-namespace game::teststage {
-    extern content::player_s player;
-
-}
-
-namespace game::content {
+namespace Game {
     //  #FIX 1
     float   bullet_bounds_x = 0.f,
             bullet_bounds_y = 0.f,
@@ -25,13 +20,6 @@ namespace game::content {
 
     float toDegrees(float rad) {
         return rad * 180.f / 3.14159265f;
-    }
-
-
-    bullet_s::bullet_s() {
-    }
-
-    bullet_s::~bullet_s() {
     }
 
     void bullet_s::reset() {
@@ -81,8 +69,8 @@ namespace game::content {
     float bullet_s::instr_angleToPlayer() {
         //  get angle to player
         //  the order is all messed up because my angles go clockwise and my Y-axis is flipped
-        float distWidth = x_pos - teststage::player.x_pos;
-        float distHeight = teststage::player.y_pos - y_pos;
+        float distWidth = x_pos - player->x_pos;
+        float distHeight = player->y_pos - y_pos;
         float angle_rad;
 
         if(distWidth != 0.f) {
@@ -90,7 +78,7 @@ namespace game::content {
             return toDegrees(angle_rad) - 90.f;
         } else {
             //  vertically lined up
-            if(y_pos < teststage::player.y_pos) {
+            if(y_pos < player->y_pos) {
                 //  underneath
                 return 0.f;
             } else {

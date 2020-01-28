@@ -6,4 +6,5 @@
 #define STBI_NO_HDR
 #define STBI_NO_PIC
 #define STBI_NO_PNM 
+//  jpeg and png support only, rest unneeded
 #include "stb_image.h"

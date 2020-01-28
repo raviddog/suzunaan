@@ -1,7 +1,7 @@
 #include "testbullet.hpp"
 
-namespace game::script::test {
-    void testbulletfunc(game::content::bullet_s *bullet) {
+namespace Game::Script::Test {
+    void testbulletfunc(Game::bullet_s *bullet) {
         if(bullet->frames == 30u) {
             bullet->accel = -0.25f;
         }

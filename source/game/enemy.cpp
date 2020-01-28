@@ -3,7 +3,7 @@
 
 #define PI 3.14159265
 
-namespace game::content {
+namespace Game{
     bullet_s* (*getBullet)();
 
     //  #FIX 1

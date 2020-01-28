@@ -1,30 +1,29 @@
-#ifndef _BULLET_H
-#define _BULLET_H
+#ifndef _ENEMY_H
+#define _ENEMY_H
 
-#include <stdint.h>
+#include <unordered_map>
+#include "bullet.hpp"
+#include <memory>
 
-namespace game::content {
-    extern float bullet_bounds_x, bullet_bounds_y, bullet_bounds_xmax, bullet_bounds_ymax;
+namespace Game {
 
-    class bullet_s {
+    extern bullet_s* (*getBullet)();
+    
+    class enemy_s {
         public:
-            bullet_s();
-            ~bullet_s();
+            enemy_s();
+            ~enemy_s();
+            void activate();
+            void update();
+
             bool active;
-            uint32_t type, frames;
-            int owner;
+            int id, type, frames, hp;
             float x_pos, y_pos;
-            
-            //  not sure which way to implement movement
-            //  should accel be per second or per frame
-            //  probably per frame, but then the values have to be super small
+
             float speed, angle;
             float accel, angle_change;
             float draw_angle;
-
-            void reset();
-            void update();
-
+            
             //  compiled scripts shouldn't need instruction maps
             //  instead just provide some storage variables
             union storage_u {
@@ -37,11 +36,14 @@ namespace game::content {
             //  adjust this to the number of storage variables needed
             storage_u storage[4];
             //  pointer to the correct instruction function
-            void (*run_instructions)(bullet_s*);            
+            void (*run_instructions)(enemy_s*);            
             //  helper functions that the instruction function can use
-            float instr_angleToPlayer();
+            // float instr_angleToPlayer();
     };
+
+
 }
+
 
 
 #endif

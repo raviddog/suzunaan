@@ -1,7 +1,7 @@
 #define SDL_MAIN_HANDLED
 
 #include "engine/engine.hpp"
-#include "game.hpp"
+#include "state.hpp"
 
 const int scrWidth = 640;
 const int scrHeight = 480;
@@ -13,14 +13,14 @@ int main(int argv, char** args) {
 
     // freopen("./test.log", "w", stdout);
 
-    game::init();
+    init();
 
     while(!engine::quit) {
         //  update input struct
         engine::inputs();
 
-        game::logic();
-        game::draw();
+        logic();
+        draw();
 
         engine::flip();
     }
