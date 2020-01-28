@@ -1,31 +1,12 @@
 #ifndef _BULLET_H
 #define _BULLET_H
 
-#include "script.hpp"
-#include <unordered_set>
+#include <stdint.h>
 
 namespace game::content {
     extern float bullet_bounds_x, bullet_bounds_y, bullet_bounds_xmax, bullet_bounds_ymax;
 
     class bullet_s {
-        private:
-            void run_instructions();
-            //  bullet instruction functions
-            void instr_speed(float);
-            void instr_accel(float);
-            void instr_angle_change(float);
-            void instr_type_set_relative(int);
-            void instr_angle(float);
-            //  needs to inform the instruction loop that an element was removed
-            size_t instr_stop(uint32_t);  
-            void instr_start(uint32_t);
-            void instr_frameTrigger(uint32_t, uint32_t);
-            void instr_frameTriggerOffset(uint32_t, uint32_t);
-            void instr_stopInterval(uint32_t);
-            void instr_angle_atPlayer();
-            void instr_random_angle_change(float, float);
-            void instr_random_angle(float, float);
-
         public:
             bullet_s();
             ~bullet_s();
@@ -41,17 +22,24 @@ namespace game::content {
             float accel, angle_change;
             float draw_angle;
 
-            bullet_script *instructions = nullptr;
-            std::vector<uint32_t> *active_instructions = nullptr;
-            //  frame triggers that are created by instructions
-            std::unordered_multimap<uint32_t, uint32_t> *cust_triggers = nullptr;
-            std::unordered_set<uint32_t> *cancel_cust_triggers = nullptr;
-            //  local version of non-frame trigger listeners
-            std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>> *listener_triggers;
-
             void reset();
             void update();
 
+            //  compiled scripts shouldn't need instruction maps
+            //  instead just provide some storage variables
+            union storage_u {
+                uint32_t u;
+                int32_t i;
+                float f;
+                bool b;
+            };
+
+            //  adjust this to the number of storage variables needed
+            storage_u storage[4];
+            //  pointer to the correct instruction function
+            void (*run_instructions)(bullet_s*);            
+            //  helper functions that the instruction function can use
+            float instr_angleToPlayer();
     };
 }
 

@@ -3,7 +3,6 @@
 #include "player.hpp"
 #include "bullet.hpp"
 #include "enemy.hpp"
-#include "script.hpp"
 
 #include <vector>
 #include <cstdlib>
@@ -28,11 +27,6 @@ namespace game::teststage {
     int last_added_bullet;
     int frames;
 
-    
-    bullet_script *toziko, *miko, *boot;
-
-    std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
-    enemy_script *enemyscript;
 
     enemy_s *testenemy;
 
@@ -112,10 +106,8 @@ namespace game::teststage {
                     bullets[i].accel = 0.f;
                     bullets[i].x_pos = 320.f;
                     bullets[i].y_pos = 120.f;
-                    bullets[i].angle = 1080.f * sin((double)frames * 3.14159265/180) + j * 45.f;
-                    bullets[i].angle = -(float)frames / 10.f + j * 30.f;
-                    bullets[i].speed = 0.f;
-                    bullets[i].instructions = toziko;
+                    bullets[i].angle = 360.f * sin((double)frames * 3.14159265/180) + j * 45.f;
+                    bullets[i].speed = 4.f;
                 }
             }
         }
@@ -218,7 +210,6 @@ namespace game::teststage {
 
     void load() {
         srand(time(NULL));
-        script_init();
 
         img_player = new SpriteSheet("./data/pl00.png", 24);
         for(int i = 0; i < 8; i++) {
@@ -280,21 +271,9 @@ namespace game::teststage {
         bullet_bounds_y = -32.f;
         bullet_bounds_ymax = 512.f;
 
-        bullet_scripts = new std::unordered_map<uint32_t, std::shared_ptr<bullet_script>>();
-        std::shared_ptr<bullet_script> temp(loadScriptBullet("./script/miko.txt"));
-        bullet_scripts->insert({1, temp});
-
-        content::bullet_scripts = teststage::bullet_scripts;
-        
-        toziko = loadScriptBullet("./script/toziko.txt");
-        miko = loadScriptBullet("./script/miko.txt");
-        boot = loadScriptBullet("./script/boot_on_head.txt");
-        enemyscript = loadScriptEnemy("./script/testenemy.txt");
-
         testenemy = new enemy_s();
         testenemy->x_pos = 320.f;
         testenemy->y_pos = 20.f;
-        testenemy->instructions = enemyscript;
 
     }
 
@@ -305,7 +284,5 @@ namespace game::teststage {
         delete img_bullet;
         delete[] bullets;
         delete bullet_draw_order;
-        delete toziko;
-        delete miko;
     }
 }
