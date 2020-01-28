@@ -10,6 +10,7 @@
 #include <ctime>
 #include <memory>
 
+#include "script\test\testbullet.hpp"
 
 using namespace engine;
 using namespace game::content;
@@ -108,6 +109,7 @@ namespace game::teststage {
                     bullets[i].y_pos = 120.f;
                     bullets[i].angle = 360.f * sin((double)frames * 3.14159265/180) + j * 45.f;
                     bullets[i].speed = 4.f;
+                    bullets[i].run_instructions = game::script::test::testbulletfunc;
                 }
             }
         }
