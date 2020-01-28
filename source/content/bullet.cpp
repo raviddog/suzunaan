@@ -65,7 +65,7 @@ namespace game::content {
                 draw_angle += 6.f;
                 if(draw_angle > 360.f) draw_angle -= 360.f;
             } else {
-                draw_angle = angle;
+                draw_angle = angle + 180.f;
             }
 
             //  disable when out of bounds
