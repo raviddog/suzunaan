@@ -1,7 +1,7 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
-namespace game::content {
+namespace Game {
 
     //  bullets part of player class for now
     //  move it to actual bullet mechanism later

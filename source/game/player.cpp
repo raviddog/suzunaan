@@ -1,6 +1,6 @@
 #include "player.hpp"
 
-namespace game::content {
+namespace Game {
     void player_s::init(float x, float y, float right, float top) {
         x_pos = (right - x) / 2.f + x;
         y_pos = (top - y) / 4.f + 3.f * y;
