@@ -35,6 +35,10 @@ namespace Game {
         accel = 0.f;
         draw_angle = 0.f;
         run_instructions = nullptr;
+        storage[0].u = 0;
+        storage[1].u = 0;
+        storage[2].u = 0;
+        storage[3].u = 0;
     }
     
     void bullet_s::update() {
@@ -66,7 +70,7 @@ namespace Game {
         }
     }
 
-    float bullet_s::instr_angleToPlayer() {
+    float bullet_s::instr_getAngleToPlayer() {
         //  get angle to player
         //  the order is all messed up because my angles go clockwise and my Y-axis is flipped
         float distWidth = x_pos - player->x_pos;

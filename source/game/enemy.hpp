@@ -6,15 +6,15 @@
 #include <memory>
 
 namespace Game {
-
-    extern bullet_s* (*getBullet)();
     
     class enemy_s {
         public:
             enemy_s();
-            ~enemy_s();
             void activate();
             void update();
+
+            
+            static bullet_s* (*getBullet)();
 
             bool active;
             int id, type, frames, hp;

@@ -11,9 +11,11 @@
 #include <memory>
 
 #include "testbullet.hpp"
+#include "testenemy.hpp"
 
 //  declare static member variable for reasons???
 Game::player_s *Game::bullet_s::player;
+Game::bullet_s* (*Game::enemy_s::getBullet)();
 
 namespace Game::Script::Test{
     const int BULLET_MAX = 10000;
@@ -86,14 +88,14 @@ void teststage::logic() {
     frames++;
 
     if(frames == 1) {
-        // testenemy->activate();
+        testenemy->activate();
     }
     testenemy->update();
 
 
     
 
-    if(frames % 3 == 0) {
+    // if(frames % 1 == 0) {
         // int i = getFreeBullet();
         // if(i > -1) {
         //     bullets[i].type = 24;
@@ -105,20 +107,20 @@ void teststage::logic() {
         // }
 
         //  bowap
-        for(int j = 0; j < 12; j++) {
-            int i = getFreeBullet();
-            if(i > -1) {
-                bullets[i].type = 48 + j % 16;
-                bullets[i].active = true;
-                bullets[i].accel = 0.f;
-                bullets[i].x_pos = 320.f;
-                bullets[i].y_pos = 120.f;
-                bullets[i].angle = 360.f * sin((double)frames * 3.14159265/180) + j * 45.f;
-                bullets[i].speed = 4.f;
-                bullets[i].run_instructions = Game::Script::Test::testbulletfunc;
-            }
-        }
-    }
+    //     for(int j = 0; j < 12; j++) {
+    //         int i = getFreeBullet();
+    //         if(i > -1) {
+    //             bullets[i].type = 48 + j % 16;
+    //             bullets[i].active = true;
+    //             bullets[i].accel = 0.f;
+    //             bullets[i].x_pos = 320.f;
+    //             bullets[i].y_pos = 120.f;
+    //             bullets[i].angle = 360.f * sin((double)frames * 3.14159265/180) + j * 45.f;
+    //             bullets[i].speed = 4.f;
+    //             bullets[i].run_instructions = Game::Script::Test::testbulletfunc;
+    //         }
+    //     }
+    // }
 
     // for(int j = 0; j < 64; j++) {
     //     int i = getFreeBullet();
@@ -173,10 +175,12 @@ void teststage::logic() {
 
     
     //  update enemy
-    // img_enemy->drawSprite(48, testenemy->x_pos, testenemy->y_pos);
+    if(testenemy->active) {
+        img_enemy->drawSprite(48, testenemy->x_pos, testenemy->y_pos);
+    }
 
     if(frames % 60 == 0) {
-        // printf("bullets: %d ", count);
+        printf("bullets: %d ", count);
     }
 }
 
@@ -273,7 +277,7 @@ teststage::teststage() {
     bullet_draw_order = new std::vector<int>();
     frames = 0;
 
-    getBullet = Game::Script::Test::getFreeBulletPointer;
+    Game::enemy_s::getBullet = Game::Script::Test::getFreeBulletPointer;
     bullet_bounds_x = -32.f;
     bullet_bounds_xmax = 672.f;
     bullet_bounds_y = -32.f;
@@ -283,6 +287,7 @@ teststage::teststage() {
     testenemy = new enemy_s();
     testenemy->x_pos = 320.f;
     testenemy->y_pos = 20.f;
+    testenemy->run_instructions = Game::Script::Test::testenemyfunc;
 
 }
 

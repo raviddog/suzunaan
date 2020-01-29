@@ -43,7 +43,7 @@ namespace Game {
             //  pointer to the correct instruction function
             void (*run_instructions)(bullet_s*);            
             //  helper functions that the instruction function can use
-            float instr_angleToPlayer();
+            float instr_getAngleToPlayer();
     };
 }
 

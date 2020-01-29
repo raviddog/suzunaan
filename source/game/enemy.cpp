@@ -38,23 +38,12 @@ namespace Game{
         run_instructions = nullptr;
     }
 
-    enemy_s::~enemy_s() {
-    }
-
     void enemy_s::activate() {
         active = true;
     }
 
     void enemy_s::update() {
         if(active) {
-            
-            if(hp > 0) {
-                
-                
-            } else {
-                active = false;
-            }
-
             if(run_instructions) run_instructions(this);
 
             speed += accel;
@@ -75,7 +64,7 @@ namespace Game{
             if(y_pos > enem_bounds_ymax) active = false;
             if(y_pos < enem_bounds_y) active = false;
 
-            frames++;
+            ++frames;
         }
     }
 }
