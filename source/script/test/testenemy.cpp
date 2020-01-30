@@ -3,17 +3,13 @@
 
 namespace Game::Script::Test {
     void testenemyfunc(Game::enemy_s *enemy) {
-        if(enemy->frames == 0u) {
-            enemy->hp = 1;
-            enemy->angle = 0.f;
-            enemy->speed = 2.f;
-        } else if(enemy->frames == 30u) {
+        if(enemy->frames == 30) {
             enemy->accel = -0.2f;
-        } else if(enemy->frames == 40u) {
+        } else if(enemy->frames == 40) {
             enemy->accel = 0.f;
         }
 
-        if(enemy->frames > 70u) {
+        if(enemy->frames > 70) {
             if(enemy->frames % 3 == 0) {
                 for(int j = 0; j < 12; j++) {
                     bullet_s *bullet = Game::enemy_s::getBullet();
