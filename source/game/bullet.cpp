@@ -48,7 +48,7 @@ namespace Game {
             speed += accel;
             angle += angle_change;
             if(angle > 360.f) angle -= 360.f;
-            if(angle < -360.f) angle += 360.f;
+            if(angle < 0.f) angle += 360.f;
             x_pos += std::sin(toRadians(angle)) * speed;
             y_pos += std::cos(toRadians(angle)) * speed;
 

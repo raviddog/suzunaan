@@ -74,7 +74,7 @@ void Stage::logic() {
     //  run custom script instruction
     Game::Script::Test::teststagefunc(frames);
 
-    //  update all bullets
+    //  update all bullets + prepare draw verts
     int count = 0;
     std::vector<int>::const_iterator iteratorB = bullet_draw_order->begin();
     while(iteratorB != bullet_draw_order->end()) {
@@ -103,6 +103,7 @@ void Stage::logic() {
         }
     }
 
+    //  update all enemies + prepare draw verts
     std::vector<Game::enemy_s*>::const_iterator iteratorE = Game::enemy_s::enemy_draw->begin();
     while(iteratorE != Game::enemy_s::enemy_draw->end()) {
         Game::enemy_s *enemy = *iteratorE;
@@ -129,7 +130,7 @@ void Stage::logic() {
 void Stage::draw() {
     using namespace Game::Script;
 
-    //  draw player bullets
+    //  buffer player bullets
     for(int i = 0; i < 42; i++) {
         if(player.bullet[i].active_frame > 0) {
             img_player_b->drawSprite(player.bullet[i].draw_frame, player.bullet[i].x_pos, player.bullet[i].y_pos, 90.f);
