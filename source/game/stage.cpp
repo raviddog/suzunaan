@@ -131,7 +131,7 @@ void Stage::draw() {
     using namespace Game::Script;
 
     //  buffer player bullets
-    for(int i = 0; i < 42; i++) {
+    for(int i = 0; i < Game::player_s::player_bullet_max; i++) {
         if(player.bullet[i].active_frame > 0) {
             img_player_b->drawSprite(player.bullet[i].draw_frame, player.bullet[i].x_pos, player.bullet[i].y_pos, 90.f);
         }
