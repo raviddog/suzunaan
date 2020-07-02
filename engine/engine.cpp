@@ -203,6 +203,9 @@ namespace engine {
                 //  fullscreen
                 gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
                 break;
+            case 3:
+                //  test, fullscreen but draw canvas mapped to screen res
+                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, dmode->w, dmode->h, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
             case 0:
             default:
                 //  normal windowed
@@ -214,6 +217,7 @@ namespace engine {
         gladLoadGLLoader(SDL_GL_GetProcAddress);
 
         switch(screenMode) {
+            case 3:
             case 1:
             {
                 float draw_ratio = (float)width_draw / (float)height_draw;
