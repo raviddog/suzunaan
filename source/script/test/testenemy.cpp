@@ -1,9 +1,8 @@
 #include "testenemy.hpp"
 #include <cmath>
 
-template <class T>
-T between(T min, T max) {
-    return (max - min) * (float)rand() / (float)RAND_MAX + min;
+template <class T> T between(T min, T max) {
+    return (T)(((float)max - (float)min) * (float)rand() / (float)RAND_MAX + (float)min);
 }
 
 namespace Game::Script::Test {
@@ -20,7 +19,7 @@ namespace Game::Script::Test {
         }
 
         if(enemy->frames > 70) {
-            if(enemy->frames % 60 == 0) {
+            if(enemy->frames % 30 == 0) {
                 enemy->storage[0].b = true;
                 enemy->storage[1].b = true;
                 enemy->storage[2].i = 0;
@@ -41,11 +40,11 @@ namespace Game::Script::Test {
             if(enemy->storage[0].b) {
                 bullet_s *b = Game::enemy_s::getBullet();
                 if(b) {
-                    b->type = 92 + enemy->storage[2].i;
+                    b->type = BTIcicle + enemy->storage[2].i;
                     b->active = true;
                     b->y_pos = 120.f;
                     b->speed = 1.f;
-                    b->accel = 0.04f;
+                    b->accel = 0.02f;
                     b->run_instructions = testbulletfunc;
                     if(enemy->storage[1].b) {
                         b->angle = between<float>(0.f, 40.f);

@@ -6,7 +6,39 @@
 
 namespace Game {
     extern float bullet_bounds_x, bullet_bounds_y, bullet_bounds_xmax, bullet_bounds_ymax;
+    
+    enum BulletTypes {
+            BTLaser = 0,
+            BTArrowhead = 16,
+            BTBallOutlined = 32,
+            BTBall = 48,
+            BTRice = 64,
+            BTKunai = 80,
+            BTIcicle = 96,
+            BTAmulet = 112,
+            BTBullet = 128,
+            BTRiceDark = 144,
+            BTStar = 160,
+            BTBallBouncy = 176,
 
+            BCBlack = 0,
+            BCRed = 1,
+            BCLightRed = 2,
+            BCPurple = 3,
+            BCPink = 4,
+            BCDarkBlue = 5,
+            BCBlue = 6,
+            BCLightBlue = 7,
+            BCAqua = 8,
+            BCTurquoise = 9,
+            BCGreen = 10,
+            BCLime = 11,
+            BCYellow = 12,
+            BCLightYellow = 13,
+            BCOrange = 14,
+            BCGrey = 15
+        };
+        
     class bullet_s {
         public:
             bool active;
@@ -44,6 +76,7 @@ namespace Game {
             void (*run_instructions)(bullet_s*);            
             //  helper functions that the instruction function can use
             float instr_getAngleToPlayer();
+
     };
 }
 

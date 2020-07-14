@@ -53,7 +53,7 @@ namespace Game {
             y_pos += std::cos(toRadians(angle)) * speed;
 
             //  update visual angle (spinning stars, etc)
-            if(type > 159 && type < 176) {
+            if(type >= BTStar && type <= (BTStar + BCGrey)) {
                 draw_angle += 6.f;
                 if(draw_angle > 360.f) draw_angle -= 360.f;
             } else {
