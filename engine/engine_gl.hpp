@@ -15,6 +15,7 @@
 #include "glm/gtc/type_ptr.hpp"
 
 namespace engine {
+
     extern bool quit;
     extern bool keyState[83];
     extern bool keyPressed[83];
@@ -54,16 +55,16 @@ namespace engine {
                 void bind();
                 static void unbind();
 
-                void createBuffer(size_t);
-                void createBuffer(size_t, size_t);
+                void createBuffer(size_t vertsize);
+                void createBuffer(size_t vertsize, size_t indsize);
 
-                void bufferVerts(size_t, float*);
-                void bufferVerts(size_t, float*, size_t, uint32_t*);
-                void bufferSubVerts(size_t, float*);
-                void bufferSubVerts(size_t, float*, size_t, uint32_t*);
+                void bufferVerts(size_t vertsize, float *verts);
+                void bufferVerts(size_t vertsize, float *verts, size_t indsize, uint32_t *indices);
+                void bufferSubVerts(size_t vertsize, float *verts);
+                void bufferSubVerts(size_t vertsize, float *verts, size_t indsize, uint32_t *indices);
                 
-                void createVertexAttribPointer(size_t, GLenum, GLsizei, const void*);
-                void createVertexAttribPointerNormalized(size_t, GLenum, GLsizei, const void*);
+                void createVertexAttribPointer(size_t size, GLenum type, GLsizei stride, const void *pointer);
+                void createVertexAttribPointerNormalized(size_t size, GLenum type, GLsizei stride, const void *pointer);
 
         };
 
@@ -74,7 +75,7 @@ namespace engine {
                 Texture();
                 ~Texture();
                 void bind();
-                void load(const std::string&);
+                void load(const std::string &path);
                 static void unbind();
         };
 
@@ -89,18 +90,18 @@ namespace engine {
                 //use/activate the shader
                 void use();
                 //utility uniform functions
-                void setBool(const std::string&, bool) const;
-                void setInt(const std::string&, int) const;
-                void setFloat(const std::string&, float) const;
-                void setVec2(const std::string&, const glm::vec2&) const;
-                void setVec2(const std::string&, float, float) const;
-                void setVec3(const std::string&, const glm::vec3&) const;
-                void setVec3(const std::string&, float, float, float) const;
-                void setVec4(const std::string&, const glm::vec4&) const;
-                void setVec4(const std::string&, float, float, float, float) const;
-                void setMat2(const std::string&, const glm::mat2&) const;
-                void setMat3(const std::string&, const glm::mat3&) const;
-                void setMat4(const std::string&, const glm::mat4&) const;
+                void setBool(const std::string &name, bool value) const;
+                void setInt(const std::string &name, int value) const;
+                void setFloat(const std::string &name, float value) const;
+                void setVec2(const std::string &name, const glm::vec2 &value) const;
+                void setVec2(const std::string &name, float x, float y) const;
+                void setVec3(const std::string &name, const glm::vec3 &value) const;
+                void setVec3(const std::string &name, float x, float y, float z) const;
+                void setVec4(const std::string &name, const glm::vec4 &value) const;
+                void setVec4(const std::string &name, float x, float y, float z, float w) const;
+                void setMat2(const std::string &name, const glm::mat2 &value) const;
+                void setMat3(const std::string &name, const glm::mat3 &value) const;
+                void setMat4(const std::string &name, const glm::mat4 &value) const;
         };
 
     }    

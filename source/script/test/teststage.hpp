@@ -4,7 +4,7 @@
 namespace Game::Script::Test {
     void teststageload();
     void teststageunload();
-    void teststagefunc(int);
+    void teststagefunc(int frames);
 }
 
 
