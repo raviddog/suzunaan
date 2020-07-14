@@ -1,6 +1,6 @@
 #include "state.hpp"
 
-static int newState;
+static int newState = -1;
 
 State *currentState;
 //  0 = menu
