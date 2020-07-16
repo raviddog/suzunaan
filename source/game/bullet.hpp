@@ -2,6 +2,7 @@
 #define _BULLET_H
 
 #include "player.hpp"
+
 #include <stdint.h>
 
 namespace Game {

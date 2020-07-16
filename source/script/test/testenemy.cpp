@@ -1,4 +1,7 @@
 #include "testenemy.hpp"
+
+#include "testbullet.hpp"
+
 #include <cmath>
 
 template <class T> T between(T min, T max) {

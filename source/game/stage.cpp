@@ -1,3 +1,5 @@
+#include "teststage.hpp"
+
 #include "engine/engine.hpp"
 #include "state.hpp"
 #include "player.hpp"
@@ -8,7 +10,6 @@
 #include <cmath>
 #include <ctime>
 
-#include "teststage.hpp"
 
 //  declare static member variables for reasons?
 Game::player_s *Game::bullet_s::player;

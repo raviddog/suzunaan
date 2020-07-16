@@ -6,13 +6,13 @@
 #include "SDL2/SDL_opengl.h"
 #include "stb_image.h"
 
-#include <string>
-#include <fstream>
-#include <sstream>
-
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+
+#include <string>
+#include <fstream>
+#include <sstream>
 
 namespace engine {
 

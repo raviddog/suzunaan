@@ -1,4 +1,5 @@
 #include "testbullet.hpp"
+
 #include <cmath>
 
 namespace Game::Script::Test {

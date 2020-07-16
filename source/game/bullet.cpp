@@ -1,6 +1,8 @@
 #include "bullet.hpp"
-#include <cmath>
+
 #include "player.hpp"
+
+#include <cmath>
 
 namespace Game {
     //  #FIX 1

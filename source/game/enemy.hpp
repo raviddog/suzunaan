@@ -2,6 +2,7 @@
 #define _ENEMY_H
 
 #include "bullet.hpp"
+
 #include <vector>
 #include "stdint.h"
 
