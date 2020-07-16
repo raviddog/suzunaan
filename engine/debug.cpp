@@ -13,7 +13,7 @@
 
 namespace engine {
     void log_debug(const char *text, ...) {
-        #ifdef DEBUG
+        #if defined(DEBUG) || defined(_DEBUG)
         va_list args;
         va_start(args, text);
         vfprintf(stdout, text, args);
@@ -25,7 +25,7 @@ namespace engine {
         // timeinfo = localtime(&rawtime);
         // printf("DEBUG [%s]: ");
     void log_release(const char *text, ...) {
-        #ifdef DEBUG
+        #if defined(DEBUG) || defined(_DEBUG)
         //  write release messages to console as well
         va_list args;
         va_start(args, text);
