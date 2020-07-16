@@ -1,5 +1,7 @@
 #include "engine.hpp"
 
+#include "debug.hpp"
+
 #include <chrono>
 #include <thread>
 
@@ -84,7 +86,7 @@ namespace engine {
             sprites[num].width = (float)width;
             sprites[num].height = (float)height;
         }
-        // printf("sprite #%d: %f %f %f %f\n", num, sprites[num].x, sprites[num].y, sprites[num].z, sprites[num].w);
+        log_debug("sprite #%d: %f %f %f %f\n", num, sprites[num].x, sprites[num].y, sprites[num].z, sprites[num].w);
     }
 
     void SpriteSheet::drawSprite(int num, float x, float y) {
@@ -310,8 +312,8 @@ namespace engine {
                 temp++;
             }
             if(temp == 0) {
-                printf("spun 0 times ");
-                printf("slept for %u ms\n", wake - start);
+                log_debug("spun 0 times ");
+                log_debug("slept for %u ms\n", wake - start);
             } 
             next_time += std::chrono::microseconds(16666);
             
@@ -333,8 +335,8 @@ namespace engine {
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {
-            printf("frame time: %ums, ", temp_ticks - frameTimeTicks);
-            printf("fps: %u\n", fps);
+            log_debug("frame time: %ums, ", temp_ticks - frameTimeTicks);
+            log_debug("fps: %u\n", fps);
             fps = 0u;
             ticks = temp_ticks;
         }

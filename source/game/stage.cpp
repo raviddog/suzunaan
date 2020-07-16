@@ -1,6 +1,7 @@
 #include "teststage.hpp"
 
 #include "engine/engine.hpp"
+#include "engine/debug.hpp"
 #include "state.hpp"
 #include "player.hpp"
 #include "bullet.hpp"
@@ -122,7 +123,7 @@ void Stage::logic() {
     }
 
     if(frames % 60 == 0) {
-        printf("bullets: %d ", count);
+        engine::log_debug("bullets: %d ", count);
     }
 
     ++frames;
