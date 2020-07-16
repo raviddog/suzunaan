@@ -20,7 +20,7 @@ namespace engine {
         load(path, numSprites);
     }
 
-    SpriteSheet::SpriteSheet(const std::string &path, int numSprites, int maxDraws) {
+    SpriteSheet::SpriteSheet(const std::string &path, int numSprites, size_t maxDraws) {
         load(path, numSprites, maxDraws);
     }
 
