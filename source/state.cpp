@@ -1,6 +1,6 @@
 #include "state.hpp"
 
-static int newState;
+static int newState = -1;
 
 State *currentState;
 //  0 = menu
@@ -13,6 +13,7 @@ void changeState(int state) {
 //  can probably inline these or merge this entire file with main
 void logic() {
     currentState->logic();
+    //  check for a request to change stage after logic is done
     if(newState > -1) {
         delete currentState;
         switch(newState) {
@@ -21,7 +22,7 @@ void logic() {
                 currentState = new Menu();
                 break;
             case 1:
-                currentState = new teststage();
+                currentState = new Stage();
                 break;
         }
         newState = -1;

@@ -8,8 +8,8 @@ const int scrHeight = 480;
 
 int main(int argv, char** args) {
     // engine::init("test", 2, 1600, 900, 640, 480);
-    // engine::init("touhou suzunaan", 1, 640, 480);
-    engine::init("test", 0, true, 640, 480);
+    engine::init("touhou suzunaan", 1, true, 640, 480);
+    // engine::init("test", 0, true, 640, 480);
 
     // freopen("./test.log", "w", stdout);
 

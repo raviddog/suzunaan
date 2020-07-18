@@ -1,5 +1,6 @@
 #include "engine_gl.hpp"
 
+#include "debug.hpp"
 
 namespace engine {
     bool quit;
@@ -423,9 +424,9 @@ namespace engine {
 
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                printf("loaded texture %s\n", path.c_str());
+                log_debug("loaded texture %s\n", path.c_str());
             } else {
-                printf("failed to load texture %s\n", path.c_str());
+                log_debug("failed to load texture %s\n", path.c_str());
             }
         }
 
@@ -461,7 +462,7 @@ namespace engine {
             }
             catch(std::ifstream::failure &e)
             {
-                printf("failed to load shaders, unable to read files %s %s\n", vertexPath, fragmentPath);
+                log_debug("failed to load shaders, unable to read files %s %s\n", vertexPath, fragmentPath);
             }
 
             const char* vShaderCode = vertexCode.c_str();
@@ -503,7 +504,7 @@ namespace engine {
                 // printf("%s ", infoLog);
             }
 
-            printf("loaded shaders %s %s\n", vertexPath, fragmentPath);
+            log_debug("loaded shaders %s %s\n", vertexPath, fragmentPath);
 
             glDeleteShader(vertex);
             glDeleteShader(fragment);
@@ -514,7 +515,7 @@ namespace engine {
             if(currentShader != this) {
                 glUseProgram(ID);
                 currentShader = this;
-                printf("switched to shader %u\n", ID);
+                log_debug("switched to shader %u\n", ID);
             }
         }
 

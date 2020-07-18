@@ -1,6 +1,8 @@
 #include "bullet.hpp"
-#include <cmath>
+
 #include "player.hpp"
+
+#include <cmath>
 
 namespace Game {
     //  #FIX 1
@@ -35,6 +37,10 @@ namespace Game {
         accel = 0.f;
         draw_angle = 0.f;
         run_instructions = nullptr;
+        storage[0].u = 0;
+        storage[1].u = 0;
+        storage[2].u = 0;
+        storage[3].u = 0;
     }
     
     void bullet_s::update() {
@@ -44,12 +50,12 @@ namespace Game {
             speed += accel;
             angle += angle_change;
             if(angle > 360.f) angle -= 360.f;
-            if(angle < -360.f) angle += 360.f;
+            if(angle < 0.f) angle += 360.f;
             x_pos += std::sin(toRadians(angle)) * speed;
             y_pos += std::cos(toRadians(angle)) * speed;
 
             //  update visual angle (spinning stars, etc)
-            if(type > 159 && type < 176) {
+            if(type >= BTStar && type <= (BTStar + BCGrey)) {
                 draw_angle += 6.f;
                 if(draw_angle > 360.f) draw_angle -= 360.f;
             } else {
@@ -66,7 +72,7 @@ namespace Game {
         }
     }
 
-    float bullet_s::instr_angleToPlayer() {
+    float bullet_s::instr_getAngleToPlayer() {
         //  get angle to player
         //  the order is all messed up because my angles go clockwise and my Y-axis is flipped
         float distWidth = x_pos - player->x_pos;

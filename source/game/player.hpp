@@ -28,7 +28,9 @@ namespace Game {
         //  moveDir
         //  1 0 2
 
-        bullet_player_s bullet[42];
+        
+        const static int player_bullet_max = 50;
+        bullet_player_s bullet[player_bullet_max];
         bool shoot_enabled;
         
         void init(float, float, float, float);

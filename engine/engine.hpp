@@ -2,11 +2,12 @@
 #define _ENGINE_H
 
 #include "engine_gl.hpp"
+
 #include <vector>
 
 namespace engine {
-    void init(const char*, int, bool, int, int);
-    void init(const char*, int, bool, int, int, int, int);
+    void init(const char *title, int screenMode, bool vsync, int width, int height);
+    void init(const char *title, int screenMode, bool vsync, int width_win, int height_win, int width_draw, int height_draw);
     void inputs();
     void flip();
     void close();
@@ -49,22 +50,22 @@ namespace engine {
             gl::Texture *tex;
             bool realloc;
 
-            void load(const std::string&, int);
-            void load(const std::string&, int, size_t);
+            void load(const std::string &path, int nummSprites);
+            void load(const std::string &path, int numSprites, size_t maxDraws);
         public:
             int numSprites;
 
-            SpriteSheet(const std::string&, int);
-            SpriteSheet(const std::string&, int, int);
+            SpriteSheet(const std::string &path, int numSprites);
+            SpriteSheet(const std::string &path, int numSprites, size_t maxDraws);
             ~SpriteSheet();
 
-            void setSprite(int, int, int, int, int);
+            void setSprite(int num, int x, int y, int width, int height);
 
             //  temp
             //  maybe not so temp after all
-            void drawSprite(int, float, float);
-            void drawSprite(int, float, float, float);
-            void drawSprite(int, float, float, float, float, float);
+            void drawSprite(int num, float x, float y);
+            void drawSprite(int num, float x, float y, float angle);
+            void drawSprite(int num, float x, float y, float angle, float width, float height);
             void buffer();
             void draw();
 

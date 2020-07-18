@@ -24,10 +24,10 @@ class Menu : public State {
 //  should i put all states here or just include a bunch of files
 //  put them here for now
 
-class teststage : public State {
+class Stage : public State {
     public:
-        teststage();
-        ~teststage();
+        Stage();
+        ~Stage();
         void logic() override;
         void draw() override;
 };

@@ -1,20 +1,24 @@
 #ifndef _ENEMY_H
 #define _ENEMY_H
 
-#include <unordered_map>
 #include "bullet.hpp"
-#include <memory>
+
+#include <vector>
+#include "stdint.h"
 
 namespace Game {
-
-    extern bullet_s* (*getBullet)();
     
     class enemy_s {
         public:
             enemy_s();
-            ~enemy_s();
             void activate();
             void update();
+
+            //  static functions
+            static bullet_s* (*getBullet)();
+            static std::vector<enemy_s*> *enemy_draw;
+            //  do i need an array for existing enemies
+            //  don't for now
 
             bool active;
             int id, type, frames, hp;
@@ -34,7 +38,7 @@ namespace Game {
             };
 
             //  adjust this to the number of storage variables needed
-            storage_u storage[4];
+            storage_u storage[6];
             //  pointer to the correct instruction function
             void (*run_instructions)(enemy_s*);            
             //  helper functions that the instruction function can use

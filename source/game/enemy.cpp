@@ -1,10 +1,13 @@
 #include "enemy.hpp"
+
 #include <cmath>
+#include <vector>
 
 #define PI 3.14159265
 
 namespace Game{
-    bullet_s* (*getBullet)();
+    // bullet_s* (*enemy_s::getBullet)();
+    // std::vector<enemy_s*> *enemy_s::enemy_draw = nullptr;
 
     //  #FIX 1
     float   enem_bounds_x = -20.f,
@@ -12,13 +15,11 @@ namespace Game{
             enem_bounds_xmax = 660.f,
             enem_bounds_ymax = 500.f;
     
-    template <class T>
-    T between(T min, T max) {
-        return (max - min) * (float)rand() / (float)RAND_MAX + min;
-    }
 
     //  #FIX 51
     //  create a common functions engine module and put these in it later
+    template <class T>
+    T between(T min, T max);
     float toRadians(float deg);
     float toDegrees(float rad);
 
@@ -38,23 +39,13 @@ namespace Game{
         run_instructions = nullptr;
     }
 
-    enemy_s::~enemy_s() {
-    }
-
     void enemy_s::activate() {
         active = true;
+        enemy_draw->push_back(this);
     }
 
     void enemy_s::update() {
         if(active) {
-            
-            if(hp > 0) {
-                
-                
-            } else {
-                active = false;
-            }
-
             if(run_instructions) run_instructions(this);
 
             speed += accel;
@@ -75,7 +66,7 @@ namespace Game{
             if(y_pos > enem_bounds_ymax) active = false;
             if(y_pos < enem_bounds_y) active = false;
 
-            frames++;
+            ++frames;
         }
     }
 }

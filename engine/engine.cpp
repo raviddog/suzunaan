@@ -1,5 +1,7 @@
 #include "engine.hpp"
 
+#include "debug.hpp"
+
 #include <chrono>
 #include <thread>
 
@@ -20,7 +22,7 @@ namespace engine {
         load(path, numSprites);
     }
 
-    SpriteSheet::SpriteSheet(const std::string &path, int numSprites, int maxDraws) {
+    SpriteSheet::SpriteSheet(const std::string &path, int numSprites, size_t maxDraws) {
         load(path, numSprites, maxDraws);
     }
 
@@ -84,7 +86,7 @@ namespace engine {
             sprites[num].width = (float)width;
             sprites[num].height = (float)height;
         }
-        // printf("sprite #%d: %f %f %f %f\n", num, sprites[num].x, sprites[num].y, sprites[num].z, sprites[num].w);
+        log_debug("sprite #%d: %f %f %f %f\n", num, sprites[num].x, sprites[num].y, sprites[num].z, sprites[num].w);
     }
 
     void SpriteSheet::drawSprite(int num, float x, float y) {
@@ -203,6 +205,9 @@ namespace engine {
                 //  fullscreen
                 gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
                 break;
+            case 3:
+                //  test, fullscreen but draw canvas mapped to screen res
+                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, dmode->w, dmode->h, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
             case 0:
             default:
                 //  normal windowed
@@ -214,6 +219,7 @@ namespace engine {
         gladLoadGLLoader(SDL_GL_GetProcAddress);
 
         switch(screenMode) {
+            case 3:
             case 1:
             {
                 float draw_ratio = (float)width_draw / (float)height_draw;
@@ -306,8 +312,8 @@ namespace engine {
                 temp++;
             }
             if(temp == 0) {
-                printf("spun 0 times ");
-                printf("slept for %u ms\n", wake - start);
+                log_debug("spun 0 times ");
+                log_debug("slept for %u ms\n", wake - start);
             } 
             next_time += std::chrono::microseconds(16666);
             
@@ -329,8 +335,8 @@ namespace engine {
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {
-            printf("frame time: %ums, ", temp_ticks - frameTimeTicks);
-            printf("fps: %u\n", fps);
+            log_debug("frame time: %ums, ", temp_ticks - frameTimeTicks);
+            log_debug("fps: %u\n", fps);
             fps = 0u;
             ticks = temp_ticks;
         }

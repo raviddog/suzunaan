@@ -23,7 +23,7 @@ namespace Game {
         hitbox_radius = 0.5f;
 
         shoot_enabled = true;
-        for(int i = 0; i < 42; i++) {
+        for(int i = 0; i < player_bullet_max; i++) {
             bullet[i].active_frame = 0;
             bullet[i].draw_frame = 0;
         }
@@ -170,7 +170,7 @@ namespace Game {
         
         //  shooting logic
         //  move bullets, advance active frame, remove if out of bounds
-        for(int i = 0; i < 42; i++) {
+        for(int i = 0; i < player_bullet_max; i++) {
             if(bullet[i].active_frame > 1) {
                 bullet[i].active_frame += 1;
                 bullet[i].y_pos -= 4.f;
@@ -183,8 +183,8 @@ namespace Game {
             } else if(bullet[i].active_frame > 0) {
                 bullet[i].y_pos -= 24.f;
 
-                //  testing fade out animation
-                if(bullet[i].y_pos < y_min + 40.f) {
+                //  kill bullet if off the screen
+                if(bullet[i].y_pos < y_min - 32.f) {
                     bullet[i].active_frame += 1;
                 }
             }
@@ -199,8 +199,8 @@ namespace Game {
                 
                 //  spawn left bullet
                 int bullet_num;
-                for(bullet_num = 0; bullet_num < 42 && bullet[bullet_num].active_frame != 0; bullet_num++);
-                if(bullet_num < 42) {
+                for(bullet_num = 0; bullet_num < player_bullet_max && bullet[bullet_num].active_frame != 0; bullet_num++);
+                if(bullet_num < player_bullet_max) {
                     bullet[bullet_num].x_pos = x_pos - 8.f;
                     bullet[bullet_num].y_pos = y_pos - 24.f;
                     bullet[bullet_num].active_frame = 1;
@@ -208,8 +208,8 @@ namespace Game {
                 }
 
                 //  spawn right bullet
-                for(bullet_num = 0; bullet_num < 42 && bullet[bullet_num].active_frame != 0; bullet_num++);
-                if(bullet_num < 42) {
+                for(bullet_num = 0; bullet_num < player_bullet_max && bullet[bullet_num].active_frame != 0; bullet_num++);
+                if(bullet_num < player_bullet_max) {
                     bullet[bullet_num].x_pos = x_pos + 8.f;
                     bullet[bullet_num].y_pos = y_pos - 24.f;
                     bullet[bullet_num].active_frame = 1;
