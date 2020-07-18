@@ -96,6 +96,64 @@ namespace engine {
     void SpriteSheet::drawSprite(int num, float x, float y, float angle) {
         if(num > -1 && num < numSprites) {
             float v[] {
+                x + sprites[num].width / 2.f, y + sprites[num].height / 2.f, sprites[num].x, sprites[num].w, -sprites[num].width, -sprites[num].height, angle,
+                x + sprites[num].width / 2.f, y + sprites[num].height / 2.f, sprites[num].x, sprites[num].y, -sprites[num].width, sprites[num].height, angle,
+                x + sprites[num].width / 2.f, y + sprites[num].height / 2.f, sprites[num].z, sprites[num].y, sprites[num].width, sprites[num].height, angle,
+                x + sprites[num].width / 2.f, y + sprites[num].height / 2.f, sprites[num].z, sprites[num].w, sprites[num].width, -sprites[num].height, angle
+
+            };
+
+            uint32_t size = verts->size() / 7;
+
+            uint32_t ind[] = {
+                size, size + 1, size + 2,
+                size, size + 3, size + 2
+            };
+
+            for(int i = 0; i < 28; i++) {
+                verts->push_back(v[i]);
+            }
+
+            for(int i = 0; i < 6; i++) {
+                indices->push_back(ind[i]);
+            }
+        }
+    }
+
+    void SpriteSheet::drawSprite(int num, float x, float y, float angle, float width, float height) {
+        if(num > -1 && num < numSprites) {
+            float v[] {
+                x + width / 2.f, y + height / 2.f, sprites[num].x, sprites[num].w, -width, -height, angle,
+                x + width / 2.f, y + height / 2.f, sprites[num].x, sprites[num].y, -width, height, angle,
+                x + width / 2.f, y + height / 2.f, sprites[num].z, sprites[num].y, width, height, angle,
+                x + width / 2.f, y + height / 2.f, sprites[num].z, sprites[num].w, width, -height, angle
+
+            };
+
+            uint32_t size = verts->size() / 7;
+
+            uint32_t ind[] = {
+                size, size + 1, size + 2,
+                size, size + 3, size + 2
+            };
+
+            for(int i = 0; i < 28; i++) {
+                verts->push_back(v[i]);
+            }
+
+            for(int i = 0; i < 6; i++) {
+                indices->push_back(ind[i]);
+            }
+        }
+    }
+
+    void SpriteSheet::drawSpriteCentered(int num, float x, float y) {
+        drawSpriteCentered(num, x, y, 0.0f);
+    }
+
+    void SpriteSheet::drawSpriteCentered(int num, float x, float y, float angle) {
+        if(num > -1 && num < numSprites) {
+            float v[] {
                 x, y, sprites[num].x, sprites[num].w, -sprites[num].width, -sprites[num].height, angle,
                 x, y, sprites[num].x, sprites[num].y, -sprites[num].width, sprites[num].height, angle,
                 x, y, sprites[num].z, sprites[num].y, sprites[num].width, sprites[num].height, angle,
@@ -120,7 +178,7 @@ namespace engine {
         }
     }
 
-    void SpriteSheet::drawSprite(int num, float x, float y, float angle, float width, float height) {
+    void SpriteSheet::drawSpriteCentered(int num, float x, float y, float angle, float width, float height) {
         if(num > -1 && num < numSprites) {
             float v[] {
                 x, y, sprites[num].x, sprites[num].w, -width, -height, angle,

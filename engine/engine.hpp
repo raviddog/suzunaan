@@ -25,7 +25,7 @@ namespace engine {
 
     //         void load(const std::string&);
     //         void unload();
-    //         void drawSprite(float, float);
+    //         void drawSpriteCentered(float, float);
     //         void buffer();
     //         void draw();
 
@@ -66,6 +66,9 @@ namespace engine {
             void drawSprite(int num, float x, float y);
             void drawSprite(int num, float x, float y, float angle);
             void drawSprite(int num, float x, float y, float angle, float width, float height);
+            void drawSpriteCentered(int num, float x, float y);
+            void drawSpriteCentered(int num, float x, float y, float angle);
+            void drawSpriteCentered(int num, float x, float y, float angle, float width, float height);
             void buffer();
             void draw();
 

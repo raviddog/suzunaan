@@ -22,6 +22,7 @@ namespace Game::Script {
     float bullet_hitbox_radius_temp = 4.27f;
 
     engine::SpriteSheet *img_player, *img_player_b, *img_player_eff, *img_bullet, *img_enemy;
+    engine::SpriteSheet *img_guibg;
     player_s player;
     bullet_s *bullets;
     std::vector<int> *bullet_draw_order;
@@ -100,7 +101,7 @@ void Stage::logic() {
             iteratorB = bullet_draw_order->erase(iteratorB);
         } else {
             count += 1;
-            img_bullet->drawSprite(bullets[*iteratorB].type, bullets[*iteratorB].x_pos, bullets[*iteratorB].y_pos, bullets[*iteratorB].draw_angle);
+            img_bullet->drawSpriteCentered(bullets[*iteratorB].type, bullets[*iteratorB].x_pos, bullets[*iteratorB].y_pos, bullets[*iteratorB].draw_angle);
             ++iteratorB;
         }
     }
@@ -117,7 +118,7 @@ void Stage::logic() {
             iteratorE = Game::enemy_s::enemy_draw->erase(iteratorE);
         } else {
             //  draw
-            img_enemy->drawSprite(48, enemy->x_pos, enemy->y_pos);
+            img_enemy->drawSpriteCentered(48, enemy->x_pos, enemy->y_pos);
             ++iteratorE;
         }
     }
@@ -135,9 +136,11 @@ void Stage::draw() {
     //  buffer player bullets
     for(int i = 0; i < Game::player_s::player_bullet_max; i++) {
         if(player.bullet[i].active_frame > 0) {
-            img_player_b->drawSprite(player.bullet[i].draw_frame, player.bullet[i].x_pos, player.bullet[i].y_pos, 90.f);
+            img_player_b->drawSpriteCentered(player.bullet[i].draw_frame, player.bullet[i].x_pos, player.bullet[i].y_pos, 90.f);
         }
     }
+
+    img_guibg->draw();
 
     img_enemy->buffer();
     img_enemy->draw();
@@ -146,7 +149,7 @@ void Stage::draw() {
     img_player_b->draw();
     
     //  draw player
-    img_player->drawSprite(player.animFrame, player.x_pos, player.y_pos);
+    img_player->drawSpriteCentered(player.animFrame, player.x_pos, player.y_pos);
     img_player->buffer();
     img_player->draw();
 
@@ -155,8 +158,8 @@ void Stage::draw() {
     img_bullet->draw();
 
     if(player.focused) {
-        img_player_eff->drawSprite(0, player.x_pos, player.y_pos, player.focused_rotation);
-        img_player_eff->drawSprite(0, player.x_pos, player.y_pos, -player.focused_rotation);
+        img_player_eff->drawSpriteCentered(0, player.x_pos, player.y_pos, player.focused_rotation);
+        img_player_eff->drawSpriteCentered(0, player.x_pos, player.y_pos, -player.focused_rotation);
         img_player_eff->buffer();
         img_player_eff->draw();
     }
@@ -165,6 +168,19 @@ void Stage::draw() {
 Stage::Stage() {
     using namespace Game::Script;
     srand(time(NULL));
+
+    img_guibg = new engine::SpriteSheet("./data/front00.png", 4);
+    img_guibg->setSprite(0, 0, 0, 32, 480);     // left
+    img_guibg->setSprite(1, 32, 0, 224, 480);   // right
+    img_guibg->setSprite(2, 0, 480, 384, 16);   // top
+    img_guibg->setSprite(3, 0, 496, 384, 16);   // bottom
+
+    //  stage elements are unchanging, so i only have to buffer them once
+    img_guibg->drawSprite(0, 0.f, 0.f);
+    img_guibg->drawSprite(1, 416.f, 0.f);
+    img_guibg->drawSprite(2, 32.f, 0.f);
+    img_guibg->drawSprite(3, 32.f, 464.f);
+    img_guibg->buffer();
 
     img_player = new engine::SpriteSheet("./data/pl00.png", 24);
     for(int i = 0; i < 8; i++) {
@@ -237,5 +253,6 @@ Stage::~Stage() {
     delete img_bullet;
     delete[] bullets;
     delete bullet_draw_order;
+    delete img_guibg;
     delete Game::enemy_s::enemy_draw;
 }
