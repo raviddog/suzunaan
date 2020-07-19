@@ -142,6 +142,8 @@ void Stage::draw() {
 
     img_guibg->draw();
 
+    engine::setViewport(32, 16, 384, 448);
+
     img_enemy->buffer();
     img_enemy->draw();
 
@@ -163,6 +165,8 @@ void Stage::draw() {
         img_player_eff->buffer();
         img_player_eff->draw();
     }
+
+    engine::setViewport();
 }
 
 Stage::Stage() {
@@ -214,7 +218,7 @@ Stage::Stage() {
     }
 
     //  center at 0,0 sprite is 32x48
-    player.init(16.f, 24.f, 624.f, 456.f);
+    player.init(8.f, 16.f, 376.f, 432.f);
     player.hitbox_radius = 1.f;
 
     img_bullet = new engine::SpriteSheet("./data/bullet1.png", 192, BULLET_MAX);

@@ -7,12 +7,12 @@
 
 namespace engine {
 
-    int scrWidth;
-    int scrHeight;
-    uint32_t ticks, fps, frameTimeTicks;
+    int scrWidth, scrHeight, drawWidth, drawHeight;
+    int viewport[4], scrMode;
 
     //  framerate stuff
     static bool _vsync;
+    uint32_t ticks, fps, frameTimeTicks, slept;
     std::chrono::steady_clock::time_point cur_time, next_time;
     #define _ENGINE_NOVSYNC_DELAY_MICROSECONDS 16666
 
@@ -239,11 +239,13 @@ namespace engine {
     }
 
     void init(const char *title, int screenMode, bool vsync, int width_win, int height_win, int width_draw, int height_draw) {
-        scrWidth = width_win;
-        scrHeight = height_win;
+        drawWidth = width_draw;
+        drawHeight = height_draw;
+        scrMode = screenMode;
         ticks = SDL_GetTicks();
         frameTimeTicks = ticks;
         fps = 0u;
+        slept = 0u;
 
         SDL_Init(SDL_INIT_EVERYTHING);
         SDL_GL_LoadLibrary(NULL);
@@ -258,18 +260,27 @@ namespace engine {
             case 1:
                 //  borderless fullscreen
                 gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, dmode->w, dmode->h, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED);
+                scrWidth = dmode->w;
+                scrHeight = dmode->h;
                 break;
             case 2:
                 //  fullscreen
-                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width_draw, height_draw, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+                scrWidth = width_draw;
+                scrHeight = height_draw;
                 break;
             case 3:
                 //  test, fullscreen but draw canvas mapped to screen res
                 gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, dmode->w, dmode->h, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+                scrWidth = dmode->w;
+                scrHeight = dmode->h;
+                break;
             case 0:
             default:
                 //  normal windowed
-                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, scrWidth, scrHeight, SDL_WINDOW_OPENGL);
+                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width_win, height_win, SDL_WINDOW_OPENGL);
+                scrWidth = width_win;
+                scrHeight = height_win;
                 break;
         }
         
@@ -283,18 +294,26 @@ namespace engine {
                 float draw_ratio = (float)width_draw / (float)height_draw;
                 float screen_ratio = (float)dmode->w / (float)dmode->h;
                 if(draw_ratio > screen_ratio) {
-                    //  wider screen
+                    //  draw area is wider than screen
                     float y_scale = (float)dmode->w / (float)width_draw;
                     float height = (float)height_draw * y_scale;
                     int offset = (dmode->h - (int)height) / 2;
                     glViewport(0, offset, dmode->w, (int)height);
+                    viewport[0] = 0;
+                    viewport[1] = offset;
+                    viewport[2] = dmode->w;
+                    viewport[3] = (int)height;
                     break;
                 } else if(draw_ratio < screen_ratio) {
-                    //  taller screen
+                    //  draw area is narrower than screen
                     float x_scale = (float)dmode->h / (float)height_draw;
                     float width = (float)width_draw * x_scale;
                     int offset = (dmode->w - (int)width) / 2;
                     glViewport(offset, 0, (int)width, dmode->h);
+                    viewport[0] = offset;
+                    viewport[1] = 0;
+                    viewport[2] = (int)width;
+                    viewport[3] = dmode->h;
                     break;
                 } else {
                     //  matches aspect ratio, although i probably need a way better way to check this
@@ -303,11 +322,19 @@ namespace engine {
                 }
             }
             case 2:
-                glViewport(0, 0, dmode->w, dmode->h);
+                glViewport(0, 0, width_draw, height_draw);
+                viewport[0] = 0;
+                viewport[1] = 0;
+                viewport[2] = width_draw;
+                viewport[3] = height_draw;
                 break;
             case 0:
             default:
                 glViewport(0, 0, width_win, height_win);
+                viewport[0] = 0;
+                viewport[1] = 0;
+                viewport[2] = width_win;
+                viewport[3] = height_win;
                 break;
         }
 
@@ -331,7 +358,7 @@ namespace engine {
         //glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        // stbi_set_flip_vertically_on_load(true);
+        // stbi_set_flip_vertically_on_load(true);  // don't need this because the shader i wrote accounts for it
         glm::vec2 scrRes = glm::vec2((float)width_draw, (float)height_draw);
         
         shaderSpriteSheetInvert = new gl::Shader();
@@ -361,19 +388,20 @@ namespace engine {
             // cur_time = std::chrono::steady_clock::now();
             uint32_t start = SDL_GetTicks();
             while(std::chrono::steady_clock::now() < next_time + std::chrono::microseconds(9000)) {
+                slept++;
                 std::this_thread::sleep_until(next_time + std::chrono::microseconds(10000));
             }
             // auto wake_time = std::chrono::steady_clock::now();
             uint32_t wake = SDL_GetTicks();
             int temp = 0;
-            while(std::chrono::steady_clock::now() < next_time + std::chrono::microseconds(16666)) {
+            while(std::chrono::steady_clock::now() < next_time + std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS)) {
                 temp++;
             }
             if(temp == 0) {
                 log_debug("spun 0 times ");
                 log_debug("slept for %u ms\n", wake - start);
             } 
-            next_time += std::chrono::microseconds(16666);
+            next_time += std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
             
             
             //  spin
@@ -393,10 +421,12 @@ namespace engine {
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {
+            log_debug("slept %u times ", slept);
             log_debug("frame time: %ums, ", temp_ticks - frameTimeTicks);
             log_debug("fps: %u\n", fps);
             fps = 0u;
             ticks = temp_ticks;
+            slept = 0u;
         }
         ++fps;
         frameTimeTicks = temp_ticks;
@@ -406,6 +436,44 @@ namespace engine {
         SDL_GL_DeleteContext(gl::maincontext);
         SDL_DestroyWindow(gl::window);
         SDL_Quit();
+    }
+
+    void setViewport() {
+        //  no arguments resets the viewport to original
+        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+        glm::vec2 scrRes = glm::vec2((float)drawWidth, (float)drawHeight);
+        shaderSpriteSheet->setVec2("res", scrRes);
+    }
+
+    void setViewport(int x, int y, int w, int h)
+    {
+        //  set viewport to specified rectangle (inside draw area)
+        //  need to calculate x and y based off of the existing draw area
+        float scalex, scaley;
+        scalex = (float)scrWidth / (float)drawWidth;
+        scaley = (float)scrHeight / (float)drawHeight;
+
+        if(scrMode == 1 || scrMode == 3) {
+            float draw_ratio = (float)drawWidth / (float)drawHeight;
+            float screen_ratio = (float)scrWidth / (float)scrHeight;
+            if(draw_ratio > screen_ratio) {
+                //  draw area is wider than screen
+                scaley = scalex;
+            } else if(draw_ratio < screen_ratio) {
+                //  draw area is narrower than screen
+                scalex = scaley;
+            }
+        }
+
+        glViewport( viewport[0] + (int)(scalex * (float)x),
+                    viewport[1] + (int)(scaley * (float)y),
+                    (int)(scalex * (float)w),
+                    (int)(scaley * (float)h));
+
+        
+        
+        glm::vec2 scrRes = glm::vec2((float)w, (float)h);
+        shaderSpriteSheet->setVec2("res", scrRes);
     }
 
 }

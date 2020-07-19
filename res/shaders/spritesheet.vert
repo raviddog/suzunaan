@@ -31,6 +31,8 @@ void main()
     vec2 normalized_coord = 2.0 * coord / res - 1.0;
 
     //  set y=0 to the top instead of the bottom
+    //  this has the side effect of flipping all the images over, but not flipping them in stbi_image
+    //      makes them render correctly
     normalized_coord.y = -normalized_coord.y;
 
     //  rotate to the right instead of the left, clockwise is more intuitive
@@ -43,6 +45,6 @@ void main()
     //  apply window aspect ratio post-rotation
     vec2 distortion = res.yx / res.xx;
     
-    // //  move coord based on center destination
+    //  move coord based on center destination
     gl_Position = vec4(rotated_coord * distortion + normalized_coord, 0.0, 1.0);
 }

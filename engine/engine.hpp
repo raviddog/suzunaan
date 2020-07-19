@@ -12,6 +12,10 @@ namespace engine {
     void flip();
     void close();
 
+    void setViewport();
+    void setViewport(int x, int y, int w, int h);
+
+
     // class Sprite {
     //     private:
     //         std::vector<float> *verts;
