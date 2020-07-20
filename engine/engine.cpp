@@ -10,6 +10,9 @@
 #include "timeapi.h"
 #endif
 
+#ifdef __GNUG__
+#include "pthread.h"
+#endif
 
 namespace engine {
 
@@ -19,7 +22,7 @@ namespace engine {
     //  framerate stuff
     static bool _vsync;
     uint32_t ticks, fps, frameTimeTicks, slept;
-    std::chrono::steady_clock::time_point cur_time, next_time;
+    std::chrono::high_resolution_clock::time_point cur_time, next_time;
     #define _ENGINE_NOVSYNC_DELAY_MICROSECONDS 16666
 
     static gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert;
@@ -356,7 +359,7 @@ namespace engine {
 
             // cur_time = std::chrono::steady_clock::now();
             // next_time = cur_time + std::chrono::milliseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
-            next_time = std::chrono::steady_clock::now();
+            next_time = std::chrono::high_resolution_clock::now();
             #ifdef _MSC_VER
             timeBeginPeriod(1);
             #endif
@@ -402,14 +405,26 @@ namespace engine {
             //     slept++;
             //     std::this_thread::sleep_until(next_time + std::chrono::microseconds(10000));
             // }
+            #ifdef __GNUG__
+            timespec delayt, delayr;
+            std::chrono::nanoseconds delaym = std::chrono::duration_cast<std::chrono::nanoseconds>(next_time - std::chrono::high_resolution_clock::now());
+            delayt.tv_sec = 0;
+            delayt.tv_nsec = delaym.count();
+            delayr.tv_nsec = 0;
+            do {
+                nanosleep(&delayt, &delayr);
+            } while (delayr.tv_nsec > 0);
+            #else
             std::this_thread::sleep_until(next_time);
+            #endif
             // auto wake_time = std::chrono::steady_clock::now();
             wake = SDL_GetTicks();
-            while(std::chrono::steady_clock::now() < next_time) {
+            while(std::chrono::high_resolution_clock::now() < next_time) {
+                //  spin
                 temp++;
             }
             if(temp == 0) {
-                log_debug("spun 0 times\n");
+                // log_debug("spun 0 times\n");
             } 
             // next_time = std::chrono::steady_clock::now();
             next_time += std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
@@ -432,7 +447,7 @@ namespace engine {
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {
-            log_debug("slept for %u ms ", wake - start);
+            // log_debug("slept for %u ms ", wake - start);
             // log_debug("slept %u times ", slept);
             log_debug("spun %d times ", temp);
             log_debug("frame time: %ums, ", temp_ticks - frameTimeTicks);
