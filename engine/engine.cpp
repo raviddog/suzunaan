@@ -5,6 +5,12 @@
 #include <chrono>
 #include <thread>
 
+#ifdef _MSC_VER
+#include "windows.h"
+#include "timeapi.h"
+#endif
+
+
 namespace engine {
 
     int scrWidth, scrHeight, drawWidth, drawHeight;
@@ -351,6 +357,9 @@ namespace engine {
             // cur_time = std::chrono::steady_clock::now();
             // next_time = cur_time + std::chrono::milliseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
             next_time = std::chrono::steady_clock::now();
+            #ifdef _MSC_VER
+            timeBeginPeriod(1);
+            #endif
         }
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -382,25 +391,27 @@ namespace engine {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //  if vsync disabled, cap fps
+        int temp = 0;
+        uint32_t start, wake;
         if(!_vsync) {
             //  wait
             // printf("before sleep %u ", SDL_GetTicks());
             // cur_time = std::chrono::steady_clock::now();
-            uint32_t start = SDL_GetTicks();
-            while(std::chrono::steady_clock::now() < next_time + std::chrono::microseconds(9000)) {
-                slept++;
-                std::this_thread::sleep_until(next_time + std::chrono::microseconds(10000));
-            }
+            start = SDL_GetTicks();
+            // while(std::chrono::steady_clock::now() < next_time + std::chrono::microseconds(9000)) {
+            //     slept++;
+            //     std::this_thread::sleep_until(next_time + std::chrono::microseconds(10000));
+            // }
+            std::this_thread::sleep_until(next_time);
             // auto wake_time = std::chrono::steady_clock::now();
-            uint32_t wake = SDL_GetTicks();
-            int temp = 0;
-            while(std::chrono::steady_clock::now() < next_time + std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS)) {
+            wake = SDL_GetTicks();
+            while(std::chrono::steady_clock::now() < next_time) {
                 temp++;
             }
             if(temp == 0) {
-                log_debug("spun 0 times ");
-                log_debug("slept for %u ms\n", wake - start);
+                log_debug("spun 0 times\n");
             } 
+            // next_time = std::chrono::steady_clock::now();
             next_time += std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
             
             
@@ -421,7 +432,9 @@ namespace engine {
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {
-            log_debug("slept %u times ", slept);
+            log_debug("slept for %u ms ", wake - start);
+            // log_debug("slept %u times ", slept);
+            log_debug("spun %d times ", temp);
             log_debug("frame time: %ums, ", temp_ticks - frameTimeTicks);
             log_debug("fps: %u\n", fps);
             fps = 0u;
@@ -433,6 +446,9 @@ namespace engine {
     }
 
     void close() {
+        #ifdef _MSC_VER
+        if(!_vsync) timeEndPeriod(1);
+        #endif
         SDL_GL_DeleteContext(gl::maincontext);
         SDL_DestroyWindow(gl::window);
         SDL_Quit();
