@@ -6,10 +6,10 @@
 
 namespace Game {
     //  #FIX 1
-    float   bullet_bounds_x = 0.f,
+    float   bullet_bounds_x = -8.f,
             bullet_bounds_y = 0.f,
-            bullet_bounds_xmax = 640.f,
-            bullet_bounds_ymax = 480.f;
+            bullet_bounds_xmax = 392.f,
+            bullet_bounds_ymax = 448.f;
     
     template <class T>
     T between(T min, T max) {
