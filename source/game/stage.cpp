@@ -125,6 +125,7 @@ void Stage::logic() {
                     && player.bullet[i].x_pos < enemy->x_pos + 20.f
                     && player.bullet[i].y_pos > enemy->y_pos - 20.f
                     && player.bullet[i].y_pos < enemy->y_pos + 40.f) {
+                        enemy->hp -= player.bullet[i].dmg;
                         player.bullet[i].active_frame++;
                     }
                 }

@@ -205,6 +205,7 @@ namespace Game {
                     bullet[bullet_num].y_pos = y_pos - 24.f;
                     bullet[bullet_num].active_frame = 1;
                     bullet[bullet_num].draw_frame = 0;
+                    bullet[bullet_num].dmg = 4;
                 }
 
                 //  spawn right bullet
@@ -214,6 +215,7 @@ namespace Game {
                     bullet[bullet_num].y_pos = y_pos - 24.f;
                     bullet[bullet_num].active_frame = 1;
                     bullet[bullet_num].draw_frame = 0;
+                    bullet[bullet_num].dmg = 4;
                 }
             }
         }
