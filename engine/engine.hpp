@@ -6,6 +6,7 @@
 #include <vector>
 
 namespace engine {
+    bool init(const char *title, const char *settingsPath);
     void init(const char *title, int screenMode, bool vsync, int width, int height);
     void init(const char *title, int screenMode, bool vsync, int width_win, int height_win, int width_draw, int height_draw);
     void inputs();

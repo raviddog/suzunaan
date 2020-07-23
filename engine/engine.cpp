@@ -4,6 +4,8 @@
 
 #include <chrono>
 #include <thread>
+#include <string>
+#include <fstream>
 
 #ifdef _MSC_VER
 #include "windows.h"
@@ -241,6 +243,45 @@ namespace engine {
 
     void SpriteSheet::useShaderNormal() {
         shaderSpriteSheet->use();
+    }
+
+    //  load settings from file
+    bool init(const char *title, const char *settingsPath) {
+        std::ifstream settings(settingsPath, std::ifstream::in);
+        if(settings.good()) {
+            
+            //  settings
+            int screenMode = 0;
+            bool vsync = true;
+            int width_win = 640, height_win = 480;
+            const int width_draw = 640, height_draw = 480;
+
+            while(settings.peek() != EOF) {
+                if(settings.peek() == '[') {
+                    settings.ignore(512, '\n');
+                } else {
+                    std::string id;
+                    std::getline(settings, id, '=');
+                    if(id == "Width") {
+                        std::getline(settings, id);
+                        sscanf(id.c_str(), "%d", &width_win);
+                    } else if(id == "Height") {
+                        std::getline(settings, id);
+                        sscanf(id.c_str(), "%d", &height_win);
+                    } else if(id == "Vsync") {
+                        std::getline(settings, id);
+                        id == "true" ? vsync = true : vsync = false;
+                    } else if(id == "ScreenMode") {
+                        std::getline(settings, id);
+                        if(id == "windowed") screenMode = 0;
+                        if(id == "borderless") screenMode = 1;
+                        if(id == "fullscreen") screenMode = 2;
+                    }
+                }
+            }
+            init(title, screenMode, vsync, width_win, height_win, width_draw, height_draw);
+            return true;
+        } else return false;
     }
 
     void init(const char *title, int screenMode, bool vsync, int width, int height) {
