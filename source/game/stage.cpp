@@ -117,11 +117,26 @@ void Stage::logic() {
             //  will invalidate enemy pointer
             iteratorE = Game::enemy_s::enemy_draw->erase(iteratorE);
         } else {
+            //  check collision with player bullets
+            for(int i = 0; i < Game::player_s::player_bullet_max; i++) {
+                if(player.bullet[i].active_frame == 1) {
+                    //  SUPER TEMP
+                    if(player.bullet[i].x_pos > enemy->x_pos - 20.f
+                    && player.bullet[i].x_pos < enemy->x_pos + 20.f
+                    && player.bullet[i].y_pos > enemy->y_pos - 20.f
+                    && player.bullet[i].y_pos < enemy->y_pos + 40.f) {
+                        player.bullet[i].active_frame++;
+                    }
+                }
+            }
+
             //  draw
             img_enemy->drawSpriteCentered(48, enemy->x_pos, enemy->y_pos);
             ++iteratorE;
         }
     }
+
+    
 
     if(frames % 60 == 0) {
         engine::log_debug("bullets: %d ", count);
