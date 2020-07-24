@@ -44,7 +44,6 @@ namespace Game::Script::Test {
                 bullet_s *b = Game::enemy_s::getBullet();
                 if(b) {
                     b->type = BTIcicle + enemy->storage[2].i;
-                    b->active = true;
                     b->y_pos = 120.f;
                     b->speed = 1.f;
                     b->accel = 0.02f;

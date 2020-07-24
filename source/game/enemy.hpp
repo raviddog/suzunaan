@@ -7,10 +7,16 @@
 #include "stdint.h"
 
 namespace Game {
+
+    struct enem_data {
+        int type;
+        float hitbox;
+    };
     
     class enemy_s {
         public:
             enemy_s();
+            enemy_s(float x_pos, float y_pos, int type, int hp);
             void activate();
             void update();
 

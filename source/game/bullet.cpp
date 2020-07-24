@@ -42,6 +42,18 @@ namespace Game {
         storage[2].u = 0;
         storage[3].u = 0;
     }
+
+    void bullet_s::setPos(float x_pos, float y_pos) {
+        this->x_pos = x_pos;
+        this->y_pos = y_pos;
+    }
+
+    void bullet_s::setPos(float x_pos, float y_pos, float speed, float angle) {
+        this->x_pos = x_pos;
+        this->y_pos = y_pos;
+        this->speed = speed;
+        this->angle = angle;
+    }
     
     void bullet_s::update() {
         if(active) {

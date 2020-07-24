@@ -62,6 +62,10 @@ namespace Game {
             void reset();
             void update();
 
+            void setPos(float x_pos, float y_pos);
+            void setPos(float x_pos, float y_pos, float speed, float angle);
+            
+
             //  compiled scripts shouldn't need instruction maps
             //  instead just provide some storage variables
             union storage_u {
