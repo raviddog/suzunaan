@@ -9,10 +9,10 @@ namespace Game::Script::Test{
     Game::enemy_s *testenemy;
 
     void teststageload() {
-        testenemy = new enemy_s(320.f, 20.f, 1, 200);
+        // testenemy = new enemy_s(320.f, 20.f, 1, 200);
         testenemy->angle = 0.2f;
         testenemy->speed = 2.f;
-        testenemy->run_instructions = Game::Script::Test::testenemyfunc;
+        // testenemy->run_instructions = Game::Script::Test::testenemyfunc;
     }
 
     void teststageunload() {

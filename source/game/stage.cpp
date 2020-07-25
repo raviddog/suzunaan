@@ -10,6 +10,8 @@
 #include <vector>
 #include <cmath>
 #include <ctime>
+#include <cstdlib>
+#include <memory>
 
 
 //  declare static member variables for reasons?
@@ -28,6 +30,10 @@ namespace Game::Script {
     std::vector<int> *bullet_draw_order;
     std::vector<int> *freebullets;
     int frames;
+
+    bullet_script *toziko, *miko;
+
+    std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
 
     int getFreeBullet() {
         if(freebullets->empty()) {
@@ -75,7 +81,24 @@ void Stage::logic() {
 
 
     //  run custom script instruction
-    Game::Script::Test::teststagefunc(frames);
+    // Game::Script::Test::teststagefunc(frames);
+    
+    //  test spawn
+    if(frames % 3 == 0) {
+        for(int j = 0; j < 12; j++) {
+            int i = getFreeBullet();
+            if(i > -1) {
+                bullets[i].type = Game::BTBall + Game::BCYellow;
+                bullets[i].active = true;
+                bullets[i].accel = 0.f;
+                bullets[i].x_pos = j * 10.f;
+                bullets[i].y_pos = 120.f;
+                bullets[i].angle = 0.f;
+                bullets[i].speed = 0.5f;
+                bullets[i].instructions = miko;
+            }
+        }
+    }
 
     //  update all bullets + prepare draw verts
     int count = 0;
@@ -188,6 +211,7 @@ void Stage::draw() {
 Stage::Stage() {
     using namespace Game::Script;
     srand(time(NULL));
+    Game::script_init();
 
     img_guibg = new engine::SpriteSheet("./data/front00.png", 4);
     img_guibg->setSprite(0, 0, 0, 32, 480);     // left
@@ -261,7 +285,10 @@ Stage::Stage() {
     Game::bullet_bounds_ymax = 512.f;
     Game::bullet_s::player = &player;
 
-    Game::Script::Test::teststageload();
+    bullet_scripts = new std::unordered_map<uint32_t, std::shared_ptr<Game::bullet_script>>();
+    std::shared_ptr<Game::bullet_script> temp(Game::loadScriptBullet("./script/miko.txt"));
+    bullet_scripts->insert({1, temp});
+    // Game::Script::Test::teststageload();
 }
 
 Stage::~Stage() {

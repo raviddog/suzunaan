@@ -47,7 +47,7 @@ namespace Game::Script::Test {
                     b->y_pos = 120.f;
                     b->speed = 1.f;
                     b->accel = 0.02f;
-                    b->run_instructions = testbulletfunc;
+                    // b->run_instructions = testbulletfunc;
                     if(enemy->storage[1].b) {
                         b->angle = between<float>(0.f, 40.f);
                         b->x_pos = enemy->storage[2].i * 40.f + between<float>(10.f, 30.f);
