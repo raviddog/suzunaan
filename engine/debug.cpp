@@ -12,11 +12,17 @@
 //  in future, write to logfile and record time
 
 namespace engine {
+    void debug_init() {
+        freopen("./test.log", "w", stderr);
+    }
+
     void log_debug(const char *text, ...) {
         #if defined(DEBUG) || defined(_DEBUG)
         va_list args;
         va_start(args, text);
         vfprintf(stdout, text, args);
+        vfprintf(stderr, text, args);
+        fflush(stderr);
         va_end(args);
         #endif
     }
@@ -30,6 +36,7 @@ namespace engine {
         va_list args;
         va_start(args, text);
         vfprintf(stdout, text, args);
+        vfprintf(stderr, text, args);
         va_end(args);
         #endif
     }

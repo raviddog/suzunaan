@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <memory>
 
 //  loads a script file into an std::unordered_map
 
@@ -85,14 +86,20 @@ namespace Game {
     
     };
 
+    struct stage_script {
+        //stage_script();
+        int a;
+        // ~stage_script();
 
-    //  load instructions  
+
+    };
+
     
-    bullet_script *loadScriptBullet(const std::string&);
-    enemy_script *loadScriptEnemy(const std::string&);
-    stage_scripts *loadStage(const std::string&);
+
+   
 
     void script_init();
+    int loadScript(const std::string &path, stage_script **stageptr, std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> **enemy_scripts_ptr, std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> **bullet_scripts_ptr);
 
 }
 

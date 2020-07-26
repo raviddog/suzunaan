@@ -5,6 +5,7 @@
 #include "script.hpp"
 
 #include <unordered_set>
+#include <memory>
 
 //#include <stdint.h>
 

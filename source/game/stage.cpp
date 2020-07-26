@@ -6,6 +6,7 @@
 #include "player.hpp"
 #include "bullet.hpp"
 #include "enemy.hpp"
+#include "script.hpp"
 
 #include <vector>
 #include <cmath>
@@ -19,7 +20,7 @@ Game::player_s *Game::bullet_s::player;
 Game::bullet_s* (*Game::enemy_s::getBullet)();
 std::vector<Game::enemy_s*> *Game::enemy_s::enemy_draw;
 
-namespace Game::Script {
+namespace Game {
     const int BULLET_MAX = 10000;
     float bullet_hitbox_radius_temp = 4.27f;
 
@@ -33,7 +34,9 @@ namespace Game::Script {
 
     bullet_script *toziko, *miko;
 
+    stage_script *stage_scripts;
     std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
+    std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts;
 
     int getFreeBullet() {
         if(freebullets->empty()) {
@@ -59,7 +62,7 @@ namespace Game::Script {
 }
 
 void Stage::logic() {
-    using namespace Game::Script;
+    using namespace Game;
 
     {
         using namespace engine;
@@ -95,7 +98,8 @@ void Stage::logic() {
                 bullets[i].y_pos = 120.f;
                 bullets[i].angle = 0.f;
                 bullets[i].speed = 0.5f;
-                bullets[i].instructions = miko;
+                // bullets[i].instructions = miko;
+                bullets[i].instructions = bullet_scripts->at(1).get();
             }
         }
     }
@@ -170,7 +174,7 @@ void Stage::logic() {
 }
 
 void Stage::draw() {
-    using namespace Game::Script;
+    using namespace Game;
 
     //  buffer player bullets
     for(int i = 0; i < Game::player_s::player_bullet_max; i++) {
@@ -209,7 +213,7 @@ void Stage::draw() {
 }
 
 Stage::Stage() {
-    using namespace Game::Script;
+    using namespace Game;
     srand(time(NULL));
     Game::script_init();
 
@@ -278,22 +282,36 @@ Stage::Stage() {
     frames = 0;
 
     Game::enemy_s::enemy_draw = new std::vector<Game::enemy_s*>();
-    Game::enemy_s::getBullet = Game::Script::getFreeBulletPointer;
+    Game::enemy_s::getBullet = Game::getFreeBulletPointer;
     Game::bullet_bounds_x = -32.f;
     Game::bullet_bounds_xmax = 672.f;
     Game::bullet_bounds_y = -32.f;
     Game::bullet_bounds_ymax = 512.f;
     Game::bullet_s::player = &player;
 
-    bullet_scripts = new std::unordered_map<uint32_t, std::shared_ptr<Game::bullet_script>>();
+    
     // std::shared_ptr<Game::bullet_script> temp(Game::loadScriptBullet("./script/miko.txt"));
     // bullet_scripts->insert({1, temp});
-    miko = Game::loadScriptBullet("./script/miko.txt");
+    // miko = Game::loadScriptBullet("./script/miko.txt");
     // Game::Script::Test::teststageload();
+    //  TODO implememnt stage script reading thingggyy
+    
+    auto enemy_scripts_ptr = &enemy_scripts;
+    auto bullet_scripts_ptr = &bullet_scripts;
+    Game::loadScript("./script/stageloader.txt", &stage_scripts, enemy_scripts_ptr, bullet_scripts_ptr);
+    enemy_scripts = *enemy_scripts_ptr;
+    bullet_scripts = *bullet_scripts_ptr;
+        //  load broke somewhere
+        //  oh no
+        //  dont actually know what to do here
+        //  error or something
+        //  TODO
+    
+
 }
 
 Stage::~Stage() {
-    using namespace Game::Script;
+    using namespace Game;
     Game::Script::Test::teststageunload();
     delete img_player;
     delete img_player_b;

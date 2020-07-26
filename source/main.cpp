@@ -8,9 +8,6 @@ const int scrHeight = 480;
 
 int main(int argv, char** args) {
     engine::init("touhou suzunaan", "./suzunaan.ini");
-
-    // freopen("./test.log", "w", stdout);
-
     init();
 
     while(!engine::quit) {

@@ -1,0 +1,11 @@
+type: stageloader
+
+#stage
+teststage.txt
+
+#enemy
+1:testenemy.txt
+
+
+#bullet
+1:miko.txt

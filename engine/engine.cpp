@@ -97,7 +97,9 @@ namespace engine {
             sprites[num].width = (float)width;
             sprites[num].height = (float)height;
         }
+        #ifdef _DEBUG_MSG_ENABLED_SPRITE
         log_debug("sprite #%d: %f %f %f %f\n", num, sprites[num].x, sprites[num].y, sprites[num].z, sprites[num].w);
+        #endif
     }
 
     void SpriteSheet::drawSprite(int num, float x, float y) {
@@ -247,6 +249,7 @@ namespace engine {
 
     //  load settings from file
     bool init(const char *title, const char *settingsPath) {
+        debug_init();
         std::ifstream settings(settingsPath, std::ifstream::in);
         if(settings.good()) {
             
@@ -436,12 +439,16 @@ namespace engine {
 
         //  if vsync disabled, cap fps
         int temp = 0;
+        #ifdef _DEBUG_MSG_ENABLED_FPS
         uint32_t start, wake;
+        #endif
         if(!_vsync) {
             //  wait
             // printf("before sleep %u ", SDL_GetTicks());
             // cur_time = std::chrono::steady_clock::now();
+            #ifdef _DEBUG_MSG_ENABLED_FPS
             start = SDL_GetTicks();
+            #endif
             // while(std::chrono::steady_clock::now() < next_time + std::chrono::microseconds(9000)) {
             //     slept++;
             //     std::this_thread::sleep_until(next_time + std::chrono::microseconds(10000));
@@ -459,7 +466,9 @@ namespace engine {
             std::this_thread::sleep_until(next_time);
             #endif
             // auto wake_time = std::chrono::steady_clock::now();
+            #ifdef _DEBUG_MSG_ENABLED_FPS
             wake = SDL_GetTicks();
+            #endif
             while(std::chrono::high_resolution_clock::now() < next_time) {
                 //  spin
                 temp++;
@@ -485,11 +494,12 @@ namespace engine {
             
         }
 
+        #ifdef _DEBUG_MSG_ENABLED_FPS
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {
-            // log_debug("slept for %u ms ", wake - start);
-            // log_debug("slept %u times ", slept);
+            log_debug("slept for %u ms ", wake - start);
+            log_debug("slept %u times ", slept);
             log_debug("spun %d times ", temp);
             log_debug("frame time: %ums, ", temp_ticks - frameTimeTicks);
             log_debug("fps: %u\n", fps);
@@ -497,8 +507,9 @@ namespace engine {
             ticks = temp_ticks;
             slept = 0u;
         }
-        ++fps;
         frameTimeTicks = temp_ticks;
+        #endif
+        ++fps;
     }
 
     void close() {
