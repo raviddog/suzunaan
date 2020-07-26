@@ -4,10 +4,6 @@
 
 #include <cmath>
 
-namespace Game::Script {
-    extern player_s player;
-}
-
 namespace Game {
     //  #FIX 1
     float   bullet_bounds_x = -8.f,
@@ -111,8 +107,8 @@ namespace Game {
                     
                     //  get distance
                     //  might wanna do this distance check when all the player collision tests are done
-                    float distanceSQ = (y_pos - Script::player.y_pos) * (y_pos - Script::player.y_pos)
-                                        + (x_pos - Script::player.x_pos) * (x_pos - Script::player.x_pos);
+                    float distanceSQ = (y_pos - player->y_pos) * (y_pos - player->y_pos)
+                                        + (x_pos - player->x_pos) * (x_pos - player->x_pos);
                     //  distanceToPlayer
                     auto range = listener_triggers->equal_range(1u);
                     auto it = range.first;
@@ -349,8 +345,8 @@ namespace Game {
     void bullet_s::instr_angle_atPlayer() {
         //  get angle to player
         //  the order is all messed up because my angles go clockwise and my Y-axis is flipped
-        float distWidth = x_pos - Script::player.x_pos;
-        float distHeight = Script::player.y_pos - y_pos;
+        float distWidth = x_pos - player->x_pos;
+        float distHeight = player->y_pos - y_pos;
         float angle_rad;
 
         if(distWidth != 0.f) {
@@ -358,7 +354,7 @@ namespace Game {
             angle = toDegrees(angle_rad) - 90.f;
         } else {
             //  vertically lined up
-            if(y_pos < Script::player.y_pos) {
+            if(y_pos < player->y_pos) {
                 //  underneath
                 angle = 0.f;
             } else {

@@ -84,14 +84,14 @@ void Stage::logic() {
     // Game::Script::Test::teststagefunc(frames);
     
     //  test spawn
-    if(frames % 3 == 0) {
+    if(frames % 6 == 0) {
         for(int j = 0; j < 12; j++) {
             int i = getFreeBullet();
             if(i > -1) {
                 bullets[i].type = Game::BTBall + Game::BCYellow;
                 bullets[i].active = true;
                 bullets[i].accel = 0.f;
-                bullets[i].x_pos = j * 10.f;
+                bullets[i].x_pos = j * 30.f;
                 bullets[i].y_pos = 120.f;
                 bullets[i].angle = 0.f;
                 bullets[i].speed = 0.5f;
@@ -162,9 +162,9 @@ void Stage::logic() {
 
     
 
-    if(frames % 60 == 0) {
-        engine::log_debug("bullets: %d ", count);
-    }
+    // if(frames % 60 == 0) {
+    //     engine::log_debug("bullets: %d ", count);
+    // }
 
     ++frames;
 }
@@ -286,8 +286,9 @@ Stage::Stage() {
     Game::bullet_s::player = &player;
 
     bullet_scripts = new std::unordered_map<uint32_t, std::shared_ptr<Game::bullet_script>>();
-    std::shared_ptr<Game::bullet_script> temp(Game::loadScriptBullet("./script/miko.txt"));
-    bullet_scripts->insert({1, temp});
+    // std::shared_ptr<Game::bullet_script> temp(Game::loadScriptBullet("./script/miko.txt"));
+    // bullet_scripts->insert({1, temp});
+    miko = Game::loadScriptBullet("./script/miko.txt");
     // Game::Script::Test::teststageload();
 }
 
