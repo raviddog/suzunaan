@@ -32,11 +32,11 @@ namespace Game {
     std::vector<int> *freebullets;
     int frames;
 
-    bullet_script *toziko, *miko;
+    // bullet_script *toziko, *miko;
 
-    stage_script *stage_scripts;
-    std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
-    std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts;
+    // stage_script *stage_scripts;
+    // std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
+    // std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts;
 
     int getFreeBullet() {
         if(freebullets->empty()) {
@@ -63,6 +63,7 @@ namespace Game {
 
 void Stage::logic() {
     using namespace Game;
+    RunScript();
 
     {
         using namespace engine;
@@ -99,7 +100,7 @@ void Stage::logic() {
                 bullets[i].angle = 0.f;
                 bullets[i].speed = 0.5f;
                 // bullets[i].instructions = miko;
-                bullets[i].instructions = bullet_scripts->at(1).get();
+                // bullets[i].instructions = bullet_scripts->at(1).get();
             }
         }
     }
@@ -215,8 +216,9 @@ void Stage::draw() {
 Stage::Stage() {
     using namespace Game;
     srand(time(NULL));
-    Game::script_init();
-
+    initScriptEngine();
+    // Game::script_init();
+    
     img_guibg = new engine::SpriteSheet("./data/front00.png", 4);
     img_guibg->setSprite(0, 0, 0, 32, 480);     // left
     img_guibg->setSprite(1, 32, 0, 224, 480);   // right
@@ -296,11 +298,11 @@ Stage::Stage() {
     // Game::Script::Test::teststageload();
     //  TODO implememnt stage script reading thingggyy
     
-    auto enemy_scripts_ptr = &enemy_scripts;
-    auto bullet_scripts_ptr = &bullet_scripts;
-    Game::loadScript("./script/stageloader.txt", &stage_scripts, enemy_scripts_ptr, bullet_scripts_ptr);
-    enemy_scripts = *enemy_scripts_ptr;
-    bullet_scripts = *bullet_scripts_ptr;
+    // auto enemy_scripts_ptr = &enemy_scripts;
+    // auto bullet_scripts_ptr = &bullet_scripts;
+    // Game::loadScript("./script/stageloader.txt", &stage_scripts, enemy_scripts_ptr, bullet_scripts_ptr);
+    // enemy_scripts = *enemy_scripts_ptr;
+    // bullet_scripts = *bullet_scripts_ptr;
         //  load broke somewhere
         //  oh no
         //  dont actually know what to do here
@@ -312,7 +314,8 @@ Stage::Stage() {
 
 Stage::~Stage() {
     using namespace Game;
-    Game::Script::Test::teststageunload();
+    // Game::Script::Test::teststageunload();
+    CleanUp();
     delete img_player;
     delete img_player_b;
     delete img_player_eff;

@@ -26,20 +26,20 @@ namespace Game {
 
     bullet_s::bullet_s() {
         active_instructions = new std::vector<uint32_t>();
-        cust_triggers = new std::unordered_multimap<uint32_t, uint32_t>();
+        // cust_triggers = new std::unordered_multimap<uint32_t, uint32_t>();
         cancel_cust_triggers = new std::unordered_set<uint32_t>();
-        listener_triggers = nullptr;
+        // listener_triggers = nullptr;
         reset();
     }
 
     bullet_s::~bullet_s() {
         delete active_instructions;
-        delete cust_triggers;
+        // delete cust_triggers;
         delete cancel_cust_triggers;
-        if(listener_triggers != nullptr) {
-            delete listener_triggers;
-            listener_triggers = nullptr;
-        }
+        // if(listener_triggers != nullptr) {
+            // delete listener_triggers;
+            // listener_triggers = nullptr;
+        // }
     }
     void bullet_s::reset() {
         active = false;
@@ -55,14 +55,14 @@ namespace Game {
         draw_angle = 0.f;
 
         //  script stuff
-        instructions = nullptr;
+        // instructions = nullptr;
         active_instructions->clear();
-        cust_triggers->clear();
+        // cust_triggers->clear();
         cancel_cust_triggers->clear();
-        if(listener_triggers != nullptr) {
-            delete listener_triggers;
-            listener_triggers = nullptr;
-        }
+        // if(listener_triggers != nullptr) {
+            // delete listener_triggers;
+            // listener_triggers = nullptr;
+        // }
         //  compiled stuff
         // run_instructions = nullptr;
         storage[0].u = 0;
@@ -88,9 +88,10 @@ namespace Game {
             if(frames == 0u) {
                 //  first frame, do some initial setup
                 //  make a copy of the non-frame trigger listeners
-                if(instructions) listener_triggers = new auto(*(instructions->listeners));
+                // if(instructions) listener_triggers = new auto(*(instructions->listeners));
             }
             //  apply instructions
+            /*
             if(instructions) {
                 //  check frame triggers
                 if(instructions->frame_triggers->count(frames) > 0) {
@@ -141,7 +142,7 @@ namespace Game {
                         active_instructions->push_back(it->second);
                     }
                 }
-            }
+            })*/
             
             run_instructions();
 
@@ -176,6 +177,7 @@ namespace Game {
         for(size_t i = 0; i < active_instructions->size();) {
             uint32_t num = active_instructions->at(i);
             //  get active script instruction from instruction list
+            /*
             if(instructions->instructions->count(num) > 0) {
                 //  instruction does exist
                 script_instruction *current = instructions->instructions->at(num);
@@ -266,7 +268,7 @@ namespace Game {
                 //  instruction doesn't exist, remove it from active
                 auto loc = active_instructions->begin() + i;
                 active_instructions->erase(loc);
-            }
+            }*/
         }
     }
 
@@ -306,7 +308,7 @@ namespace Game {
             return active_instructions->size();
         }
     }
-
+/*
     void bullet_s::instr_start(uint32_t val) {
         //  first check if instruction is a real instruction
         if(instructions->instructions->count(val) > 0) {
@@ -370,7 +372,7 @@ namespace Game {
 
     void bullet_s::instr_random_angle(float min, float max) {
         angle = between<float>(min, max);
-    }
+    }*/
 
     //  compiled script update function
     /*

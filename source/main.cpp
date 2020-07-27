@@ -1,4 +1,6 @@
+#ifdef _MSC_VER
 #define SDL_MAIN_HANDLED
+#endif
 
 #include "engine/engine.hpp"
 #include "state.hpp"
