@@ -63,7 +63,7 @@ namespace Game {
         }
 
         //  movement direction animation changes
-        if(keys[left] && !keys[right] && moveDir != 1) {
+        if(keys[left] && moveDir != 1) {
             //  left pushed but not right, not moving left
             animDelay = 0;
             animFrame = 8;
@@ -137,25 +137,25 @@ namespace Game {
             //  right
             x_pos += str;
             
-        } else if(!keys[up] && keys[right] && keys[down] && !keys[left]) {
+        } else if(keys[right] && keys[down] && !keys[left]) {
             //  right down
             x_pos += diag;
             y_pos += diag;
             
-        } else if(!keys[up] && !keys[right] && keys[down] && !keys[left]) {
+        } else if(!keys[right] && keys[down] && !keys[left]) {
             //  down
             y_pos += str;
             
-        } else if(!keys[up] && !keys[right] && keys[down] && keys[left]) {
+        } else if(keys[down] && keys[left]) {
             //  down left
             y_pos += diag;
             x_pos -= diag;
             
-        } else if(!keys[up] && !keys[right] && !keys[down] && keys[left]) {
+        } else if(!keys[up] && !keys[down] && keys[left]) {
             //  left
             x_pos -= str;
             
-        } else if(keys[up] && !keys[right] && !keys[down] && keys[left]) {
+        } else if(keys[up] && !keys[down] && keys[left]) {
             //  left up
             x_pos -= diag;
             y_pos -= diag;
