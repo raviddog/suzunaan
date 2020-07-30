@@ -8,11 +8,11 @@ static bool draw_changed;
 
 void Menu::logic() {
     if(opt_tree == 0) {
-        if(engine::keyPressed[engine::kbUp]) {
+        if(engine::checkKey(engine::inputUp)) {
             opt_selected -= 1;
             draw_changed = true;
         }
-        if(engine::keyPressed[engine::kbDown]) {
+        if(engine::checkKey(engine::inputDown)) {
             opt_selected += 1;
             draw_changed = true;
         }
@@ -35,7 +35,7 @@ void Menu::logic() {
         }
 
 
-        if(engine::keyPressed[engine::kbZ]) {
+        if(engine::checkKey(engine::inputFire)) {
             if(opt_selected == 0) {
                 changeState(1);
             } else if(opt_selected == 1) {

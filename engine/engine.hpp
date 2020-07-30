@@ -6,6 +6,15 @@
 #include <vector>
 
 namespace engine {
+
+    //  set game controls here
+    enum inputKeys {
+        inputUp, inputDown, inputLeft, inputRight,
+        inputFire, inputFocus, inputBomb, inputPause,
+        inputQuit, inputRestart, inputSkip
+    };
+    bool checkKey(int key);
+
     bool init(const char *title, const char *settingsPath);
     void init(const char *title, int screenMode, bool vsync, int width, int height);
     void init(const char *title, int screenMode, bool vsync, int width_win, int height_win, int width_draw, int height_draw);

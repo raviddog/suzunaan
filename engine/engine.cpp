@@ -20,6 +20,8 @@ namespace engine {
 
     int scrWidth, scrHeight, drawWidth, drawHeight;
     int viewport[4], scrMode;
+    
+    uint32_t controls[inputSkip];
 
     //  framerate stuff
     static bool _vsync;
@@ -250,6 +252,34 @@ namespace engine {
     //  load settings from file
     bool init(const char *title, const char *settingsPath) {
         debug_init();
+
+        //  default controls if there's none in config
+        controls[inputUp] = 2;
+        controls[inputDown] = 3;
+        controls[inputLeft] = 0;
+        controls[inputRight] = 1;
+        controls[inputFire] = 58;
+        controls[inputFocus] = 57;
+        controls[inputBomb] = 59;
+        controls[inputPause] = 4;
+        controls[inputQuit] = 32;
+        controls[inputRestart] = 35;
+        controls[inputSkip] = 69;
+
+        std::string inputStrings[] = {
+            "Up",
+            "Down",
+            "Left",
+            "Right",
+            "Fire",
+            "Focus",
+            "Bomb",
+            "Pause",
+            "Quit",
+            "Restart",
+            "Skip"
+        };
+
         std::ifstream settings(settingsPath, std::ifstream::in);
         if(settings.good()) {
             
@@ -279,6 +309,18 @@ namespace engine {
                         if(id == "windowed") screenMode = 0;
                         if(id == "borderless") screenMode = 1;
                         if(id == "fullscreen") screenMode = 2;
+                    } else {
+                        //  check if its an input setting
+                        std::getline(settings, id);
+                        int x = 0;
+                        while(x < inputSkip && id != inputStrings[x]) {
+                            ++x;
+                        }
+
+                        if(x < inputSkip) {
+                            //  found
+                            controls[x] = stoul(id);
+                        }
                     }
                 }
             }
@@ -557,6 +599,10 @@ namespace engine {
         
         glm::vec2 scrRes = glm::vec2((float)w, (float)h);
         shaderSpriteSheet->setVec2("res", scrRes);
+    }
+
+    bool checkKey(int key) {
+        return keyState[controls[key]];
     }
 
 }

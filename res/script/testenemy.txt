@@ -1,7 +1,7 @@
 type: enemy
 
 init(): setHP(100);
-frame(0):angle(0) speed(2);
-frame(20):accel(-0.2);
+frame(0):angle(90) speed(0);
+frame(20):accel(0.5);
 frame(30):accel(0);
-1:intervalStart(2, 30): bullet(120, 0, 2, 0);
+1:intervalStart(2, 30): bullet(120, 1, 2, 0);

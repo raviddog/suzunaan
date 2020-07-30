@@ -3,6 +3,7 @@
 
 // #define _DEBUG_MSG_ENABLED_SPRITE
 // #define _DEBUG_MSG_ENABLED_FPS
+#define _DEBUG_MSG_ENABLED_BULLETCOUNT
 
 namespace engine {
     void debug_init();

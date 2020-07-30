@@ -34,6 +34,9 @@ namespace Game {
 
     bullet_script *toziko, *miko;
 
+
+
+
     stage_script *stage_scripts;
     std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
     std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts;
@@ -66,43 +69,51 @@ void Stage::logic() {
 
     {
         using namespace engine;
-        //  c shift x z right left down up
+        //  ctrl shift x z right left down up
         unsigned char key = 0x00;
-        if(keyState[kbUp]) key = key | 0x01;
-        if(keyState[kbDown]) key = key | 0x02;
-        if(keyState[kbLeft]) key = key | 0x04;
-        if(keyState[kbRight]) key = key | 0x08;
-        if(keyState[kbZ]) key = key | 0x10;
-        if(keyState[kbX]) key = key | 0x20;
-        if(keyState[kbLShift]) key = key | 0x40;
-        if(keyState[kbC]) key = key | 0x80;
+        if(checkKey(inputUp)) key = key | 0x01;
+        if(checkKey(inputDown)) key = key | 0x02;
+        if(checkKey(inputLeft)) key = key | 0x04;
+        if(checkKey(inputRight)) key = key | 0x08;
+        if(checkKey(inputFire)) key = key | 0x10;
+        if(checkKey(inputBomb)) key = key | 0x20;
+        if(checkKey(inputFocus)) key = key | 0x40;
+        if(checkKey(inputSkip)) key = key | 0x80;
         //  update player
         player.update(key);
 
-        if(keyPressed[kbEscape]) changeState(0);
+        if(checkKey(inputQuit)) changeState(0);
     }
 
 
     //  run custom script instruction
     // Game::Script::Test::teststagefunc(frames);
+    if(frames % 60) {
+        enemy_s *testenemy = new enemy_s();
+        testenemy->x_pos = 0.f;
+        testenemy->y_pos = 100.f;
+        testenemy->instructions = enemy_scripts->at(1).get();
+        testenemy->activate();
+    }
+    
     
     //  test spawn
-    if(frames % 6 == 0) {
-        for(int j = 0; j < 12; j++) {
-            int i = getFreeBullet();
-            if(i > -1) {
-                bullets[i].type = Game::BTBall + Game::BCYellow;
-                bullets[i].active = true;
-                bullets[i].accel = 0.f;
-                bullets[i].x_pos = j * 30.f;
-                bullets[i].y_pos = 120.f;
-                bullets[i].angle = 0.f;
-                bullets[i].speed = 0.5f;
-                // bullets[i].instructions = miko;
-                bullets[i].instructions = bullet_scripts->at(1).get();
-            }
-        }
-    }
+    // if(frames % 6 == 0) {
+    //     for(int j = 0; j < 12; j++) {
+    //         int i = getFreeBullet();
+    //         if(i > -1) {
+    //             bullets[i].type = Game::BTBall + Game::BCYellow;
+    //             bullets[i].active = true;
+    //             bullets[i].accel = 0.f;
+    //             bullets[i].x_pos = j * 30.f;
+    //             bullets[i].y_pos = 120.f;
+    //             bullets[i].angle = 0.f;
+    //             bullets[i].speed = 0.5f;
+    //             // bullets[i].instructions = miko;
+    //             bullets[i].instructions = bullet_scripts->at(1).get();
+    //         }
+    //     }
+    // }
 
     //  update all bullets + prepare draw verts
     int count = 0;
@@ -165,10 +176,11 @@ void Stage::logic() {
     }
 
     
-
-    // if(frames % 60 == 0) {
-    //     engine::log_debug("bullets: %d ", count);
-    // }
+    #ifdef _DEBUG_MSG_ENABLED_BULLETCOUNT
+    if(frames % 60 == 0) {
+        engine::log_debug("bullets: %d ", count);
+    }
+    #endif
 
     ++frames;
 }
@@ -306,6 +318,9 @@ Stage::Stage() {
         //  dont actually know what to do here
         //  error or something
         //  TODO
+
+    
+
     
 
 }
