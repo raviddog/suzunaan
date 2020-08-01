@@ -37,9 +37,9 @@ namespace Game {
 
 
 
-    stage_script *stage_scripts;
-    std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
-    std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts;
+    stage_script *stagescript = nullptr;
+    std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts = nullptr;
+    std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts = nullptr;
 
     int getFreeBullet() {
         if(freebullets->empty()) {
@@ -85,64 +85,41 @@ void Stage::logic() {
         if(checkKey(inputQuit)) changeState(0);
     }
 
+    if(stagescript) {
+        if(stagescript->frame_triggers->count(frames) > 0) {
+            script_instruction *instr = stagescript->frame_triggers->at(frames);
+            for(int i = 0; i < instr->instruct->size(); i++) {
+                int type = instr->instruct->at(i);
+                script_args args = instr->val->at(i);
 
-    //  run custom script instruction
-    // Game::Script::Test::teststagefunc(frames);
-    if(frames % 60) {
-        enemy_s *testenemy = new enemy_s();
-        testenemy->x_pos = 0.f;
-        testenemy->y_pos = 100.f;
-        testenemy->instructions = enemy_scripts->at(1).get();
-        testenemy->activate();
-    }
-    
-    
-    //  test spawn
-    // if(frames % 6 == 0) {
-    //     for(int j = 0; j < 12; j++) {
-    //         int i = getFreeBullet();
-    //         if(i > -1) {
-    //             bullets[i].type = Game::BTBall + Game::BCYellow;
-    //             bullets[i].active = true;
-    //             bullets[i].accel = 0.f;
-    //             bullets[i].x_pos = j * 30.f;
-    //             bullets[i].y_pos = 120.f;
-    //             bullets[i].angle = 0.f;
-    //             bullets[i].speed = 0.5f;
-    //             // bullets[i].instructions = miko;
-    //             bullets[i].instructions = bullet_scripts->at(1).get();
-    //         }
-    //     }
-    // }
-
-    //  update all bullets + prepare draw verts
-    int count = 0;
-    std::vector<int>::const_iterator iteratorB = bullet_draw_order->begin();
-    while(iteratorB != bullet_draw_order->end()) {
-        bullets[*iteratorB].update();
-
-        //  collision
-        //  check distance between player and bullet
-        //  cache these values later
-        if(       (bullets[*iteratorB].y_pos - player.y_pos) * (bullets[*iteratorB].y_pos - player.y_pos)
-                + (bullets[*iteratorB].x_pos - player.x_pos) * (bullets[*iteratorB].x_pos - player.x_pos)
-                < (bullet_hitbox_radius_temp + player.hitbox_radius) * (bullet_hitbox_radius_temp + player.hitbox_radius))
-        {
-            //  collided
-            //  for now just remove bullet
-            bullets[*iteratorB].active = false;
-        }
-
-
-        if(!bullets[*iteratorB].active) {
-            freebullets->push_back(*iteratorB);
-            iteratorB = bullet_draw_order->erase(iteratorB);
-        } else {
-            count += 1;
-            img_bullet->drawSpriteCentered(bullets[*iteratorB].type, bullets[*iteratorB].x_pos, bullets[*iteratorB].y_pos, bullets[*iteratorB].draw_angle);
-            ++iteratorB;
+                switch(type) {
+                    case 1:
+                        //  spawn bullet
+                        break;
+                    case 2:
+                    {
+                        //  spawn enemy
+                        uint32_t spawnid = args.type_3;
+                        enemy_s *testenemy = new enemy_s();
+                        enemy_spawn es = stagescript->enemy_spawns->at(spawnid);
+                        testenemy->x_pos = es.x_offset;
+                        testenemy->y_pos = es.y_offset;
+                        testenemy->speed = es.speed;
+                        testenemy->angle = es.angle;
+                        testenemy->accel = es.accel;
+                        testenemy->instructions = enemy_scripts->at(es.scriptID).get();
+                        testenemy->activate();
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
         }
     }
+    
+
+
 
     //  update all enemies + prepare draw verts
     std::vector<Game::enemy_s*>::const_iterator iteratorE = Game::enemy_s::enemy_draw->begin();
@@ -175,6 +152,34 @@ void Stage::logic() {
         }
     }
 
+    //  update all bullets + prepare draw verts
+    int count = 0;
+    std::vector<int>::const_iterator iteratorB = bullet_draw_order->begin();
+    while(iteratorB != bullet_draw_order->end()) {
+        bullets[*iteratorB].update();
+
+        //  collision
+        //  check distance between player and bullet
+        //  cache these values later
+        if(       (bullets[*iteratorB].y_pos - player.y_pos) * (bullets[*iteratorB].y_pos - player.y_pos)
+                + (bullets[*iteratorB].x_pos - player.x_pos) * (bullets[*iteratorB].x_pos - player.x_pos)
+                < (bullet_hitbox_radius_temp + player.hitbox_radius) * (bullet_hitbox_radius_temp + player.hitbox_radius))
+        {
+            //  collided
+            //  for now just remove bullet
+            bullets[*iteratorB].active = false;
+        }
+
+
+        if(!bullets[*iteratorB].active) {
+            freebullets->push_back(*iteratorB);
+            iteratorB = bullet_draw_order->erase(iteratorB);
+        } else {
+            count += 1;
+            img_bullet->drawSpriteCentered(bullets[*iteratorB].type, bullets[*iteratorB].x_pos, bullets[*iteratorB].y_pos, bullets[*iteratorB].draw_angle);
+            ++iteratorB;
+        }
+    }
     
     #ifdef _DEBUG_MSG_ENABLED_BULLETCOUNT
     if(frames % 60 == 0) {
@@ -291,7 +296,7 @@ Stage::Stage() {
         freebullets->push_back(i);
     }
     bullet_draw_order = new std::vector<int>();
-    frames = 0;
+    frames = 1;
 
     Game::enemy_s::enemy_draw = new std::vector<Game::enemy_s*>();
     Game::enemy_s::getBullet = Game::getFreeBulletPointer;
@@ -308,9 +313,11 @@ Stage::Stage() {
     // Game::Script::Test::teststageload();
     //  TODO implememnt stage script reading thingggyy
     
+    auto stagescript_ptr = &stagescript;
     auto enemy_scripts_ptr = &enemy_scripts;
     auto bullet_scripts_ptr = &bullet_scripts;
-    Game::loadScript("./script/stageloader.txt", &stage_scripts, enemy_scripts_ptr, bullet_scripts_ptr);
+    Game::loadScript("./script/stageloader.txt", stagescript_ptr, enemy_scripts_ptr, bullet_scripts_ptr);
+    stagescript = *stagescript_ptr;
     enemy_scripts = *enemy_scripts_ptr;
     bullet_scripts = *bullet_scripts_ptr;
         //  load broke somewhere
@@ -319,15 +326,14 @@ Stage::Stage() {
         //  error or something
         //  TODO
 
-    
 
-    
 
 }
 
 Stage::~Stage() {
     using namespace Game;
     Game::Script::Test::teststageunload();
+    script_cleanup();
     delete img_player;
     delete img_player_b;
     delete img_player_eff;

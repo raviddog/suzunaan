@@ -232,7 +232,7 @@ namespace Game{
 
     void enemy_s::instr_bullet(uint32_t spawnID) {
         if(instructions->bullet_spawns->count(spawnID) > 0) {
-            enemy_script_bullet_spawn bs = instructions->bullet_spawns->at(spawnID);
+            bullet_spawn bs = instructions->bullet_spawns->at(spawnID);
             bullet_s *bullet = getBullet();
             if(bullet) {
                 //  initialise bullet with spawn values

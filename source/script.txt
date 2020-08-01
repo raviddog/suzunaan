@@ -9,7 +9,11 @@ the id is optional but some recurring triggers need it in order to stop their in
 instructions aren't restricted to one per line, or one line per trigger,
     but your id and trigger must be on the same line, separated by colons.
 
+stage
+==============
 
+only has frame triggers
+enemy(int id, float x, float y)
 
 enemy
 ==============

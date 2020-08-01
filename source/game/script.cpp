@@ -14,7 +14,7 @@ namespace Game {
     
     bullet_script *loadScriptBullet(const std::string&);
     enemy_script *loadScriptEnemy(const std::string&);
-    stage_scripts *loadStage(const std::string&);
+    stage_script *loadScriptStage(const std::string&);
 
     /*
         LISTENER IDS
@@ -70,6 +70,18 @@ namespace Game {
             
         }
 
+        if(stage_instr == nullptr) {
+            stage_instr = new std::unordered_map<std::string, std::pair<int, int>>();
+            stage_instr->insert({"bullet", std::make_pair(1, 100)});
+            stage_instr->insert({"enemy", std::make_pair(2, 200)});
+        }
+
+    }
+
+    void script_cleanup() {
+        delete stage_instr;
+        delete enemy_instr;
+        delete bullet_instr;
     }
 
     int loadScript(const std::string &path, stage_script **stageptr, std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> **enemy_scripts_ptr, std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> **bullet_scripts_ptr) {
@@ -204,9 +216,10 @@ namespace Game {
                     // TODO do error checking later
                     while(content[next + offset] != '\n') offset++;
                     //  substring is stage script file location
-                    //  TODO create it
+                    stage = loadScriptStage(dir + content.substr(next, offset));
                     next += offset;
                     offset = 0;
+                    ++files;
                 } else if(section == 2) {
                     //  TODO do error checking later
                     //  get id
@@ -1263,7 +1276,7 @@ namespace Game {
                                     offset--;
                                     
                                     //  set bullet spawn properties
-                                    enemy_script_bullet_spawn bs;
+                                    bullet_spawn bs;
                                     bs.type = type;
                                     bs.scriptID = scriptID;
                                     bs.speed = speed;
@@ -1295,6 +1308,254 @@ namespace Game {
             }
         }
         engine::log_debug("finished loading script\n");
+        return script;
+    }
+
+    stage_script *loadScriptStage(const std::string &path) {
+        engine::log_debug("loading stage script file %s\n", path.c_str());
+        std::string content;
+        size_t next = 0, offset = 0, length;
+        int line = 1;
+        std::ifstream file;
+
+        file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        try {
+            file.open(path);
+            std::stringstream filestream;
+            filestream << file.rdbuf();
+            file.close();
+            content = filestream.str();
+        } catch (std::ifstream::failure &ex) {
+            engine::log_debug("failed to open file, %s\n", ex.what());
+        }
+
+        length = content.length();
+
+        //  read script type in first line
+        while(next + offset < length && content[next + offset] != ':') offset++;
+        if(content.substr(next, offset) != "type") {
+            //  no type header in script file
+            engine::log_debug("no type header in script, aborting\n");
+            return nullptr;
+        }
+
+        //  skip past colon and spaces
+        offset++;
+        while(content[next + offset] == ' ') offset++;
+        next += offset;
+        offset = 0;
+        while(content[next + offset] != '\n' && next + offset < length) offset++;
+
+        std::string script_type = content.substr(next, offset);
+        if(script_type == "bullet") {
+            engine::log_debug("bullet script detected instead, aborting\n");
+            return nullptr;
+        } else if(script_type == "enemy") {
+            engine::log_debug("enemy script detected instead, aborting\n");
+            return nullptr;
+        } else if(script_type != "stage") {
+            engine::log_debug("unknown script type, aborting\n");
+            return nullptr;
+        }
+
+        stage_script *script = new stage_script();
+        uint32_t bullet_id = 0, enemy_id = 0;
+
+        next += offset + 1;
+        offset = 0;
+        line++;
+
+        while(next < length) {
+            //  skip spaces
+             while(content[next] == ' ') next++;
+            if(content[next] == '\n') {
+                next++;
+                line++;
+            } else if(content[next] == '/' && content[next + 1] == '/') {
+                //  skip comment lines starting with "//"
+                while(next < length && content[next] != '\n') next++;
+            } else {
+                //  process instruction
+                //  go until colon or newline to get frame number
+                while(next + offset < length && content[next + offset] != ':' && content[next+offset] != '\n') {
+                    offset++;
+                }
+                //  get frame
+                uint32_t frame;
+                script_instruction* instruction = nullptr;
+                try {
+                    frame = std::stoul(content.substr(next, offset), nullptr);
+                    if(script->frame_triggers->count(frame) == 0) {
+                        //  this frame hasn't got trigger data
+                        //  create the instruction
+                        instruction = new script_instruction;
+                        script->frame_triggers->insert({frame, instruction});
+                    } else {
+                        instruction = script->frame_triggers->at(frame);
+                    }
+                } catch (std::invalid_argument &ex) {
+                    engine::log_debug("can't read frame, skipping. ");
+                    //  move to end of line?
+                }
+
+                //  advance next to start of functions
+                next += offset + 1;
+                offset = 0;
+
+                if(instruction) {
+                    bool abort = false;
+                    //  read functions until semicolon terminator
+
+                    while(next < length && content[next] != ';') {
+                        //  skip spaces and newlines
+                        while(content[next] == ' ' || content[next] == '\n') {
+                            if(content[next] == '\n') line++;
+                            next++;
+                        }
+
+                        offset = 0;
+                        //  set offset to end of function name, or semicolon/newline in case of improperly written script
+                        while(next + offset < length && content[next + offset] != '(' && content[next + offset] != ';') {
+                            offset++;
+                        }
+
+                        //  get function string
+                        std::string function_name = content.substr(next, offset);
+                        //  set next to beginning of arguments
+                        next += offset + 1;
+                        offset = 0;
+                        //  set offset to end of function
+                        while(next + offset < length && content[next + offset] != ')'
+                            && content[next + offset] != ';' && content[next + offset] != '\n') offset++;
+
+                        //  load function info
+                        std::pair<int, int> function_info;
+                        if(stage_instr->count(function_name) > 0) {
+                            //  load function info and insert
+                            engine::log_debug(" function %s", function_name.c_str());
+                            function_info = stage_instr->at(function_name);
+                            //  only insert function if arguments are successfully inserted
+                            bool success = true;
+
+                            //  get arguments
+                            if(function_info.second == 100) {
+                                //  bullet firing function
+                                //  definitely need to modify this at some point
+                                //  these values are only used by bullet firing functions
+                                try {
+                                    //  get function arguments
+                                    uint32_t type = std::stoul(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    uint32_t scriptID = std::stoul(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    float speed = std::stof(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    float angle = std::stof(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    
+                                    //  set bullet spawn properties
+                                    bullet_spawn bs;
+                                    bs.type = type;
+                                    bs.scriptID = scriptID;
+                                    bs.speed = speed;
+                                    bs.angle = angle;
+                                    script->bullet_spawns->push_back(bs);
+
+                                    script_args args;
+                                    args.type_3 = bullet_id;
+                                    instruction->val->push_back(args);
+                                    bullet_id++;
+                                    engine::log_debug("(type=%u, scriptID=%u, speed=%f, angle=%f)", type, scriptID, speed, angle);
+                                } catch (std::invalid_argument &ex) {
+                                    success = false;
+                                    engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
+                                }
+                            } else if(function_info.second == 200) {
+                                //  enemy spawning function
+                                //  definitely need to modify this at some point
+                                try {
+                                    //  get function arguments
+                                    uint32_t type = std::stoul(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    uint32_t scriptID = std::stoul(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    float speed = std::stof(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    float angle = std::stof(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    
+                                    //  set bullet spawn properties
+                                    enemy_spawn es;
+                                    es.type = type;
+                                    es.scriptID = scriptID;
+                                    es.speed = speed;
+                                    es.angle = angle;
+                                    script->enemy_spawns->push_back(es);
+
+                                    script_args args;
+                                    args.type_3 = enemy_id;
+                                    instruction->val->push_back(args);
+                                    enemy_id++;
+                                    engine::log_debug("(type=%u, scriptID=%u, speed=%f, angle=%f)", type, scriptID, speed, angle);
+                                } catch (std::invalid_argument &ex) {
+                                    success = false;
+                                    engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
+                                }
+                            }
+                            if(success) {
+                                if(instruction) instruction->instruct->push_back(function_info.first);
+                            }
+                        } else {
+                            engine::log_debug("unable to locate instruction %s\n", function_name.c_str());
+                        }
+                        next += offset + 1;
+                        offset = 0;
+                    }
+                }
+                while(next < length && content[next] != '\n') next++;
+                engine::log_debug("\n");
+            }
+        }
         return script;
     }
 
@@ -1369,7 +1630,7 @@ namespace Game {
         frame_triggers = new std::unordered_map<uint32_t, std::vector<uint32_t>*>();
         instructions = new std::unordered_map<uint32_t, script_instruction*>();
         listeners = new std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>>();
-        bullet_spawns = new std::unordered_map<uint32_t, enemy_script_bullet_spawn>();
+        bullet_spawns = new std::unordered_map<uint32_t, bullet_spawn>();
     }
 
     enemy_script::~enemy_script() {
@@ -1401,6 +1662,22 @@ namespace Game {
     script_instruction::~script_instruction() {
         delete instruct;
         delete val;
+    }
+
+    stage_script::stage_script() {
+        bullet_spawns = new std::vector<bullet_spawn>();
+        enemy_spawns = new std::vector<enemy_spawn>();
+        frame_triggers = new std::unordered_map<uint32_t, script_instruction*>();
+    }
+
+    stage_script::~stage_script() {
+        delete bullet_spawns;
+        delete enemy_spawns;
+        delete frame_triggers;
+
+        bullet_spawns = nullptr;
+        enemy_spawns = nullptr;
+        frame_triggers = nullptr;
     }
 
 }
