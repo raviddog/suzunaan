@@ -25,7 +25,7 @@ namespace engine {
 
     //  framerate stuff
     static bool _vsync;
-    uint32_t ticks, fps, frameTimeTicks, slept;
+    uint32_t ticks, fps, frameTimeTicks;
     std::chrono::high_resolution_clock::time_point cur_time, next_time;
     #define _ENGINE_NOVSYNC_DELAY_MICROSECONDS 16666
 
@@ -340,7 +340,6 @@ namespace engine {
         ticks = SDL_GetTicks();
         frameTimeTicks = ticks;
         fps = 0u;
-        slept = 0u;
 
         SDL_Init(SDL_INIT_EVERYTHING);
         SDL_GL_LoadLibrary(NULL);
@@ -481,20 +480,8 @@ namespace engine {
 
         //  if vsync disabled, cap fps
         int temp = 0;
-        #ifdef _DEBUG_MSG_ENABLED_FPS
-        uint32_t start, wake;
-        #endif
         if(!_vsync) {
             //  wait
-            // printf("before sleep %u ", SDL_GetTicks());
-            // cur_time = std::chrono::steady_clock::now();
-            #ifdef _DEBUG_MSG_ENABLED_FPS
-            start = SDL_GetTicks();
-            #endif
-            // while(std::chrono::steady_clock::now() < next_time + std::chrono::microseconds(9000)) {
-            //     slept++;
-            //     std::this_thread::sleep_until(next_time + std::chrono::microseconds(10000));
-            // }
             #ifdef __GNUG__
             timespec delayt, delayr;
             std::chrono::nanoseconds delaym = std::chrono::duration_cast<std::chrono::nanoseconds>(next_time - std::chrono::high_resolution_clock::now());
@@ -508,9 +495,6 @@ namespace engine {
             std::this_thread::sleep_until(next_time);
             #endif
             // auto wake_time = std::chrono::steady_clock::now();
-            #ifdef _DEBUG_MSG_ENABLED_FPS
-            wake = SDL_GetTicks();
-            #endif
             while(std::chrono::high_resolution_clock::now() < next_time) {
                 //  spin
                 temp++;
@@ -522,32 +506,17 @@ namespace engine {
             next_time += std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
             
             
-            //  spin
-            // next_time = cur_time + std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
-            
-            //  wait and spin
-            // std::this_thread::sleep_until(cur_time + std::chrono::microseconds(8000));
-            
-            // do {
-            //     cur_time = std::chrono::steady_clock::now();
-            //     // std::this_thread::yield();
-            // } while(cur_time < next_time);
-            // next_time += std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
-            
         }
 
         #ifdef _DEBUG_MSG_ENABLED_FPS
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {
-            log_debug("slept for %u ms ", wake - start);
-            log_debug("slept %u times ", slept);
             log_debug("spun %d times ", temp);
             log_debug("frame time: %ums, ", temp_ticks - frameTimeTicks);
             log_debug("fps: %u\n", fps);
             fps = 0u;
             ticks = temp_ticks;
-            slept = 0u;
         }
         frameTimeTicks = temp_ticks;
         #endif

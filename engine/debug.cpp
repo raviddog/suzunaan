@@ -13,15 +13,25 @@
 
 namespace engine {
     void debug_init() {
-        freopen("./test.log", "w", stderr);
+        //  find a better way of versioning
+        #ifdef _DEBUG_MSG_ENABLED_VER
+        fprintf(stdout, "Touhou Suzunaan ver. 0.0.0\nBranch: dev\nCommit: 6c2a0f6\n\n");
+        #endif
+        #ifdef _DEBUG_MSG_ENABLED_LOG
+        freopen("./debug.log", "w", stderr);
+        #endif
     }
 
     void log_debug(const char *text, ...) {
         #if defined(DEBUG) || defined(_DEBUG)
         va_list args;
         va_start(args, text);
+        #ifdef _DEBUG_MSG_ENABLED_CONSOLE
         vfprintf(stdout, text, args);
+        #endif
+        #ifdef _DEBUG_MSG_ENABLED_LOG
         vfprintf(stderr, text, args);
+        #endif
         fflush(stderr);
         va_end(args);
         #endif
@@ -35,8 +45,12 @@ namespace engine {
         //  write release messages to console as well
         va_list args;
         va_start(args, text);
+        #ifdef _DEBUG_MSG_ENABLED_CONSOLE
         vfprintf(stdout, text, args);
+        #endif
+        #ifdef _DEBUG_MSG_ENABLED_LOG
         vfprintf(stderr, text, args);
+        #endif
         va_end(args);
         #endif
     }
