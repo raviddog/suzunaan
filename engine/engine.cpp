@@ -472,19 +472,26 @@ namespace engine {
     }
 
     void flip() {
+        using namespace std::chrono;
         //  flip buffers
         SDL_GL_SwapWindow(gl::window);
 
         //  clear new buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        #ifdef _DEBUG_MSG_ENABLED_FPS
+        uint32_t slept;
+        #endif
         //  if vsync disabled, cap fps
         int temp = 0;
         if(!_vsync) {
             //  wait
+            #ifdef _DEBUG_MSG_ENABLED_FPS
+            high_resolution_clock::time_point sleep = high_resolution_clock::now();
+            #endif
             #ifdef __GNUG__
             timespec delayt, delayr;
-            std::chrono::nanoseconds delaym = std::chrono::duration_cast<std::chrono::nanoseconds>(next_time - std::chrono::high_resolution_clock::now());
+            nanoseconds delaym = duration_cast<nanoseconds>(next_time - high_resolution_clock::now());
             delayt.tv_sec = 0;
             delayt.tv_nsec = delaym.count();
             delayr.tv_nsec = 0;
@@ -494,16 +501,19 @@ namespace engine {
             #else
             std::this_thread::sleep_until(next_time);
             #endif
-            // auto wake_time = std::chrono::steady_clock::now();
-            while(std::chrono::high_resolution_clock::now() < next_time) {
+
+            #ifdef _DEBUG_MSG_ENABLED_FPS
+            slept = duration_cast<milliseconds>(high_resolution_clock::now() - sleep).count();
+            #endif
+
+            // auto wake_time = steady_clock::now();
+            while(high_resolution_clock::now() < next_time) {
                 //  spin
                 temp++;
             }
-            if(temp == 0) {
-                // log_debug("spun 0 times\n");
-            } 
-            // next_time = std::chrono::steady_clock::now();
-            next_time += std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
+
+            // next_time = high_resolution_clock::now();
+            next_time += microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
             
             
         }
@@ -512,11 +522,13 @@ namespace engine {
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {
+            log_debug("slept for %u ms ", slept);
             log_debug("spun %d times ", temp);
             log_debug("frame time: %ums, ", temp_ticks - frameTimeTicks);
             log_debug("fps: %u\n", fps);
             fps = 0u;
             ticks = temp_ticks;
+            temp = 0u;
         }
         frameTimeTicks = temp_ticks;
         #endif
