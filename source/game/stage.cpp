@@ -1,5 +1,3 @@
-#include "teststage.hpp"
-
 #include "engine/engine.hpp"
 #include "engine/debug.hpp"
 #include "state.hpp"
@@ -136,6 +134,7 @@ void Stage::logic() {
             for(int i = 0; i < Game::player_s::player_bullet_max; i++) {
                 if(player.bullet[i].active_frame == 1) {
                     //  SUPER TEMP
+                    //  enemy has hitbox 40 wide and 60 long
                     if(player.bullet[i].x_pos > enemy->x_pos - 20.f
                     && player.bullet[i].x_pos < enemy->x_pos + 20.f
                     && player.bullet[i].y_pos > enemy->y_pos - 20.f
@@ -289,6 +288,7 @@ Stage::Stage() {
         }
     }
 
+    //  initialize bullets
     bullets = new Game::bullet_s[BULLET_MAX];
     freebullets = new std::vector<int>();
     freebullets->reserve(BULLET_MAX);
@@ -306,13 +306,7 @@ Stage::Stage() {
     Game::bullet_bounds_ymax = 512.f;
     Game::bullet_s::player = &player;
 
-    
-    // std::shared_ptr<Game::bullet_script> temp(Game::loadScriptBullet("./script/miko.txt"));
-    // bullet_scripts->insert({1, temp});
-    // miko = Game::loadScriptBullet("./script/miko.txt");
-    // Game::Script::Test::teststageload();
-    //  TODO implememnt stage script reading thingggyy
-    
+    //  load scripts
     auto stagescript_ptr = &stagescript;
     auto enemy_scripts_ptr = &enemy_scripts;
     auto bullet_scripts_ptr = &bullet_scripts;
@@ -320,19 +314,10 @@ Stage::Stage() {
     stagescript = *stagescript_ptr;
     enemy_scripts = *enemy_scripts_ptr;
     bullet_scripts = *bullet_scripts_ptr;
-        //  load broke somewhere
-        //  oh no
-        //  dont actually know what to do here
-        //  error or something
-        //  TODO
-
-
-
 }
 
 Stage::~Stage() {
     using namespace Game;
-    Game::Script::Test::teststageunload();
     script_cleanup();
     delete img_player;
     delete img_player_b;
