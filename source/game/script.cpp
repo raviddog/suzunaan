@@ -82,6 +82,10 @@ namespace Game {
         delete stage_instr;
         delete enemy_instr;
         delete bullet_instr;
+
+        stage_instr = nullptr;
+        enemy_instr = nullptr;
+        bullet_instr = nullptr;
     }
 
     int loadScript(const std::string &path, stage_script **stageptr, std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> **enemy_scripts_ptr, std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> **bullet_scripts_ptr) {

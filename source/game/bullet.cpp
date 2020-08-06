@@ -33,13 +33,15 @@ namespace Game {
     }
 
     bullet_s::~bullet_s() {
-        delete active_instructions;
-        delete cust_triggers;
-        delete cancel_cust_triggers;
-        if(listener_triggers != nullptr) {
-            delete listener_triggers;
-            listener_triggers = nullptr;
-        }
+        if(active_instructions) delete active_instructions;
+        if(cust_triggers) delete cust_triggers;
+        if(cancel_cust_triggers) delete cancel_cust_triggers;
+        if(listener_triggers) delete listener_triggers;
+        
+        active_instructions = nullptr;
+        cust_triggers = nullptr;
+        cancel_cust_triggers = nullptr;
+        listener_triggers = nullptr;
     }
     void bullet_s::reset() {
         active = false;
