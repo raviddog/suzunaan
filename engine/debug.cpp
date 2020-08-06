@@ -15,7 +15,7 @@ namespace engine {
     void debug_init() {
         //  find a better way of versioning
         #ifdef _DEBUG_MSG_ENABLED_VER
-        fprintf(stdout, "Touhou Suzunaan ver d.0.0.1\n\n");
+        log_debug("Touhou Suzunaan ver d.0.0.1\n\n");
         #endif
         #ifdef _DEBUG_MSG_ENABLED_LOG
         freopen("./debug.log", "w", stderr);
