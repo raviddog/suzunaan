@@ -1513,14 +1513,14 @@ namespace Game {
                                     }
                                     next++;
                                     offset--;
-                                    float speed = std::stof(content.substr(next, offset), nullptr);
+                                    float loc_x = std::stof(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
                                     }
                                     next++;
                                     offset--;
-                                    float angle = std::stof(content.substr(next, offset), nullptr);
+                                    float loc_y = std::stof(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
@@ -1532,15 +1532,15 @@ namespace Game {
                                     enemy_spawn es;
                                     es.type = type;
                                     es.scriptID = scriptID;
-                                    es.speed = speed;
-                                    es.angle = angle;
+                                    es.x_offset = loc_x;
+                                    es.y_offset = loc_y;
                                     script->enemy_spawns->push_back(es);
 
                                     script_args args;
                                     args.type_3 = enemy_id;
                                     instruction->val->push_back(args);
                                     enemy_id++;
-                                    engine::log_debug("(type=%u, scriptID=%u, speed=%f, angle=%f)", type, scriptID, speed, angle);
+                                    engine::log_debug("(type=%u, scriptID=%u, x=%f, y=%f)", type, scriptID, loc_x, loc_y);
                                 } catch (std::invalid_argument &ex) {
                                     success = false;
                                     engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);

@@ -63,6 +63,7 @@ namespace Game {
         }
 
         //  movement direction animation changes
+        //  1 0 2
         if(keys[left] && moveDir != 1) {
             //  left pushed but not right, not moving left
             animDelay = 0;

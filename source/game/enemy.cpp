@@ -32,9 +32,12 @@ namespace Game{
         listener_triggers = nullptr;
 
         active = false;
+        moveDir = 0;
         id = -1;
-        type = 0u;
-        frames = 0u;
+        type = 0;
+        animFrame = 0;
+        animDelay = 0;
+        frames = 0;
         hp = 0;
         x_pos = 320.f;
         y_pos = 0.f;
@@ -116,8 +119,57 @@ namespace Game{
             speed += accel;
             angle += angle_change;
             if(angle > 360.f) angle -= 360.f;
+            if(angle < 0.f) angle += 360.f;
             x_pos += std::sin(angle * PI / 180.f) * speed;
             y_pos += std::cos(angle * PI / 180.f) * speed;
+
+            //  time delay for animation update
+            animDelay += 1;
+            if(animDelay >= 4) {
+                animDelay = 0;
+                animFrame += 1;
+            }
+
+            if(angle < 355.f && angle > 185.f && moveDir != 1) {
+                //  switch to moving left
+                animDelay = 0;
+                animFrame = 8;
+                moveDir = 1;
+
+            } else if(angle < 175.f && angle > 5.f && moveDir != 2) {
+                //  switch to moving right
+                animDelay = 0;
+                animFrame = 16;
+                moveDir = 2;
+            } else if((angle < 5.f || (angle > 175.f && angle < 185.f) || angle > 355.f) && moveDir != 0) {
+                //  stop moving side
+                animDelay = 0;
+                animFrame = 0;
+                moveDir = 0;
+            }
+
+            switch(type) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    switch(moveDir) {
+                        case 0:
+                            if(animFrame >= 4) {
+                                animFrame = 0;
+                            }
+                            break;
+                        case 1:
+                        case 2:
+                            if(animFrame >= 12) {
+                                animFrame = 8;
+                            }
+                            break;
+                    }
+                default:
+                    break;
+            };
 
             if(hp <= 0) active = false;
 

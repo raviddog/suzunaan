@@ -44,7 +44,7 @@ namespace Game {
             //  don't for now
 
             bool active;
-            int id, type, frames, hp;
+            int id, type, animFrame, animDelay, moveDir, frames, hp;
             float x_pos, y_pos;
 
             float speed, angle;

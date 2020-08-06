@@ -80,7 +80,7 @@ void Stage::logic() {
         //  update player
         player.update(key);
 
-        if(checkKey(inputQuit)) changeState(0);
+        if(checkKeyPressed(inputQuit)) changeState(0);
     }
 
     if(stagescript) {
@@ -146,7 +146,30 @@ void Stage::logic() {
             }
 
             //  draw
-            img_enemy->drawSpriteCentered(48, enemy->x_pos, enemy->y_pos);
+            switch(enemy->type) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                    if(enemy->moveDir == 1) {
+                        //  draw flipped
+                        img_enemy->drawSpriteCentered(enemy->type * 12 + enemy->animFrame, enemy->x_pos, enemy->y_pos, 0.f, -32.f, 32.f);
+                    } else {
+                        img_enemy->drawSpriteCentered(enemy->type * 12 + enemy->animFrame, enemy->x_pos, enemy->y_pos);
+                    }
+                    break;
+                case 4:
+                    if(enemy->moveDir == 1) {
+                        //  draw flipped
+                        img_enemy->drawSpriteCentered(48 + enemy->animFrame, enemy->x_pos, enemy->y_pos, 0.f, -64.f, 64.f);
+                    } else {
+                        img_enemy->drawSpriteCentered(48 + enemy->animFrame, enemy->x_pos, enemy->y_pos);
+                    }
+                    break;
+                    break;
+                default:
+                    break;
+            }
             ++iteratorE;
         }
     }
