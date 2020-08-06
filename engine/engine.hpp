@@ -14,6 +14,7 @@ namespace engine {
         inputQuit, inputRestart, inputSkip
     };
     bool checkKey(int key);
+    bool checkKeyPressed(int key);
 
     bool init(const char *title, const char *settingsPath);
     void init(const char *title, int screenMode, bool vsync, int width, int height);

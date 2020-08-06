@@ -522,8 +522,10 @@ namespace engine {
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {
-            log_debug("slept for %u ms ", slept);
-            log_debug("spun %d times ", temp);
+            if(!_vsync) {
+                log_debug("slept for %u ms ", slept);
+                log_debug("spun %d times ", temp);
+            }
             log_debug("frame time: %ums, ", temp_ticks - frameTimeTicks);
             log_debug("fps: %u\n", fps);
             fps = 0u;
@@ -584,6 +586,10 @@ namespace engine {
 
     bool checkKey(int key) {
         return keyState[controls[key]];
+    }
+
+    bool checkKeyPressed(int key) {
+        return keyPressed[controls[key]];
     }
 
 }

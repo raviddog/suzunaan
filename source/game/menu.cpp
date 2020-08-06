@@ -8,11 +8,11 @@ static bool draw_changed;
 
 void Menu::logic() {
     if(opt_tree == 0) {
-        if(engine::checkKey(engine::inputUp)) {
+        if(engine::checkKeyPressed(engine::inputUp)) {
             opt_selected -= 1;
             draw_changed = true;
         }
-        if(engine::checkKey(engine::inputDown)) {
+        if(engine::checkKeyPressed(engine::inputDown)) {
             opt_selected += 1;
             draw_changed = true;
         }
