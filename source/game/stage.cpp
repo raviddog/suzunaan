@@ -129,7 +129,7 @@ void Stage::logic() {
             //  remove from draw vector
             //  will invalidate enemy pointer
             iteratorE = Game::enemy_s::enemy_draw->erase(iteratorE);
-        } else {
+        } else if(enemy->type >= 0) {
             //  check collision with player bullets
             for(int i = 0; i < Game::player_s::player_bullet_max; i++) {
                 if(player.bullet[i].active_frame == 1) {
@@ -170,6 +170,8 @@ void Stage::logic() {
                 default:
                     break;
             }
+            ++iteratorE;
+        } else {
             ++iteratorE;
         }
     }

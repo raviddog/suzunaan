@@ -34,7 +34,7 @@ namespace Game{
         active = false;
         moveDir = 0;
         id = -1;
-        type = 0;
+        type = -1;
         animFrame = 0;
         animDelay = 0;
         frames = 0;
@@ -296,6 +296,7 @@ namespace Game{
                 bullet->accel = bs.accel;
                 bullet->angle_change = bs.angle_change;
                 bullet->instructions = nullptr;
+                bullet->owner = id;
 
                 if(bs.scriptID > 0) {
                     if(bullet_scripts->count(bs.scriptID) > 0) {

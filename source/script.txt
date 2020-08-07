@@ -18,6 +18,8 @@ enemy(int id, int type, float x, float y)
 enemy
 ==============
 
+id = -1 for spawner type
+
 triggers
 -------------------
 
