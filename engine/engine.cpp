@@ -290,7 +290,7 @@ namespace engine {
             const int width_draw = 640, height_draw = 480;
 
             while(settings.peek() != EOF) {
-                if(settings.peek() == '[') {
+                if(settings.peek() == '[' || settings.peek() == ';') {
                     settings.ignore(512, '\n');
                 } else {
                     std::string id;
