@@ -9,6 +9,8 @@
 namespace Game{
     // bullet_s* (*enemy_s::getBullet)();
     extern std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
+    extern std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts;
+    extern std::vector<enemy_s*> *spawn_enemies;
     // std::vector<enemy_s*> *enemy_s::enemy_draw = nullptr;
 
     //  #FIX 1
@@ -32,13 +34,15 @@ namespace Game{
         listener_triggers = nullptr;
 
         active = false;
+        owned = false;
         moveDir = 0;
         id = -1;
+        owner = -1;
         type = -1;
         animFrame = 0;
         animDelay = 0;
         frames = 0;
-        hp = 0;
+        hp = 1;
         x_pos = 320.f;
         y_pos = 0.f;
         speed = 0.f;
@@ -249,6 +253,12 @@ namespace Game{
                         case 10:
                             instr_stopInterval(args.type_3);
                             break;
+                        case 11:
+                            instr_enemy(args.type_3);
+                            break;
+                        case 12:
+                            instr_angle_change(args.type_1);
+                            break;
                         default:
                             break;
                     }
@@ -362,5 +372,35 @@ namespace Game{
     void enemy_s::instr_stopInterval(uint32_t id) {
         //  can only have 1 of each element in a set, so no need to check if it already exists
         cancel_cust_triggers->insert(id);
+    }
+
+    void enemy_s::instr_enemy(uint32_t spawnID) {
+        if(instructions->bullet_spawns->count(spawnID) > 0) {
+            enemy_spawn es = instructions->enemy_spawns->at(spawnID);
+            enemy_s *enemy = new enemy_s();
+            if(enemy) { 
+                enemy->type = es.type;
+                enemy->x_pos = x_pos + es.x_offset;
+                enemy->y_pos = y_pos + es.y_offset;
+                enemy->speed = es.speed;
+                enemy->angle = es.angle;
+                enemy->accel = es.accel;
+                enemy->angle_change = 0.f;
+                enemy->instructions = nullptr;
+                enemy->owner = id;
+                enemy->id = -1;
+
+                if(es.scriptID > 0) {
+                    if(enemy_scripts->count(es.scriptID) > 0) {
+                        enemy->instructions = (enemy_scripts->at(es.scriptID)).get();
+                    }
+                }
+                spawn_enemies->push_back(enemy);
+            }
+        }
+    }
+
+    void enemy_s::instr_angle_change(float val) {
+        angle += val;
     }
 }

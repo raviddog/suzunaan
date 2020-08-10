@@ -83,7 +83,7 @@ namespace Game {
 
         std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>> *listeners;
         std::unordered_map<uint32_t, bullet_spawn> *bullet_spawns;
-    
+        std::unordered_map<uint32_t, enemy_spawn> *enemy_spawns;
     };
 
     struct stage_script {

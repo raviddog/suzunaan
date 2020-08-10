@@ -30,6 +30,8 @@ namespace Game {
             void instr_frameTrigger(uint32_t, uint32_t);
             void instr_frameTriggerOffset(uint32_t, uint32_t);
             void instr_stopInterval(uint32_t);
+            void instr_enemy(uint32_t);
+            void instr_angle_change(float);
         public:
             enemy_s();
             enemy_s(float x_pos, float y_pos, int type, int hp);
@@ -43,8 +45,8 @@ namespace Game {
             //  do i need an array for existing enemies
             //  don't for now
 
-            bool active;
-            int id, type, animFrame, animDelay, moveDir, frames, hp;
+            bool active, owned;
+            int id, owner, type, animFrame, animDelay, moveDir, frames, hp;
             float x_pos, y_pos;
 
             float speed, angle;

@@ -67,7 +67,8 @@ namespace Game {
             enemy_instr->insert({"frameTrigger", std::make_pair(8, 4)});
             enemy_instr->insert({"frameTriggerOffset", std::make_pair(9, 4)});
             enemy_instr->insert({"stopInterval", std::make_pair(10, 3)});
-            
+            enemy_instr->insert({"enemy", std::make_pair(11, 200)});
+            enemy_instr->insert({"angle_change", std::make_pair(12, 1)});
         }
 
         if(stage_instr == nullptr) {
@@ -819,7 +820,7 @@ namespace Game {
         }
 
         enemy_script *script = new enemy_script();
-        uint32_t nextId = 0;
+        uint32_t nextId = 0, enemy_id = 0;
 
         next += offset + 1;
         offset = 0;
@@ -1297,6 +1298,56 @@ namespace Game {
                                     engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
                                 }
 
+                            } else if(function_info.second == 200) {
+                                //  enemy spawning function
+                                try {
+                                    //  get function arguments
+                                    uint32_t type = std::stol(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    uint32_t scriptID = std::stol(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    float loc_x = std::stof(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    float loc_y = std::stof(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+
+                                    //  set enemy spawn properties
+                                    enemy_spawn es;
+                                    es.type = type;
+                                    es.scriptID = scriptID;
+                                    es.x_offset = loc_x;
+                                    es.y_offset = loc_y;
+                                    script->enemy_spawns->insert({enemy_id, es});
+
+                                    script_args args;
+                                    args.type_3 = enemy_id;
+                                    instruction->val->push_back(args);
+                                    enemy_id++;
+                                    engine::log_debug("(type=%u, scriptID=%u, x=%f, y=%f)", type, scriptID, loc_x, loc_y);
+                                } catch (std::invalid_argument &ex) {
+                                    success = false;
+                                    engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
+                                }
                             }
                             if(success) {
                                 if(instruction) instruction->instruct->push_back(function_info.first);
@@ -1528,7 +1579,7 @@ namespace Game {
                                     next++;
                                     offset--;
                                     
-                                    //  set bullet spawn properties
+                                    //  set enemy spawn properties
                                     enemy_spawn es;
                                     es.type = type;
                                     es.scriptID = scriptID;
@@ -1635,6 +1686,7 @@ namespace Game {
         instructions = new std::unordered_map<uint32_t, script_instruction*>();
         listeners = new std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>>();
         bullet_spawns = new std::unordered_map<uint32_t, bullet_spawn>();
+        enemy_spawns = new std::unordered_map<uint32_t, enemy_spawn>();
     }
 
     enemy_script::~enemy_script() {
@@ -1653,6 +1705,8 @@ namespace Game {
             iit_begin++;
         }
         delete instructions;
+        delete bullet_spawns;
+        delete enemy_spawns;
         delete id_map;
         delete listeners;
     }

@@ -38,6 +38,7 @@ namespace Game {
     stage_script *stagescript = nullptr;
     std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts = nullptr;
     std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts = nullptr;
+    std::vector<enemy_s*> *spawn_enemies = nullptr;
 
     int getFreeBullet() {
         if(freebullets->empty()) {
@@ -100,6 +101,7 @@ void Stage::logic() {
                         uint32_t spawnid = args.type_3;
                         enemy_s *testenemy = new enemy_s();
                         enemy_spawn es = stagescript->enemy_spawns->at(spawnid);
+                        testenemy->type = es.type;
                         testenemy->x_pos = es.x_offset;
                         testenemy->y_pos = es.y_offset;
                         testenemy->speed = es.speed;
@@ -115,6 +117,13 @@ void Stage::logic() {
             }
         }
     }
+
+    //  spawn enemies that need to be spawned
+    while(spawn_enemies->size() > 0) {
+        enemy_s *enem = spawn_enemies->back();
+        enem->activate();
+        spawn_enemies->pop_back();
+    }
     
 
 
@@ -126,6 +135,8 @@ void Stage::logic() {
         enemy->update();
         
         if(!enemy->active) {
+            //  delete enemy from memory
+            delete enemy;
             //  remove from draw vector
             //  will invalidate enemy pointer
             iteratorE = Game::enemy_s::enemy_draw->erase(iteratorE);
@@ -339,6 +350,8 @@ Stage::Stage() {
     stagescript = *stagescript_ptr;
     enemy_scripts = *enemy_scripts_ptr;
     bullet_scripts = *bullet_scripts_ptr;
+
+    spawn_enemies = new std::vector<enemy_s*>();
 }
 
 Stage::~Stage() {
@@ -350,6 +363,12 @@ Stage::~Stage() {
     delete img_bullet;
     delete[] bullets;
     delete bullet_draw_order;
+    delete spawn_enemies;
     delete img_guibg;
+
+    for(auto it = enemy_s::enemy_draw->begin(); it != enemy_s::enemy_draw->end();) {
+        delete *it;
+        it = enemy_s::enemy_draw->erase(it);
+    }
     delete Game::enemy_s::enemy_draw;
 }
