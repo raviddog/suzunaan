@@ -8,4 +8,4 @@ teststage.txt
 
 
 #bullet
-1:miko.txt
+1:b.txt

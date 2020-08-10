@@ -13,7 +13,7 @@ stage
 ==============
 
 only has frame triggers
-enemy(int id, int type, float x, float y)
+enemy(int type, int scriptID, float x, float y)
 
 enemy
 ==============

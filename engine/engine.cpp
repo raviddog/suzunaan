@@ -125,13 +125,8 @@ namespace engine {
                 size, size + 3, size + 2
             };
 
-            for(int i = 0; i < 28; i++) {
-                verts->push_back(v[i]);
-            }
-
-            for(int i = 0; i < 6; i++) {
-                indices->push_back(ind[i]);
-            }
+            verts->insert(verts->end(), std::begin(v), std::end(v));
+            indices->insert(indices->end(), std::begin(ind), std::end(ind));
         }
     }
 
@@ -152,13 +147,8 @@ namespace engine {
                 size, size + 3, size + 2
             };
 
-            for(int i = 0; i < 28; i++) {
-                verts->push_back(v[i]);
-            }
-
-            for(int i = 0; i < 6; i++) {
-                indices->push_back(ind[i]);
-            }
+            verts->insert(verts->end(), std::begin(v), std::end(v));
+            indices->insert(indices->end(), std::begin(ind), std::end(ind));
         }
     }
 
@@ -183,13 +173,8 @@ namespace engine {
                 size, size + 3, size + 2
             };
 
-            for(int i = 0; i < 28; i++) {
-                verts->push_back(v[i]);
-            }
-
-            for(int i = 0; i < 6; i++) {
-                indices->push_back(ind[i]);
-            }
+            verts->insert(verts->end(), std::begin(v), std::end(v));
+            indices->insert(indices->end(), std::begin(ind), std::end(ind));
         }
     }
 
@@ -210,13 +195,8 @@ namespace engine {
                 size, size + 3, size + 2
             };
 
-            for(int i = 0; i < 28; i++) {
-                verts->push_back(v[i]);
-            }
-
-            for(int i = 0; i < 6; i++) {
-                indices->push_back(ind[i]);
-            }
+            verts->insert(verts->end(), std::begin(v), std::end(v));
+            indices->insert(indices->end(), std::begin(ind), std::end(ind));
         }
     }
 
