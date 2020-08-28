@@ -4,7 +4,7 @@
 #include "player.hpp"
 #include "script.hpp"
 
-#include <unordered_set>
+#include <set>
 #include <memory>
 
 //#include <stdint.h>
@@ -98,10 +98,10 @@ namespace Game {
             //  continuous instructions
             std::vector<uint32_t> *active_instructions = nullptr;
             //  frame triggers that are created by instructions
-            std::unordered_multimap<uint32_t, uint32_t> *cust_triggers = nullptr;
-            std::unordered_set<uint32_t> *cancel_cust_triggers = nullptr;
+            std::multimap<uint32_t, uint32_t> *cust_triggers = nullptr;
+            std::set<uint32_t> *cancel_cust_triggers = nullptr;
             //  local version of non-frame trigger listeners
-            std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>> *listener_triggers;
+            std::multimap<uint32_t, std::pair<script_args, uint32_t>> *listener_triggers;
 
             
 

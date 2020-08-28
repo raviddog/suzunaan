@@ -8,8 +8,8 @@
 
 namespace Game{
     // bullet_s* (*enemy_s::getBullet)();
-    extern std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
-    extern std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts;
+    extern std::map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
+    extern std::map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts;
     extern std::vector<enemy_s*> *spawn_enemies;
     // std::vector<enemy_s*> *enemy_s::enemy_draw = nullptr;
 
@@ -29,8 +29,8 @@ namespace Game{
 
     enemy_s::enemy_s() {
         active_instructions = new std::vector<uint32_t>();
-        cust_triggers = new std::unordered_multimap<uint32_t, uint32_t>();
-        cancel_cust_triggers = new std::unordered_set<uint32_t>();
+        cust_triggers = new std::multimap<uint32_t, uint32_t>();
+        cancel_cust_triggers = new std::set<uint32_t>();
         listener_triggers = nullptr;
 
         active = false;
@@ -98,8 +98,8 @@ namespace Game{
                 //  run custom frame triggers
                 if(cust_triggers->count(frames) > 0) {
                     //  could've used auto lol
-                    std::pair<  std::unordered_multimap<uint32_t, uint32_t>::iterator,
-                                std::unordered_multimap<uint32_t, uint32_t>::iterator> range = cust_triggers->equal_range(frames);
+                    std::pair<  std::multimap<uint32_t, uint32_t>::iterator,
+                                std::multimap<uint32_t, uint32_t>::iterator> range = cust_triggers->equal_range(frames);
                     for(auto it = range.first; it != range.second; ++it) {
                         //  check if this trigger is to be canceled
                         if(cancel_cust_triggers->count(it->second) > 0) {

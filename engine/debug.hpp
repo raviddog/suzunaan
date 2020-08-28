@@ -1,19 +1,27 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#define _DEBUG_MSG_ENABLED_VER
-#define _DEBUG_MSG_ENABLED_SPRITE
-#define _DEBUG_MSG_ENABLED_FPS
-#define _DEBUG_MSG_ENABLED_BULLETCOUNT
-#define _DEBUG_MSG_ENABLED_CONSOLE
-#define _DEBUG_MSG_ENABLED_LOG
+// #if defined(DEBUG) || defined(_DEBUG)
+// #if !defined(DEBUG) && !defined(_DEBUG)
+
+#define _MSG_DEBUG_ENABLED
+#define _MSG_RELEASE_ENABLED
+
+#define _MSG_DEBUG_ENABLED_VER
+#define _MSG_DEBUG_ENABLED_SPRITE
+#define _MSG_DEBUG_ENABLED_FPS
+#define _MSG_DEBUG_ENABLED_BULLETCOUNT
+#define _MSG_DEBUG_ENABLED_CONSOLE
+#define _MSG_DEBUG_ENABLED_LOG
+
+#define _MSG_RPERF_ENABLED_BULLETCOUNT
+#define _MSG_RPERF_ENABLED_FPS
 
 namespace engine {
     void debug_init();
 
     void log_debug(const char *text, ...);
 
-    template<typename ...Args>
     void log_release(const char *text, ...);
 }
 

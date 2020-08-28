@@ -99,7 +99,7 @@ namespace engine {
             sprites[num].width = (float)width;
             sprites[num].height = (float)height;
         }
-        #ifdef _DEBUG_MSG_ENABLED_SPRITE
+        #ifdef _MSG_DEBUG_ENABLED_SPRITE
         log_debug("sprite #%d: %f %f %f %f\n", num, sprites[num].x, sprites[num].y, sprites[num].z, sprites[num].w);
         #endif
     }
@@ -459,14 +459,14 @@ namespace engine {
         //  clear new buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        #ifdef _DEBUG_MSG_ENABLED_FPS
+        #ifdef _MSG_DEBUG_ENABLED_FPS
         uint32_t slept;
         #endif
         //  if vsync disabled, cap fps
         int temp = 0;
         if(!_vsync) {
             //  wait
-            #ifdef _DEBUG_MSG_ENABLED_FPS
+            #ifdef _MSG_DEBUG_ENABLED_FPS
             high_resolution_clock::time_point sleep = high_resolution_clock::now();
             #endif
             #ifdef __GNUG__
@@ -482,7 +482,7 @@ namespace engine {
             std::this_thread::sleep_until(next_time);
             #endif
 
-            #ifdef _DEBUG_MSG_ENABLED_FPS
+            #ifdef _MSG_DEBUG_ENABLED_FPS
             slept = duration_cast<milliseconds>(high_resolution_clock::now() - sleep).count();
             #endif
 
@@ -498,7 +498,7 @@ namespace engine {
             
         }
 
-        #ifdef _DEBUG_MSG_ENABLED_FPS
+        #ifdef _MSG_DEBUG_ENABLED_FPS
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {

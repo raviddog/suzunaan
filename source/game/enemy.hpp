@@ -4,7 +4,7 @@
 #include "bullet.hpp"
 #include "script.hpp"
 
-#include <unordered_map>
+#include <map>
 #include <vector>
 #include "stdint.h"
 
@@ -56,10 +56,10 @@ namespace Game {
             enemy_script *instructions = nullptr;
             std::vector<uint32_t> *active_instructions = nullptr;
             //  frame triggers that are created by instructions
-            std::unordered_multimap<uint32_t, uint32_t> *cust_triggers = nullptr;
-            std::unordered_set<uint32_t> *cancel_cust_triggers = nullptr;
+            std::multimap<uint32_t, uint32_t> *cust_triggers = nullptr;
+            std::set<uint32_t> *cancel_cust_triggers = nullptr;
             //  local version of non-frame trigger listeners
-            std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>> *listener_triggers;
+            std::multimap<uint32_t, std::pair<script_args, uint32_t>> *listener_triggers;
             
             //  compiled scripts shouldn't need instruction maps
             //  instead just provide some storage variables

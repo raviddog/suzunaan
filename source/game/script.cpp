@@ -31,13 +31,13 @@ namespace Game {
     */
 
     //  instruction id converter thingies
-    std::unordered_map<std::string, std::pair<int, int>> *stage_instr = nullptr;
-    std::unordered_map<std::string, std::pair<int, int>> *bullet_instr = nullptr;
-    std::unordered_map<std::string, std::pair<int, int>> *enemy_instr = nullptr;
+    std::map<std::string, std::pair<int, int>> *stage_instr = nullptr;
+    std::map<std::string, std::pair<int, int>> *bullet_instr = nullptr;
+    std::map<std::string, std::pair<int, int>> *enemy_instr = nullptr;
 
     void script_init() {
         if(bullet_instr == nullptr) {
-            bullet_instr = new std::unordered_map<std::string, std::pair<int, int>>();
+            bullet_instr = new std::map<std::string, std::pair<int, int>>();
             bullet_instr->insert({"speed", std::make_pair(1, 1)});
             bullet_instr->insert({"accel", std::make_pair(2, 1)});
             bullet_instr->insert({"angle_change", std::make_pair(3, 1)});
@@ -54,7 +54,7 @@ namespace Game {
         }
 
         if(enemy_instr == nullptr) {
-            enemy_instr = new std::unordered_map<std::string, std::pair<int, int>>();
+            enemy_instr = new std::map<std::string, std::pair<int, int>>();
             enemy_instr->insert({"speed", std::make_pair(1, 1)});
             enemy_instr->insert({"angle", std::make_pair(2, 1)});
             enemy_instr->insert({"accel", std::make_pair(3, 1)});
@@ -72,7 +72,7 @@ namespace Game {
         }
 
         if(stage_instr == nullptr) {
-            stage_instr = new std::unordered_map<std::string, std::pair<int, int>>();
+            stage_instr = new std::map<std::string, std::pair<int, int>>();
             stage_instr->insert({"bullet", std::make_pair(1, 100)});
             stage_instr->insert({"enemy", std::make_pair(2, 200)});
         }
@@ -89,7 +89,7 @@ namespace Game {
         bullet_instr = nullptr;
     }
 
-    int loadScript(const std::string &path, stage_script **stageptr, std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> **enemy_scripts_ptr, std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> **bullet_scripts_ptr) {
+    int loadScript(const std::string &path, stage_script **stageptr, std::map<uint32_t, std::shared_ptr<enemy_script>> **enemy_scripts_ptr, std::map<uint32_t, std::shared_ptr<bullet_script>> **bullet_scripts_ptr) {
         //  path to stage loader script
         //  load the stage script and the listed enemy and bullet scripts
         //  should be the only thing needed to be called from stage.cpp
@@ -115,8 +115,8 @@ namespace Game {
         }
 
         stage_script *stage = *stageptr;
-        std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts = *enemy_scripts_ptr;
-        std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts = *bullet_scripts_ptr;
+        std::map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts = *enemy_scripts_ptr;
+        std::map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts = *bullet_scripts_ptr;
 
 
 
@@ -185,8 +185,8 @@ namespace Game {
         if(enemy_scripts) delete enemy_scripts;
         if(bullet_scripts) delete bullet_scripts;
 
-        enemy_scripts = new std::unordered_map<uint32_t, std::shared_ptr<enemy_script>>();
-        bullet_scripts = new std::unordered_map<uint32_t, std::shared_ptr<bullet_script>>();
+        enemy_scripts = new std::map<uint32_t, std::shared_ptr<enemy_script>>();
+        bullet_scripts = new std::map<uint32_t, std::shared_ptr<bullet_script>>();
 
         next += offset + 1;
         offset = 0;
@@ -1654,10 +1654,10 @@ namespace Game {
 
 
     bullet_script::bullet_script() {
-        id_map = new std::unordered_map<uint32_t, uint32_t>();
-        frame_triggers = new std::unordered_map<uint32_t, std::vector<uint32_t>*>();
-        instructions = new std::unordered_map<uint32_t, script_instruction*>();
-        listeners = new std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>>();
+        id_map = new std::map<uint32_t, uint32_t>();
+        frame_triggers = new std::map<uint32_t, std::vector<uint32_t>*>();
+        instructions = new std::map<uint32_t, script_instruction*>();
+        listeners = new std::multimap<uint32_t, std::pair<script_args, uint32_t>>();
     }
 
     bullet_script::~bullet_script() {
@@ -1681,12 +1681,12 @@ namespace Game {
     }
 
     enemy_script::enemy_script() {
-        id_map = new std::unordered_map<uint32_t, uint32_t>();
-        frame_triggers = new std::unordered_map<uint32_t, std::vector<uint32_t>*>();
-        instructions = new std::unordered_map<uint32_t, script_instruction*>();
-        listeners = new std::unordered_multimap<uint32_t, std::pair<script_args, uint32_t>>();
-        bullet_spawns = new std::unordered_map<uint32_t, bullet_spawn>();
-        enemy_spawns = new std::unordered_map<uint32_t, enemy_spawn>();
+        id_map = new std::map<uint32_t, uint32_t>();
+        frame_triggers = new std::map<uint32_t, std::vector<uint32_t>*>();
+        instructions = new std::map<uint32_t, script_instruction*>();
+        listeners = new std::multimap<uint32_t, std::pair<script_args, uint32_t>>();
+        bullet_spawns = new std::map<uint32_t, bullet_spawn>();
+        enemy_spawns = new std::map<uint32_t, enemy_spawn>();
     }
 
     enemy_script::~enemy_script() {
@@ -1725,7 +1725,7 @@ namespace Game {
     stage_script::stage_script() {
         bullet_spawns = new std::vector<bullet_spawn>();
         enemy_spawns = new std::vector<enemy_spawn>();
-        frame_triggers = new std::unordered_map<uint32_t, script_instruction*>();
+        frame_triggers = new std::map<uint32_t, script_instruction*>();
     }
 
     stage_script::~stage_script() {

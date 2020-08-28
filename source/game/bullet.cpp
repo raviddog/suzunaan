@@ -26,8 +26,8 @@ namespace Game {
 
     bullet_s::bullet_s() {
         active_instructions = new std::vector<uint32_t>();
-        cust_triggers = new std::unordered_multimap<uint32_t, uint32_t>();
-        cancel_cust_triggers = new std::unordered_set<uint32_t>();
+        cust_triggers = new std::multimap<uint32_t, uint32_t>();
+        cancel_cust_triggers = new std::set<uint32_t>();
         listener_triggers = nullptr;
         reset();
     }
@@ -130,8 +130,8 @@ namespace Game {
             //  run custom frame triggers
             if(cust_triggers->count(frames) > 0) {
                 //  could've used auto lol
-                std::pair<  std::unordered_multimap<uint32_t, uint32_t>::iterator,
-                            std::unordered_multimap<uint32_t, uint32_t>::iterator> range = cust_triggers->equal_range(frames);
+                std::pair<  std::multimap<uint32_t, uint32_t>::iterator,
+                            std::multimap<uint32_t, uint32_t>::iterator> range = cust_triggers->equal_range(frames);
                 for(auto it = range.first; it != range.second; it++) {
                     //  check if this trigger is to be canceled
                     if(cancel_cust_triggers->count(it->second) > 0) {

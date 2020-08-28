@@ -19,7 +19,7 @@ Game::bullet_s* (*Game::enemy_s::getBullet)();
 std::vector<Game::enemy_s*> *Game::enemy_s::enemy_draw;
 
 namespace Game {
-    const int BULLET_MAX = 10000;
+    const int BULLET_MAX = 120000;
     float bullet_hitbox_radius_temp = 4.27f;
 
     engine::SpriteSheet *img_player, *img_player_b, *img_player_eff, *img_bullet, *img_enemy;
@@ -36,8 +36,8 @@ namespace Game {
 
 
     stage_script *stagescript = nullptr;
-    std::unordered_map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts = nullptr;
-    std::unordered_map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts = nullptr;
+    std::map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts = nullptr;
+    std::map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts = nullptr;
     std::vector<enemy_s*> *spawn_enemies = nullptr;
 
     int getFreeBullet() {
@@ -216,7 +216,7 @@ void Stage::logic() {
         }
     }
     
-    #ifdef _DEBUG_MSG_ENABLED_BULLETCOUNT
+    #ifdef _MSG_DEBUG_ENABLED_BULLETCOUNT
     if(frames % 60 == 0) {
         engine::log_debug("bullets: %d ", count);
     }
