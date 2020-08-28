@@ -47,7 +47,7 @@ namespace Game {
         active = false;
         type = 0;
         owner = -1;
-        frames = 0;
+        frames = -15;
         x_pos = 0.f;
         y_pos = 0.f;
         speed = 0.f;
@@ -87,87 +87,93 @@ namespace Game {
 
     void bullet_s::update() {
         if(active) {
-            if(frames == 0u) {
-                //  first frame, do some initial setup
-                //  make a copy of the non-frame trigger listeners
-                if(instructions) listener_triggers = new auto(*(instructions->listeners));
-            }
-            //  apply instructions
-            if(instructions) {
-                //  check frame triggers
-                if(instructions->frame_triggers->count(frames) > 0) {
-                    //  add instructions from the vector to the active instructions
-                    std::vector<uint32_t> *ins = instructions->frame_triggers->at(frames);
-                    for(size_t i = 0; i < ins->size(); i++) {
-                        active_instructions->push_back(ins->at(i));
+            //  fully spawned
+            if(frames >= 0) {
+                if(frames == 0) {
+                    //  first frame, do some initial setup
+                    //  make a copy of the non-frame trigger listeners
+                    if(instructions) listener_triggers = new auto(*(instructions->listeners));
+                }
+                //  apply instructions
+                if(instructions) {
+                    //  check frame triggers
+                    if(instructions->frame_triggers->count(frames) > 0) {
+                        //  add instructions from the vector to the active instructions
+                        std::vector<uint32_t> *ins = instructions->frame_triggers->at(frames);
+                        for(size_t i = 0; i < ins->size(); i++) {
+                            active_instructions->push_back(ins->at(i));
+                        }
+                    }
+                    //  check listener triggers
+                    if(listener_triggers) {
+                        //  probably just do listeners manually here
+                        //  there won't be enough of them to justify making separate functions?
+                        
+                        //  get distance
+                        //  might wanna do this distance check when all the player collision tests are done
+                        float distanceSQ = (y_pos - player->y_pos) * (y_pos - player->y_pos)
+                                            + (x_pos - player->x_pos) * (x_pos - player->x_pos);
+                        //  distanceToPlayer
+                        auto range = listener_triggers->equal_range(1u);
+                        auto it = range.first;
+                        while(it != range.second) {
+                            //  get value
+                            float val = it->second.first.type_1;
+                            if(distanceSQ < val * val) {
+                                //  activate and remove
+                                active_instructions->push_back(it->second.second);
+                                it = listener_triggers->erase(it);
+                            } else {
+                                it++;
+                            }                     
+                        }
                     }
                 }
-                //  check listener triggers
-                if(listener_triggers) {
-                    //  probably just do listeners manually here
-                    //  there won't be enough of them to justify making separate functions?
-                    
-                    //  get distance
-                    //  might wanna do this distance check when all the player collision tests are done
-                    float distanceSQ = (y_pos - player->y_pos) * (y_pos - player->y_pos)
-                                        + (x_pos - player->x_pos) * (x_pos - player->x_pos);
-                    //  distanceToPlayer
-                    auto range = listener_triggers->equal_range(1u);
-                    auto it = range.first;
-                    while(it != range.second) {
-                        //  get value
-                        float val = it->second.first.type_1;
-                        if(distanceSQ < val * val) {
-                            //  activate and remove
-                            active_instructions->push_back(it->second.second);
-                            it = listener_triggers->erase(it);
+                //  run custom frame triggers
+                if(cust_triggers->count(frames) > 0) {
+                    //  could've used auto lol
+                    std::pair<  std::multimap<uint32_t, uint32_t>::iterator,
+                                std::multimap<uint32_t, uint32_t>::iterator> range = cust_triggers->equal_range(frames);
+                    for(auto it = range.first; it != range.second; it++) {
+                        //  check if this trigger is to be canceled
+                        if(cancel_cust_triggers->count(it->second) > 0) {
+                            //  don't run it
+                            //  since it's a frame trigger, it can't be reached again, so there's no need to delete it
+                            //  remove the cancel though, so that this trigger can be created again if so
+                            cancel_cust_triggers->erase(it->second);
                         } else {
-                            it++;
-                        }                     
+                            active_instructions->push_back(it->second);
+                        }
                     }
                 }
-            }
-            //  run custom frame triggers
-            if(cust_triggers->count(frames) > 0) {
-                //  could've used auto lol
-                std::pair<  std::multimap<uint32_t, uint32_t>::iterator,
-                            std::multimap<uint32_t, uint32_t>::iterator> range = cust_triggers->equal_range(frames);
-                for(auto it = range.first; it != range.second; it++) {
-                    //  check if this trigger is to be canceled
-                    if(cancel_cust_triggers->count(it->second) > 0) {
-                        //  don't run it
-                        //  since it's a frame trigger, it can't be reached again, so there's no need to delete it
-                        //  remove the cancel though, so that this trigger can be created again if so
-                        cancel_cust_triggers->erase(it->second);
-                    } else {
-                        active_instructions->push_back(it->second);
-                    }
+                
+                run_instructions();
+
+                speed += accel;
+                angle += angle_change;
+                if(angle > 360.f) angle -= 360.f;
+                if(angle < -360.f) angle += 360.f;
+                x_pos += std::sin(toRadians(angle)) * speed;
+                y_pos += std::cos(toRadians(angle)) * speed;
+
+                //  update visual angle (spinning stars, etc)
+                if(type > 159 && type < 176) {
+                    draw_angle += 6.f;
+                    if(draw_angle > 360.f) draw_angle -= 360.f;
+                } else {
+                    draw_angle = angle;
                 }
-            }
-            
-            run_instructions();
 
-            speed += accel;
-            angle += angle_change;
-            if(angle > 360.f) angle -= 360.f;
-            if(angle < -360.f) angle += 360.f;
-            x_pos += std::sin(toRadians(angle)) * speed;
-            y_pos += std::cos(toRadians(angle)) * speed;
 
-            //  update visual angle (spinning stars, etc)
-            if(type > 159 && type < 176) {
-                draw_angle += 6.f;
-                if(draw_angle > 360.f) draw_angle -= 360.f;
+                //  disable when out of bounds
+                if(x_pos > bullet_bounds_xmax) active = false;
+                if(x_pos < bullet_bounds_x) active = false;
+                if(y_pos > bullet_bounds_ymax) active = false;
+                if(y_pos < bullet_bounds_y) active = false;
             } else {
-                draw_angle = angle;
+                //  spawning
+                //  dont do movement logic
             }
-
-
-            //  disable when out of bounds
-            if(x_pos > bullet_bounds_xmax) active = false;
-            if(x_pos < bullet_bounds_x) active = false;
-            if(y_pos > bullet_bounds_ymax) active = false;
-            if(y_pos < bullet_bounds_y) active = false;
 
             
             frames++;

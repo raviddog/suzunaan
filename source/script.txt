@@ -123,7 +123,7 @@ run every x frames
 triggered by id
 it is recommended you provide an instruction id for this trigger, even if you aren't using it
 
-intervalStart(int start, int frames)
+intervalStart(int frames, int start)
 starting from specified frame, run every x frames
 cancellable by id
 it is recommended you provide an instruction id for this trigger, even if you aren't using it

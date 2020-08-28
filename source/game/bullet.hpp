@@ -71,8 +71,8 @@ namespace Game {
             ~bullet_s();
 
             bool active;
-            uint32_t type, frames;
-            int owner;
+            uint32_t type;
+            int owner, frames;
             float x_pos, y_pos;
             
             //  not sure which way to implement movement

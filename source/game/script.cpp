@@ -400,7 +400,7 @@ namespace Game {
                     //  add to frame triggers
                     try {
                         //  get frame number
-                        uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
+                        int frame = std::stol(content.substr(next, offset), nullptr);
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
                             //  doesn't exist, create the vector
@@ -451,7 +451,7 @@ namespace Game {
                     //  same as frame, but selfdestruct is false
                     try {
                         //  get frame number
-                        uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
+                        int frame = std::stol(content.substr(next, offset), nullptr);
                         engine::log_debug("frame %u:", frame);
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
@@ -523,7 +523,7 @@ namespace Game {
                         }
                         next++;
                         offset--;
-                        uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
+                        int frame = std::stol(content.substr(next, offset), nullptr);
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
                             //  doesn't exist, create the vector
@@ -1655,7 +1655,7 @@ namespace Game {
 
     bullet_script::bullet_script() {
         id_map = new std::map<uint32_t, uint32_t>();
-        frame_triggers = new std::map<uint32_t, std::vector<uint32_t>*>();
+        frame_triggers = new std::map<int, std::vector<uint32_t>*>();
         instructions = new std::map<uint32_t, script_instruction*>();
         listeners = new std::multimap<uint32_t, std::pair<script_args, uint32_t>>();
     }

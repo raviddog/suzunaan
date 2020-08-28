@@ -40,7 +40,7 @@ namespace Game {
         //  id map needs to be stored in script structure, in case other scripts need to interact with it
         std::map<uint32_t, uint32_t> *id_map;
         std::map<uint32_t, script_instruction*> *instructions;
-        std::map<uint32_t, std::vector<uint32_t>*> *frame_triggers;
+        std::map<int, std::vector<uint32_t>*> *frame_triggers;
 
         //  list of listeners (non-frame based triggers)
         //  listener type, pair<listener type, value, instruction id>

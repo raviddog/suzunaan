@@ -211,7 +211,13 @@ void Stage::logic() {
             iteratorB = bullet_draw_order->erase(iteratorB);
         } else {
             count += 1;
-            img_bullet->drawSpriteCentered(bullets[*iteratorB].type, bullets[*iteratorB].x_pos, bullets[*iteratorB].y_pos, bullets[*iteratorB].draw_angle);
+            if(bullets[*iteratorB].frames < 0) {
+                int num = (bullets[*iteratorB].type % 16) / 2;
+                float sizemod = (7.5f - bullets[*iteratorB].frames) / 7.5f;
+                img_bullet->drawSpriteCentered(192 + num, bullets[*iteratorB].x_pos, bullets[*iteratorB].y_pos, 0.f, 24.f * sizemod, 24.f * sizemod);
+            } else {
+                img_bullet->drawSpriteCentered(bullets[*iteratorB].type, bullets[*iteratorB].x_pos, bullets[*iteratorB].y_pos, bullets[*iteratorB].draw_angle);
+            }
             ++iteratorB;
         }
     }
@@ -317,11 +323,14 @@ Stage::Stage() {
     player.init(8.f, 16.f, 376.f, 432.f);
     player.hitbox_radius = 1.f;
 
-    img_bullet = new engine::SpriteSheet("./data/bullet1.png", 192, BULLET_MAX);
+    img_bullet = new engine::SpriteSheet("./data/bullet1.png", 200, BULLET_MAX);
     for(int y = 0; y < 12; y++) {
         for(int x = 0; x < 16; x++) {
             img_bullet->setSprite(y * 16 + x, x * 16, y * 16, 16, 16);
         }
+    }
+    for(int i = 0; i < 12; i++) {
+        img_bullet->setSprite(192 + i, i * 32, 208, 32, 32);
     }
 
     //  initialize bullets
