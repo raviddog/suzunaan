@@ -20,6 +20,7 @@ namespace engine {
 
     int scrWidth, scrHeight, drawWidth, drawHeight;
     int viewport[4], scrMode;
+    float scalex, scaley;
     
     uint32_t controls[inputSkip];
 
@@ -414,6 +415,23 @@ namespace engine {
 
         delete dmode;
 
+        //  precalculate stuff for setviewport
+        //  set viewport to specified rectangle (inside draw area)
+        //  need to calculate x and y based off of the existing draw area
+        scalex = (float)scrWidth / (float)drawWidth;
+        scaley = (float)scrHeight / (float)drawHeight;
+
+        if(scrMode == 1 || scrMode == 3) {
+            float draw_ratio = (float)drawWidth / (float)drawHeight;
+            float screen_ratio = (float)scrWidth / (float)scrHeight;
+            if(draw_ratio > screen_ratio) {
+                //  draw area is wider than screen
+                scaley = scalex;
+            } else if(draw_ratio < screen_ratio) {
+                //  draw area is narrower than screen
+                scalex = scaley;
+            }
+        }
 
         if(vsync) {
             _vsync = true;
@@ -535,31 +553,10 @@ namespace engine {
 
     void setViewport(int x, int y, int w, int h)
     {
-        //  set viewport to specified rectangle (inside draw area)
-        //  need to calculate x and y based off of the existing draw area
-        float scalex, scaley;
-        scalex = (float)scrWidth / (float)drawWidth;
-        scaley = (float)scrHeight / (float)drawHeight;
-
-        if(scrMode == 1 || scrMode == 3) {
-            float draw_ratio = (float)drawWidth / (float)drawHeight;
-            float screen_ratio = (float)scrWidth / (float)scrHeight;
-            if(draw_ratio > screen_ratio) {
-                //  draw area is wider than screen
-                scaley = scalex;
-            } else if(draw_ratio < screen_ratio) {
-                //  draw area is narrower than screen
-                scalex = scaley;
-            }
-        }
-
         glViewport( viewport[0] + (int)(scalex * (float)x),
                     viewport[1] + (int)(scaley * (float)y),
                     (int)(scalex * (float)w),
                     (int)(scaley * (float)h));
-
-        
-        
         glm::vec2 scrRes = glm::vec2((float)w, (float)h);
         shaderSpriteSheet->setVec2("res", scrRes);
     }
