@@ -22,7 +22,7 @@ namespace engine {
     int viewport[4], scrMode;
     float scalex, scaley;
     
-    uint32_t controls[inputSkip];
+    uint32_t controls[inputSkip + 1];
 
     //  framerate stuff
     static bool _vsync;
@@ -510,8 +510,8 @@ namespace engine {
                 temp++;
             }
 
-            // next_time = high_resolution_clock::now();
-            next_time += microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
+            next_time = high_resolution_clock::now() + microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
+            // next_time += microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
             
             
         }
