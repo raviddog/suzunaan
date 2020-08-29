@@ -1,6 +1,6 @@
 type: bullet
 
-frame(0):angle(180) speed(2);
+init():angle(180) speed(2);
 
 1:none() : type_set_relative(16) accel(-0.25);
 frame(1) : frameTrigger(1, 30);

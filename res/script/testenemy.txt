@@ -4,5 +4,5 @@ init(): setHP(10);
 frame(20):angle(90) speed(1);
 2:intervalStart(1, 1):angle_change(5);
 frame(30):accel(0);
-1:intervalStart(30, 1): bullet(120, 1, 0.05, 0);
+1:intervalStart(15, 1): bullet(120, 1, 0.05, 0);
 //frame(20):enemy(1, 1, 0, 0);

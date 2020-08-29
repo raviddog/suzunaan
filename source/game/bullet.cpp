@@ -87,24 +87,33 @@ namespace Game {
 
     void bullet_s::update() {
         if(active) {
-            //  fully spawned
-            if(frames >= 0) {
-                if(frames == 0) {
-                    //  first frame, do some initial setup
-                    //  make a copy of the non-frame trigger listeners
-                    if(instructions) listener_triggers = new auto(*(instructions->listeners));
-                }
-                //  apply instructions
-                if(instructions) {
-                    //  check frame triggers
-                    if(instructions->frame_triggers->count(frames) > 0) {
-                        //  add instructions from the vector to the active instructions
-                        std::vector<uint32_t> *ins = instructions->frame_triggers->at(frames);
-                        for(size_t i = 0; i < ins->size(); i++) {
-                            active_instructions->push_back(ins->at(i));
-                        }
+            //  make a copy of the non-frame trigger listeners if none exists
+            //  also run init trigger here
+            if(instructions && !listener_triggers) {
+                listener_triggers = new auto(*(instructions->listeners));
+                if(listener_triggers->count(2u) > 0) {
+                    auto range = listener_triggers->equal_range(2u);
+                    auto it = range.first;
+                    while(it != range.second) {
+                        //  activate all
+                        active_instructions->push_back(it->second.second);
+                        it = listener_triggers->erase(it);
                     }
-                    //  check listener triggers
+                }
+            }
+
+            //  apply instructions
+            if(instructions) {
+                //  check frame triggers
+                if(instructions->frame_triggers->count(frames) > 0) {
+                    //  add instructions from the vector to the active instructions
+                    std::vector<uint32_t> *ins = instructions->frame_triggers->at(frames);
+                    for(size_t i = 0; i < ins->size(); i++) {
+                        active_instructions->push_back(ins->at(i));
+                    }
+                }
+                //  check listener triggers
+                if(frames >= 0) {
                     if(listener_triggers) {
                         //  probably just do listeners manually here
                         //  there won't be enough of them to justify making separate functions?
@@ -146,34 +155,31 @@ namespace Game {
                         }
                     }
                 }
-                
-                run_instructions();
-
-                speed += accel;
-                angle += angle_change;
-                if(angle > 360.f) angle -= 360.f;
-                if(angle < -360.f) angle += 360.f;
-                x_pos += std::sin(toRadians(angle)) * speed;
-                y_pos += std::cos(toRadians(angle)) * speed;
-
-                //  update visual angle (spinning stars, etc)
-                if(type > 159 && type < 176) {
-                    draw_angle += 6.f;
-                    if(draw_angle > 360.f) draw_angle -= 360.f;
-                } else {
-                    draw_angle = angle;
-                }
-
-
-                //  disable when out of bounds
-                if(x_pos > bullet_bounds_xmax) active = false;
-                if(x_pos < bullet_bounds_x) active = false;
-                if(y_pos > bullet_bounds_ymax) active = false;
-                if(y_pos < bullet_bounds_y) active = false;
-            } else {
-                //  spawning
-                //  dont do movement logic
             }
+                
+            run_instructions();
+
+            speed += accel;
+            angle += angle_change;
+            if(angle > 360.f) angle -= 360.f;
+            if(angle < -360.f) angle += 360.f;
+            x_pos += std::sin(toRadians(angle)) * speed;
+            y_pos += std::cos(toRadians(angle)) * speed;
+
+            //  update visual angle (spinning stars, etc)
+            if(type > 159 && type < 176) {
+                draw_angle += 6.f;
+                if(draw_angle > 360.f) draw_angle -= 360.f;
+            } else {
+                draw_angle = angle;
+            }
+
+
+            //  disable when out of bounds
+            if(x_pos > bullet_bounds_xmax) active = false;
+            if(x_pos < bullet_bounds_x) active = false;
+            if(y_pos > bullet_bounds_ymax) active = false;
+            if(y_pos < bullet_bounds_y) active = false;
 
             
             frames++;

@@ -567,6 +567,22 @@ namespace Game {
                         engine::log_debug("invalid frame trigger in line %d, skipping line", line);
                         abort = true;
                     }
+                } else if(trigger_type == "init") {
+                    //  insert listener argument
+                    std::pair<script_args, uint32_t> args;
+                    args.second = instruct_id;
+                    //  there's not really any arguments for this trigger
+                    //  just insert a blank one?
+                    script->listeners->insert({2u, args});
+                    //  create instruction
+                    if(script->instructions->count(instruct_id) > 0) {
+                        instruction = script->instructions->at(instruct_id);
+                    } else  {
+                        instruction = new script_instruction();
+                        script->instructions->insert({instruct_id, instruction});
+                    }
+                    instruction->selfdestruct = true;
+                    engine::log_debug("trigger: init ");
                 } else if(trigger_type == "distToPlayer") {
                     try {
                         //  get distance
