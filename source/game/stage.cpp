@@ -329,7 +329,7 @@ Stage::Stage() {
             img_bullet->setSprite(y * 16 + x, x * 16, y * 16, 16, 16);
         }
     }
-    for(int i = 0; i < 12; i++) {
+    for(int i = 0; i < 8; i++) {
         img_bullet->setSprite(192 + i, i * 32, 208, 32, 32);
     }
 
