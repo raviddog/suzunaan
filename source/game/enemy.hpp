@@ -23,14 +23,14 @@ namespace Game {
             void instr_speed(float);
             void instr_angle(float);
             void instr_accel(float);
-            void instr_bullet(uint32_t);
+            void instr_bullet(int);
             void instr_setHP(int);
-            size_t instr_stop(uint32_t);
-            void instr_start(uint32_t);
-            void instr_frameTrigger(uint32_t, uint32_t);
-            void instr_frameTriggerOffset(uint32_t, uint32_t);
-            void instr_stopInterval(uint32_t);
-            void instr_enemy(uint32_t);
+            size_t instr_stop(int);
+            void instr_start(int);
+            void instr_frameTrigger(int, int);
+            void instr_frameTriggerOffset(int, int);
+            void instr_stopInterval(int);
+            void instr_enemy(int);
             void instr_angle_change(float);
         public:
             enemy_s();
@@ -54,12 +54,12 @@ namespace Game {
             float draw_angle;
 
             enemy_script *instructions = nullptr;
-            std::vector<uint32_t> *active_instructions = nullptr;
+            std::vector<int> *active_instructions = nullptr;
             //  frame triggers that are created by instructions
-            std::multimap<uint32_t, uint32_t> *cust_triggers = nullptr;
-            std::set<uint32_t> *cancel_cust_triggers = nullptr;
+            std::multimap<int, int> *cust_triggers = nullptr;
+            std::set<int> *cancel_cust_triggers = nullptr;
             //  local version of non-frame trigger listeners
-            std::multimap<uint32_t, std::pair<script_args, uint32_t>> *listener_triggers;
+            std::multimap<int, std::pair<script_args, int>> *listener_triggers;
             
             //  compiled scripts shouldn't need instruction maps
             //  instead just provide some storage variables

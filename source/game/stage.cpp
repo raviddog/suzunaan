@@ -36,8 +36,8 @@ namespace Game {
 
 
     stage_script *stagescript = nullptr;
-    std::map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts = nullptr;
-    std::map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts = nullptr;
+    std::map<int, std::shared_ptr<bullet_script>> *bullet_scripts = nullptr;
+    std::map<int, std::shared_ptr<enemy_script>> *enemy_scripts = nullptr;
     std::vector<enemy_s*> *spawn_enemies = nullptr;
 
     int getFreeBullet() {
@@ -98,7 +98,7 @@ void Stage::logic() {
                     case 2:
                     {
                         //  spawn enemy
-                        uint32_t spawnid = args.type_3;
+                        int spawnid = args.type_3;
                         enemy_s *testenemy = new enemy_s();
                         enemy_spawn es = stagescript->enemy_spawns->at(spawnid);
                         testenemy->type = es.type;

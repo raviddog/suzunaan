@@ -8,8 +8,8 @@
 
 namespace Game{
     // bullet_s* (*enemy_s::getBullet)();
-    extern std::map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts;
-    extern std::map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts;
+    extern std::map<int, std::shared_ptr<bullet_script>> *bullet_scripts;
+    extern std::map<int, std::shared_ptr<enemy_script>> *enemy_scripts;
     extern std::vector<enemy_s*> *spawn_enemies;
     // std::vector<enemy_s*> *enemy_s::enemy_draw = nullptr;
 
@@ -28,9 +28,9 @@ namespace Game{
     float toDegrees(float rad);
 
     enemy_s::enemy_s() {
-        active_instructions = new std::vector<uint32_t>();
-        cust_triggers = new std::multimap<uint32_t, uint32_t>();
-        cancel_cust_triggers = new std::set<uint32_t>();
+        active_instructions = new std::vector<int>();
+        cust_triggers = new std::multimap<int, int>();
+        cancel_cust_triggers = new std::set<int>();
         listener_triggers = nullptr;
 
         active = false;
@@ -84,7 +84,7 @@ namespace Game{
                 if(instructions) {
                     if(instructions->frame_triggers->count(frames) > 0) {
                         //  add instructions from the vector to the active instructions
-                        std::vector<uint32_t> *ins = instructions->frame_triggers->at(frames);
+                        std::vector<int> *ins = instructions->frame_triggers->at(frames);
                         for(size_t i = 0; i < ins->size(); i++) {
                             active_instructions->push_back(ins->at(i));
                         }
@@ -98,8 +98,8 @@ namespace Game{
                 //  run custom frame triggers
                 if(cust_triggers->count(frames) > 0) {
                     //  could've used auto lol
-                    std::pair<  std::multimap<uint32_t, uint32_t>::iterator,
-                                std::multimap<uint32_t, uint32_t>::iterator> range = cust_triggers->equal_range(frames);
+                    std::pair<  std::multimap<int, int>::iterator,
+                                std::multimap<int, int>::iterator> range = cust_triggers->equal_range(frames);
                     for(auto it = range.first; it != range.second; ++it) {
                         //  check if this trigger is to be canceled
                         if(cancel_cust_triggers->count(it->second) > 0) {
@@ -193,7 +193,7 @@ namespace Game{
 
      void enemy_s::run_instructions() {
         for(size_t i = 0; i < active_instructions->size();) {
-            uint32_t num = active_instructions->at(i);
+            int num = active_instructions->at(i);
             //  get active script instruction from instruction list
             if(instructions->instructions->count(num) > 0) {
                 //  instruction does exist
@@ -240,13 +240,13 @@ namespace Game{
                             break;
                         case 8:
                         {
-                            std::pair<uint32_t, uint32_t> val = script_getIntInt(args.type_4);
+                            std::pair<int, int> val = script_getIntInt(args.type_4);
                             instr_frameTrigger(val.first, val.second);
                             break;
                         }
                         case 9:
                         {
-                            std::pair<uint32_t, uint32_t> val = script_getIntInt(args.type_4);
+                            std::pair<int, int> val = script_getIntInt(args.type_4);
                             instr_frameTriggerOffset(val.first, val.second);
                             break;
                         }
@@ -292,7 +292,7 @@ namespace Game{
         accel = val;
     }
 
-    void enemy_s::instr_bullet(uint32_t spawnID) {
+    void enemy_s::instr_bullet(int spawnID) {
         if(instructions->bullet_spawns->count(spawnID) > 0) {
             bullet_spawn bs = instructions->bullet_spawns->at(spawnID);
             bullet_s *bullet = getBullet();
@@ -322,7 +322,7 @@ namespace Game{
         hp = newhp;
     }
 
-    size_t enemy_s::instr_stop(uint32_t val) {
+    size_t enemy_s::instr_stop(int val) {
         size_t i = 0;
         for(;i < active_instructions->size(); i++) {
             //  found instruction
@@ -339,7 +339,7 @@ namespace Game{
         }
     }
 
-    void enemy_s::instr_start(uint32_t val) {
+    void enemy_s::instr_start(int val) {
         //  first check if instruction is a real instruction
         if(instructions->instructions->count(val) > 0) {
             //  don't duplicate instructions, search active array to check if instruction is already running
@@ -355,26 +355,20 @@ namespace Game{
         }
     }
 
-    void enemy_s::instr_frameTrigger(uint32_t id, uint32_t frame) {
-        if(instructions->id_map->count(id) > 0) {
-            id = instructions->id_map->at(id);
-        }
+    void enemy_s::instr_frameTrigger(int id, int frame) {
         cust_triggers->insert({frame, id});
     }
 
-    void enemy_s::instr_frameTriggerOffset(uint32_t id, uint32_t frame) {
-        if(instructions->id_map->count(id) > 0) {
-            id = instructions->id_map->at(id);
-        }
+    void enemy_s::instr_frameTriggerOffset(int id, int frame) {
         cust_triggers->insert({frame + frames, id});
     }
 
-    void enemy_s::instr_stopInterval(uint32_t id) {
+    void enemy_s::instr_stopInterval(int id) {
         //  can only have 1 of each element in a set, so no need to check if it already exists
         cancel_cust_triggers->insert(id);
     }
 
-    void enemy_s::instr_enemy(uint32_t spawnID) {
+    void enemy_s::instr_enemy(int spawnID) {
         if(instructions->bullet_spawns->count(spawnID) > 0) {
             enemy_spawn es = instructions->enemy_spawns->at(spawnID);
             enemy_s *enemy = new enemy_s();

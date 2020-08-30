@@ -54,11 +54,11 @@ namespace Game {
             void instr_type_set_relative(int);
             void instr_angle(float);
             //  needs to inform the instruction loop that an element was removed
-            size_t instr_stop(uint32_t);  
-            void instr_start(uint32_t);
-            void instr_frameTrigger(uint32_t, uint32_t);
-            void instr_frameTriggerOffset(uint32_t, uint32_t);
-            void instr_stopInterval(uint32_t);
+            size_t instr_stop(int);  
+            void instr_start(int);
+            void instr_frameTrigger(int, int);
+            void instr_frameTriggerOffset(int, int);
+            void instr_stopInterval(int);
             void instr_angle_atPlayer();
             void instr_random_angle_change(float, float);
             void instr_random_angle(float, float);
@@ -71,7 +71,7 @@ namespace Game {
             ~bullet_s();
 
             bool active;
-            uint32_t type;
+            int type;
             int owner, frames;
             float x_pos, y_pos;
             
@@ -96,12 +96,12 @@ namespace Game {
             //  source instructions
             bullet_script *instructions = nullptr;
             //  continuous instructions
-            std::vector<uint32_t> *active_instructions = nullptr;
+            std::vector<int> *active_instructions = nullptr;
             //  frame triggers that are created by instructions
-            std::multimap<uint32_t, uint32_t> *cust_triggers = nullptr;
-            std::set<uint32_t> *cancel_cust_triggers = nullptr;
+            std::multimap<int, int> *cust_triggers = nullptr;
+            std::set<int> *cancel_cust_triggers = nullptr;
             //  local version of non-frame trigger listeners
-            std::multimap<uint32_t, std::pair<script_args, uint32_t>> *listener_triggers;
+            std::multimap<int, std::pair<script_args, int>> *listener_triggers;
 
             
 

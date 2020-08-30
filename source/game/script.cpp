@@ -7,7 +7,7 @@
 
 namespace Game {
 
-    uint64_t script_setIntInt(uint32_t, uint32_t);
+    uint64_t script_setIntInt(int, int);
     uint64_t script_setFloatFloat(float, float);
 
      //  load instructions  
@@ -89,7 +89,7 @@ namespace Game {
         bullet_instr = nullptr;
     }
 
-    int loadScript(const std::string &path, stage_script **stageptr, std::map<uint32_t, std::shared_ptr<enemy_script>> **enemy_scripts_ptr, std::map<uint32_t, std::shared_ptr<bullet_script>> **bullet_scripts_ptr) {
+    int loadScript(const std::string &path, stage_script **stageptr, std::map<int, std::shared_ptr<enemy_script>> **enemy_scripts_ptr, std::map<int, std::shared_ptr<bullet_script>> **bullet_scripts_ptr) {
         //  path to stage loader script
         //  load the stage script and the listed enemy and bullet scripts
         //  should be the only thing needed to be called from stage.cpp
@@ -115,8 +115,8 @@ namespace Game {
         }
 
         stage_script *stage = *stageptr;
-        std::map<uint32_t, std::shared_ptr<enemy_script>> *enemy_scripts = *enemy_scripts_ptr;
-        std::map<uint32_t, std::shared_ptr<bullet_script>> *bullet_scripts = *bullet_scripts_ptr;
+        std::map<int, std::shared_ptr<enemy_script>> *enemy_scripts = *enemy_scripts_ptr;
+        std::map<int, std::shared_ptr<bullet_script>> *bullet_scripts = *bullet_scripts_ptr;
 
 
 
@@ -185,8 +185,8 @@ namespace Game {
         if(enemy_scripts) delete enemy_scripts;
         if(bullet_scripts) delete bullet_scripts;
 
-        enemy_scripts = new std::map<uint32_t, std::shared_ptr<enemy_script>>();
-        bullet_scripts = new std::map<uint32_t, std::shared_ptr<bullet_script>>();
+        enemy_scripts = new std::map<int, std::shared_ptr<enemy_script>>();
+        bullet_scripts = new std::map<int, std::shared_ptr<bullet_script>>();
 
         next += offset + 1;
         offset = 0;
@@ -229,7 +229,7 @@ namespace Game {
                     //  TODO do error checking later
                     //  get id
                     while(content[next + offset] != ':') offset++;
-                    uint32_t id = std::stoul(content.substr(next, offset), nullptr);
+                    int id = std::stol(content.substr(next, offset), nullptr);
                     next += offset;
                     offset = 0;
                     //  skip colon
@@ -246,7 +246,7 @@ namespace Game {
                     //  TODO do error checking later
                     //  get id
                     while(content[next + offset] != ':') offset++;
-                    uint32_t id = std::stoul(content.substr(next, offset), nullptr);
+                    int id = std::stol(content.substr(next, offset), nullptr);
                     next += offset;
                     offset = 0;
                     //  skip colon
@@ -318,7 +318,7 @@ namespace Game {
         }
 
         bullet_script *script = new bullet_script();
-        uint32_t nextId = 0;
+        int nextId = 0;
 
         next += offset + 1;
         offset = 0;
@@ -338,10 +338,7 @@ namespace Game {
                 //  check if the line has an id in it by counting colons
                 //  this is a really shitty jank way of doing it
                 int colons = 0;
-                uint32_t instruct_id = 0;
-                //  keep track of the old user provided id, so the interval triggers can create functions with the correct arguments
-                bool userId = false;
-                uint32_t old_id = 0;
+                int instruct_id = 0;
                 while(next + offset < length && content[next + offset] != '\n') {
                     if(content[next + offset] == ':') colons++;
                     offset++;
@@ -350,27 +347,13 @@ namespace Game {
                 if(colons == 2) {
                     //  read id
                     try {
-                        uint32_t tempid = std::stoul(content.substr(next, offset), nullptr);
-                        //  check if it already exists
-                        if(script->id_map->count(tempid) > 0) {
-                            //  just assume the user knows what they're doing, duplicating an id
-                            //  maybe you can do some cool tricks with this
-                            instruct_id = script->id_map->at(tempid);
-                        } else {
-                            //  insert into user id map
-                            script->id_map->insert({tempid, nextId});
-                            instruct_id = nextId;
-                            nextId++;
-                        }
-                        //  user provided id
-                        userId = true;
-                        old_id = tempid;
+                        instruct_id = std::stol(content.substr(next, offset), nullptr);
                         engine::log_debug("id: %u ", instruct_id);
                     } catch (std::invalid_argument &ex) {
                         //  invalid id, use nextId
                         engine::log_debug("invalid id, ignoring. ");
                         instruct_id = nextId;
-                        nextId++;
+                        nextId--;
                     }
                     //  position next at the trigger function name
                     while(next < length && content[next] != ':') next++;
@@ -378,7 +361,7 @@ namespace Game {
                 } else {
                     //  no id given, just use nextId
                     instruct_id = nextId;
-                    nextId++;
+                    nextId--;
                 }
 
 
@@ -404,7 +387,7 @@ namespace Game {
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
                             //  doesn't exist, create the vector
-                            std::vector<uint32_t> *v = new std::vector<uint32_t>();
+                            std::vector<int> *v = new std::vector<int>();
                             script->frame_triggers->insert({frame, v});
                         }
                         //  insert instruction ID into frame triggers
@@ -456,7 +439,7 @@ namespace Game {
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
                             //  doesn't exist, create the vector
-                            std::vector<uint32_t> *v = new std::vector<uint32_t>();
+                            std::vector<int> *v = new std::vector<int>();
                             script->frame_triggers->insert({frame, v});
                         }
                         //  insert instruction ID into frame triggers
@@ -476,7 +459,7 @@ namespace Game {
                 } else if(trigger_type == "interval") {
                     try {
                         //  get arguments
-                        uint32_t interval = std::stoul(content.substr(next, offset), nullptr);
+                        int interval = std::stol(content.substr(next, offset), nullptr);
                         //  no initial trigger, just insert instruction ID
                         if(script->instructions->count(instruct_id) > 0) {
                             instruction = script->instructions->at(instruct_id);
@@ -488,23 +471,7 @@ namespace Game {
                         instruction->selfdestruct = true;
                         //  create and insert frameTriggerOffset into the instructions
                         script_args args;
-                        //  get the supplied user id for the trigger id, or generate one if not supplied
-                        if(userId) {
-                            //  user provided id
-                            args.type_4 = script_setIntInt(old_id, interval);
-                        } else {
-                            //  no user id, generate one
-                            //  if this collides with a user id in the future it would be very bad
-                            //  start from uint_max, and just go down from there
-                            //  so its recommended users provide ids to any interval function
-                            //  good thing unsigned overflow/underflow is defined behaviour
-                            uint32_t tempid = 0u - 1u;
-                            //  search for an unmapped id
-                            while(script->id_map->count(tempid) > 0) tempid--;
-                            //  tempid now refers to an unmapped id
-                            script->id_map->insert({tempid, instruct_id});
-                            args.type_4 = script_setIntInt(tempid, interval);
-                        }
+                        args.type_4 = script_setIntInt(instruct_id, interval);
                         instruction->instruct->push_back(9);
                         instruction->val->push_back(args);
                         engine::log_debug("trigger: interval %u ", interval);
@@ -516,7 +483,7 @@ namespace Game {
                     //  same as interval but with a frame trigger
                     try {
                         //  get arguments
-                        uint32_t interval = std::stoul(content.substr(next, offset), nullptr);
+                        int interval = std::stol(content.substr(next, offset), nullptr);
                         while(content[next] != ',' && offset > 0) {
                             next++;
                             offset--;
@@ -527,7 +494,7 @@ namespace Game {
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
                             //  doesn't exist, create the vector
-                            std::vector<uint32_t> *v = new std::vector<uint32_t>();
+                            std::vector<int> *v = new std::vector<int>();
                             script->frame_triggers->insert({frame, v});
                         }
                         //  insert instruction ID into frame triggers
@@ -544,22 +511,7 @@ namespace Game {
                         //  create and insert frameTriggerOffset into the instructions
                         script_args args;
                         //  get the supplied user id for the trigger id, or generate one if not supplied
-                        if(userId) {
-                            //  user provided id
-                            args.type_4 = script_setIntInt(old_id, interval);
-                        } else {
-                            //  no user id, generate one
-                            //  if this collides with a user id in the future it would be very bad
-                            //  start from uint_max, and just go down from there
-                            //  so its recommended users provide ids to any interval function
-                            //  good thing unsigned overflow/underflow is defined behaviour
-                            uint32_t tempid = 0u - 1u;
-                            //  search for an unmapped id
-                            while(script->id_map->count(tempid) > 0) tempid--;
-                            //  tempid now refers to an unmapped id
-                            script->id_map->insert({tempid, instruct_id});
-                            args.type_4 = script_setIntInt(tempid, interval);
-                        }
+                        args.type_4 = script_setIntInt(instruct_id, interval);
                         instruction->instruct->push_back(9);
                         instruction->val->push_back(args);
                         engine::log_debug("trigger: frame %u interval %u ", frame, interval);
@@ -569,7 +521,7 @@ namespace Game {
                     }
                 } else if(trigger_type == "init") {
                     //  insert listener argument
-                    std::pair<script_args, uint32_t> args;
+                    std::pair<script_args, int> args;
                     args.second = instruct_id;
                     //  there's not really any arguments for this trigger
                     //  just insert a blank one?
@@ -588,7 +540,7 @@ namespace Game {
                         //  get distance
                         float distance = std::stof(content.substr(next, offset), nullptr);
                         //  prepare listener arguments
-                        std::pair<script_args, uint32_t> args;
+                        std::pair<script_args, int> args;
                         args.first.type_1 = distance;
                         args.second = instruct_id;
                         //  place into listeners
@@ -694,22 +646,10 @@ namespace Game {
                                 //  unsigned int, probably only used for start and stop because frame ids
                                 //  single int
                                 try {
-                                    uint32_t arg_1 = std::stoul(content.substr(next, offset), nullptr);
+                                    int arg_1 = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
-                                    }
-                                    //  additional logic for start and stop, gotta create an entry in the id map
-                                    if(function_name == "start" || function_name == "stop" || function_name == "stopInterval") {
-                                        if(script->id_map->count(arg_1) > 0) {
-                                            //  there's an entry already, switch the argument to the new id
-                                            arg_1 = script->id_map->at(arg_1);
-                                        } else {
-                                            //  no entry, create one
-                                            script->id_map->insert({arg_1, nextId});
-                                            arg_1 = nextId;
-                                            nextId++;
-                                        }
                                     }
                                     script_args args;
                                     args.type_3 = arg_1;
@@ -722,14 +662,14 @@ namespace Game {
                             } else if(function_info.second == 4) {
                                 //  two unsigned ints
                                 try {
-                                    uint32_t arg_1 = std::stoul(content.substr(next, offset), nullptr);
+                                    int arg_1 = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
                                     }
                                     next++;
                                     offset--;
-                                    uint32_t arg_2 = std::stoul(content.substr(next, offset), nullptr);
+                                    int arg_2 = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
@@ -836,7 +776,7 @@ namespace Game {
         }
 
         enemy_script *script = new enemy_script();
-        uint32_t nextId = 0, enemy_id = 0;
+        int nextId = 0, enemy_id = 0;
 
         next += offset + 1;
         offset = 0;
@@ -856,12 +796,9 @@ namespace Game {
                 //  check if the line has an id in it by counting colons
                 //  this is a really shitty jank way of doing it
                 int colons = 0;
-                uint32_t instruct_id = 0;
-                //  keep track of the old user provided id, so the interval triggers can create functions with the correct arguments
-                bool userId = false;
-                uint32_t old_id = 0;
+                int instruct_id = 0;
                 //  next free bullet_spawn id
-                uint32_t bullet_id = 0u;
+                int bullet_id = 0;
                 while(next + offset < length && content[next + offset] != '\n') {
                     if(content[next + offset] == ':') colons++;
                     offset++;
@@ -870,27 +807,13 @@ namespace Game {
                 if(colons == 2) {
                     //  read id
                     try {
-                        uint32_t tempid = std::stoul(content.substr(next, offset), nullptr);
-                        //  check if it already exists
-                        if(script->id_map->count(tempid) > 0) {
-                            //  just assume the user knows what they're doing, duplicating an id
-                            //  maybe you can do some cool tricks with this
-                            instruct_id = script->id_map->at(tempid);
-                        } else {
-                            //  insert into user id map
-                            script->id_map->insert({tempid, nextId});
-                            instruct_id = nextId;
-                            nextId++;
-                        }
-                        //  user provided id
-                        userId = true;
-                        old_id = tempid;
+                        instruct_id = std::stol(content.substr(next, offset), nullptr);
                         engine::log_debug("id: %u ", instruct_id);
                     } catch (std::invalid_argument &ex) {
                         //  invalid id, use nextId
                         engine::log_debug("invalid id, ignoring. ");
                         instruct_id = nextId;
-                        nextId++;
+                        nextId--;
                     }
                     //  position next at the trigger function name
                     while(next < length && content[next] != ':') next++;
@@ -898,7 +821,7 @@ namespace Game {
                 } else {
                     //  no id given, just use nextId
                     instruct_id = nextId;
-                    nextId++;
+                    nextId--;
                 }
 
                  //  first get trigger function name
@@ -920,11 +843,11 @@ namespace Game {
                     //  add to frame triggers
                     try {
                         //  get frame number
-                        uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
+                        int frame = std::stol(content.substr(next, offset), nullptr);
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
                             //  doesn't exist, create the vector
-                            std::vector<uint32_t> *v = new std::vector<uint32_t>();
+                            std::vector<int> *v = new std::vector<int>();
                             script->frame_triggers->insert({frame, v});
                         }
                         //  insert instruction ID into frame triggers
@@ -971,12 +894,12 @@ namespace Game {
                     //  same as frame, but selfdestruct is false
                     try {
                         //  get frame number
-                        uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
+                        int frame = std::stol(content.substr(next, offset), nullptr);
                         engine::log_debug("frame %u:", frame);
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
                             //  doesn't exist, create the vector
-                            std::vector<uint32_t> *v = new std::vector<uint32_t>();
+                            std::vector<int> *v = new std::vector<int>();
                             script->frame_triggers->insert({frame, v});
                         }
                         //  insert instruction ID into frame triggers
@@ -996,7 +919,7 @@ namespace Game {
                 } else if(trigger_type == "interval") {
                     try {
                         //  get arguments
-                        uint32_t interval = std::stoul(content.substr(next, offset), nullptr);
+                        int interval = std::stol(content.substr(next, offset), nullptr);
                         //  no initial trigger, just insert instruction ID
                         if(script->instructions->count(instruct_id) > 0) {
                             instruction = script->instructions->at(instruct_id);
@@ -1009,22 +932,7 @@ namespace Game {
                         //  create and insert frameTriggerOffset into the instructions
                         script_args args;
                         //  get the supplied user id for the trigger id, or generate one if not supplied
-                        if(userId) {
-                            //  user provided id
-                            args.type_4 = script_setIntInt(old_id, interval);
-                        } else {
-                            //  no user id, generate one
-                            //  if this collides with a user id in the future it would be very bad
-                            //  start from uint_max, and just go down from there
-                            //  so its recommended users provide ids to any interval function
-                            //  good thing unsigned overflow/underflow is defined behaviour
-                            uint32_t tempid = 0u - 1u;
-                            //  search for an unmapped id
-                            while(script->id_map->count(tempid) > 0) tempid--;
-                            //  tempid now refers to an unmapped id
-                            script->id_map->insert({tempid, instruct_id});
-                            args.type_4 = script_setIntInt(tempid, interval);
-                        }
+                        args.type_4 = script_setIntInt(instruct_id, interval);
                         instruction->instruct->push_back(9);
                         instruction->val->push_back(args);
                         engine::log_debug("trigger: interval %u ", interval);
@@ -1036,18 +944,18 @@ namespace Game {
                     //  same as interval but with a frame trigger
                     try {
                         //  get arguments
-                        uint32_t interval = std::stoul(content.substr(next, offset), nullptr);
+                        int interval = std::stol(content.substr(next, offset), nullptr);
                         while(content[next] != ',' && offset > 0) {
                             next++;
                             offset--;
                         }
                         next++;
                         offset--;
-                        uint32_t frame = std::stoul(content.substr(next, offset), nullptr);
+                        int frame = std::stol(content.substr(next, offset), nullptr);
                         //  check if frame data exists
                         if(script->frame_triggers->count(frame) == 0) {
                             //  doesn't exist, create the vector
-                            std::vector<uint32_t> *v = new std::vector<uint32_t>();
+                            std::vector<int> *v = new std::vector<int>();
                             script->frame_triggers->insert({frame, v});
                         }
                         //  insert instruction ID into frame triggers
@@ -1064,22 +972,7 @@ namespace Game {
                         //  create and insert frameTriggerOffset into the instructions
                         script_args args;
                         //  get the supplied user id for the trigger id, or generate one if not supplied
-                        if(userId) {
-                            //  user provided id
-                            args.type_4 = script_setIntInt(old_id, interval);
-                        } else {
-                            //  no user id, generate one
-                            //  if this collides with a user id in the future it would be very bad
-                            //  start from uint_max, and just go down from there
-                            //  so its recommended users provide ids to any interval function
-                            //  good thing unsigned overflow/underflow is defined behaviour
-                            uint32_t tempid = 0u - 1u;
-                            //  search for an unmapped id
-                            while(script->id_map->count(tempid) > 0) tempid--;
-                            //  tempid now refers to an unmapped id
-                            script->id_map->insert({tempid, instruct_id});
-                            args.type_4 = script_setIntInt(tempid, interval);
-                        }
+                        args.type_4 = script_setIntInt(instruct_id, interval);
                         instruction->instruct->push_back(9);
                         instruction->val->push_back(args);
                         engine::log_debug("trigger: frame %u interval %u ", frame, interval);
@@ -1089,7 +982,7 @@ namespace Game {
                     }
                 } else if(trigger_type == "init") {
                     //  insert listener argument
-                    std::pair<script_args, uint32_t> args;
+                    std::pair<script_args, int> args;
                     args.second = instruct_id;
                     //  there's not really any arguments for this trigger
                     //  just insert a blank one?
@@ -1190,22 +1083,10 @@ namespace Game {
                                 //  unsigned int, probably only used for start and stop because frame ids
                                 //  single int
                                 try {
-                                    uint32_t arg_1 = std::stoul(content.substr(next, offset), nullptr);
+                                    int arg_1 = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
-                                    }
-                                    //  additional logic for start and stop, gotta create an entry in the id map
-                                    if(function_name == "start" || function_name == "stop" || function_name == "stopInterval") {
-                                        if(script->id_map->count(arg_1) > 0) {
-                                            //  there's an entry already, switch the argument to the new id
-                                            arg_1 = script->id_map->at(arg_1);
-                                        } else {
-                                            //  no entry, create one
-                                            script->id_map->insert({arg_1, nextId});
-                                            arg_1 = nextId;
-                                            nextId++;
-                                        }
                                     }
                                     script_args args;
                                     args.type_3 = arg_1;
@@ -1218,14 +1099,14 @@ namespace Game {
                             } else if(function_info.second == 4) {
                                 //  two unsigned ints
                                 try {
-                                    uint32_t arg_1 = std::stoul(content.substr(next, offset), nullptr);
+                                    int arg_1 = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
                                     }
                                     next++;
                                     offset--;
-                                    uint32_t arg_2 = std::stoul(content.substr(next, offset), nullptr);
+                                    int arg_2 = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
@@ -1267,14 +1148,14 @@ namespace Game {
                                 //  these values are only used by bullet firing functions
                                 try {
                                     //  get function arguments
-                                    uint32_t type = std::stoul(content.substr(next, offset), nullptr);
+                                    int type = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
                                     }
                                     next++;
                                     offset--;
-                                    uint32_t scriptID = std::stoul(content.substr(next, offset), nullptr);
+                                    int scriptID = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
@@ -1318,14 +1199,14 @@ namespace Game {
                                 //  enemy spawning function
                                 try {
                                     //  get function arguments
-                                    uint32_t type = std::stol(content.substr(next, offset), nullptr);
+                                    int type = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
                                     }
                                     next++;
                                     offset--;
-                                    uint32_t scriptID = std::stol(content.substr(next, offset), nullptr);
+                                    int scriptID = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
@@ -1430,7 +1311,7 @@ namespace Game {
         }
 
         stage_script *script = new stage_script();
-        uint32_t bullet_id = 0, enemy_id = 0;
+        int bullet_id = 0, enemy_id = 0;
 
         next += offset + 1;
         offset = 0;
@@ -1452,10 +1333,10 @@ namespace Game {
                     offset++;
                 }
                 //  get frame
-                uint32_t frame;
+                int frame;
                 script_instruction* instruction = nullptr;
                 try {
-                    frame = std::stoul(content.substr(next, offset), nullptr);
+                    frame = std::stol(content.substr(next, offset), nullptr);
                     if(script->frame_triggers->count(frame) == 0) {
                         //  this frame hasn't got trigger data
                         //  create the instruction
@@ -1515,14 +1396,14 @@ namespace Game {
                                 //  these values are only used by bullet firing functions
                                 try {
                                     //  get function arguments
-                                    uint32_t type = std::stoul(content.substr(next, offset), nullptr);
+                                    int type = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
                                     }
                                     next++;
                                     offset--;
-                                    uint32_t scriptID = std::stoul(content.substr(next, offset), nullptr);
+                                    int scriptID = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
@@ -1566,14 +1447,14 @@ namespace Game {
                                 //  definitely need to modify this at some point
                                 try {
                                     //  get function arguments
-                                    uint32_t type = std::stoul(content.substr(next, offset), nullptr);
+                                    int type = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
                                     }
                                     next++;
                                     offset--;
-                                    uint32_t scriptID = std::stoul(content.substr(next, offset), nullptr);
+                                    int scriptID = std::stol(content.substr(next, offset), nullptr);
                                     while(content[next] != ',' && offset > 0) {
                                         next++;
                                         offset--;
@@ -1632,7 +1513,7 @@ namespace Game {
 
 
 
-    uint64_t script_setIntInt(uint32_t first, uint32_t second) {
+    uint64_t script_setIntInt(int first, int second) {
         uint64_t out = 0;
         out += first;
         out += ((uint64_t)second) << 32;
@@ -1640,7 +1521,7 @@ namespace Game {
     }
 
     uint64_t script_setFloatFloat(float first, float second) {
-        uint32_t storage_1 = 0u, storage_2 = 0u;
+        int storage_1 = 0u, storage_2 = 0u;
         memcpy(&storage_1, &first, 4);
         memcpy(&storage_2, &second, 4);
         uint64_t val = storage_1;
@@ -1650,15 +1531,15 @@ namespace Game {
 
 
 
-    std::pair<uint32_t, uint32_t> script_getIntInt(uint64_t in) {
-        std::pair<uint32_t, uint32_t> out;
-        out.first = (uint32_t)in;
-        out.second = (uint32_t)(in >> 32);
+    std::pair<int, int> script_getIntInt(uint64_t in) {
+        std::pair<int, int> out;
+        out.first = (int)in;
+        out.second = (int)(in >> 32);
         return out;
     }
 
     std::pair<float, float> script_getFloatFloat(uint64_t in) {
-        uint32_t data_1, data_2;
+        int data_1, data_2;
         data_1 = in;
         data_2 = in >> 32;
         float f1, f2;
@@ -1670,10 +1551,9 @@ namespace Game {
 
 
     bullet_script::bullet_script() {
-        id_map = new std::map<uint32_t, uint32_t>();
-        frame_triggers = new std::map<int, std::vector<uint32_t>*>();
-        instructions = new std::map<uint32_t, script_instruction*>();
-        listeners = new std::multimap<uint32_t, std::pair<script_args, uint32_t>>();
+        frame_triggers = new std::map<int, std::vector<int>*>();
+        instructions = new std::map<int, script_instruction*>();
+        listeners = new std::multimap<int, std::pair<script_args, int>>();
     }
 
     bullet_script::~bullet_script() {
@@ -1692,17 +1572,15 @@ namespace Game {
             iit_begin++;
         }
         delete instructions;
-        delete id_map;
         delete listeners;
     }
 
     enemy_script::enemy_script() {
-        id_map = new std::map<uint32_t, uint32_t>();
-        frame_triggers = new std::map<uint32_t, std::vector<uint32_t>*>();
-        instructions = new std::map<uint32_t, script_instruction*>();
-        listeners = new std::multimap<uint32_t, std::pair<script_args, uint32_t>>();
-        bullet_spawns = new std::map<uint32_t, bullet_spawn>();
-        enemy_spawns = new std::map<uint32_t, enemy_spawn>();
+        frame_triggers = new std::map<int, std::vector<int>*>();
+        instructions = new std::map<int, script_instruction*>();
+        listeners = new std::multimap<int, std::pair<script_args, int>>();
+        bullet_spawns = new std::map<int, bullet_spawn>();
+        enemy_spawns = new std::map<int, enemy_spawn>();
     }
 
     enemy_script::~enemy_script() {
@@ -1723,13 +1601,12 @@ namespace Game {
         delete instructions;
         delete bullet_spawns;
         delete enemy_spawns;
-        delete id_map;
         delete listeners;
     }
 
 
     script_instruction::script_instruction() {
-        instruct = new std::vector<uint32_t>();
+        instruct = new std::vector<int>();
         val = new std::vector<script_args>();
     }
 
@@ -1741,7 +1618,7 @@ namespace Game {
     stage_script::stage_script() {
         bullet_spawns = new std::vector<bullet_spawn>();
         enemy_spawns = new std::vector<enemy_spawn>();
-        frame_triggers = new std::map<uint32_t, script_instruction*>();
+        frame_triggers = new std::map<int, script_instruction*>();
     }
 
     stage_script::~stage_script() {

@@ -22,14 +22,14 @@ namespace Game {
         // std::tuple<float, int> *type_3;
     };
 
-    std::pair<uint32_t, uint32_t> script_getIntInt(uint64_t);
+    std::pair<int, int> script_getIntInt(uint64_t);
     std::pair<float, float> script_getFloatFloat(uint64_t);
 
     struct script_instruction {
         script_instruction();
         ~script_instruction();
         bool selfdestruct = false;
-        std::vector<uint32_t> *instruct;
+        std::vector<int> *instruct;
         std::vector<script_args> *val;
     };
 
@@ -37,22 +37,20 @@ namespace Game {
         bullet_script();
         ~bullet_script();
 
-        //  id map needs to be stored in script structure, in case other scripts need to interact with it
-        std::map<uint32_t, uint32_t> *id_map;
-        std::map<uint32_t, script_instruction*> *instructions;
-        std::map<int, std::vector<uint32_t>*> *frame_triggers;
+        std::map<int, script_instruction*> *instructions;
+        std::map<int, std::vector<int>*> *frame_triggers;
 
         //  list of listeners (non-frame based triggers)
         //  listener type, pair<listener type, value, instruction id>
-        std::multimap<uint32_t, std::pair<script_args, uint32_t>> *listeners;
+        std::multimap<int, std::pair<script_args, int>> *listeners;
     };
 
     //  a struct containing the initial values a bullet is spawned with
     //  this will definitely need to be changed in the future when i add variables in enemy scripts
     //  also this name sucks, but whatever
     struct bullet_spawn {
-        uint32_t type = 0;
-        uint32_t scriptID = 0;
+        int type = 0;
+        int scriptID = 0;
         //  have a type variable for changing whether these are offsets or absolute coordinates
         float x_offset = 0.f;
         float y_offset = 0.f;
@@ -63,8 +61,8 @@ namespace Game {
     };
 
     struct enemy_spawn {
-        uint32_t type = 0;
-        uint32_t scriptID = 0;
+        int type = 0;
+        int scriptID = 0;
         //  have a type variable for changing whether these are offsets or absolute coordinates
         float x_offset = 0.f;
         float y_offset = 0.f;
@@ -77,31 +75,27 @@ namespace Game {
         enemy_script();
         ~enemy_script();
 
-        std::map<uint32_t, uint32_t> *id_map;
-        std::map<uint32_t, script_instruction*> *instructions;
-        std::map<uint32_t, std::vector<uint32_t>*> *frame_triggers;
+        std::map<int, script_instruction*> *instructions;
+        std::map<int, std::vector<int>*> *frame_triggers;
 
-        std::multimap<uint32_t, std::pair<script_args, uint32_t>> *listeners;
-        std::map<uint32_t, bullet_spawn> *bullet_spawns;
-        std::map<uint32_t, enemy_spawn> *enemy_spawns;
+        std::multimap<int, std::pair<script_args, int>> *listeners;
+        std::map<int, bullet_spawn> *bullet_spawns;
+        std::map<int, enemy_spawn> *enemy_spawns;
     };
 
     struct stage_script {
         stage_script();
         ~stage_script();
         
-        // std::map<uint32_t, bullet_spawn> *bullet_spawns;
+        // std::map<int, bullet_spawn> *bullet_spawns;
         std::vector<bullet_spawn> *bullet_spawns;
         std::vector<enemy_spawn> *enemy_spawns;
-        std::map<uint32_t, script_instruction*> *frame_triggers;
+        std::map<int, script_instruction*> *frame_triggers;
     };
-    
-
-   
 
     void script_init();
     void script_cleanup();
-    int loadScript(const std::string &path, stage_script **stageptr, std::map<uint32_t, std::shared_ptr<enemy_script>> **enemy_scripts_ptr, std::map<uint32_t, std::shared_ptr<bullet_script>> **bullet_scripts_ptr);
+    int loadScript(const std::string &path, stage_script **stageptr, std::map<int, std::shared_ptr<enemy_script>> **enemy_scripts_ptr, std::map<int, std::shared_ptr<bullet_script>> **bullet_scripts_ptr);
 
 }
 
