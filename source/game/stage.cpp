@@ -98,7 +98,7 @@ void Stage::logic() {
                     case 2:
                     {
                         //  spawn enemy
-                        int spawnid = args.type_3;
+                        int spawnid = args.type_2;
                         enemy_s *testenemy = new enemy_s();
                         enemy_spawn es = stagescript->enemy_spawns->at(spawnid);
                         testenemy->type = es.type;

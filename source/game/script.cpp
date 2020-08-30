@@ -652,9 +652,9 @@ namespace Game {
                                         offset--;
                                     }
                                     script_args args;
-                                    args.type_3 = arg_1;
+                                    args.type_2 = arg_1;
                                     instruction->val->push_back(args);
-                                    engine::log_debug("(uint %u)", arg_1);
+                                    engine::log_debug("(int %u)", arg_1);
                                 } catch (std::invalid_argument &ex) {
                                     success = false;
                                     engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
@@ -677,7 +677,7 @@ namespace Game {
                                     script_args args;
                                     args.type_4 = script_setIntInt(arg_1, arg_2);
                                     instruction->val->push_back(args);
-                                    engine::log_debug("(uint %u, uint %u)", arg_1, arg_2);
+                                    engine::log_debug("(int %u, int %u)", arg_1, arg_2);
                                 } catch (std::invalid_argument &ex) {
                                     success = false;
                                     engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
@@ -1089,9 +1089,9 @@ namespace Game {
                                         offset--;
                                     }
                                     script_args args;
-                                    args.type_3 = arg_1;
+                                    args.type_2 = arg_1;
                                     instruction->val->push_back(args);
-                                    engine::log_debug("(uint %u)", arg_1);
+                                    engine::log_debug("(int %u)", arg_1);
                                 } catch (std::invalid_argument &ex) {
                                     success = false;
                                     engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
@@ -1114,7 +1114,7 @@ namespace Game {
                                     script_args args;
                                     args.type_4 = script_setIntInt(arg_1, arg_2);
                                     instruction->val->push_back(args);
-                                    engine::log_debug("(uint %u, uint %u)", arg_1, arg_2);
+                                    engine::log_debug("(int %u, int %u)", arg_1, arg_2);
                                 } catch (std::invalid_argument &ex) {
                                     success = false;
                                     engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
@@ -1186,7 +1186,7 @@ namespace Game {
                                     script->bullet_spawns->insert({bullet_id, bs});
 
                                     script_args args;
-                                    args.type_3 = bullet_id;
+                                    args.type_2 = bullet_id;
                                     instruction->val->push_back(args);
                                     bullet_id++;
                                     engine::log_debug("(type=%u, scriptID=%u, speed=%f, angle=%f)", type, scriptID, speed, angle);
@@ -1237,7 +1237,7 @@ namespace Game {
                                     script->enemy_spawns->insert({enemy_id, es});
 
                                     script_args args;
-                                    args.type_3 = enemy_id;
+                                    args.type_2 = enemy_id;
                                     instruction->val->push_back(args);
                                     enemy_id++;
                                     engine::log_debug("(type=%u, scriptID=%u, x=%f, y=%f)", type, scriptID, loc_x, loc_y);
@@ -1434,7 +1434,7 @@ namespace Game {
                                     script->bullet_spawns->push_back(bs);
 
                                     script_args args;
-                                    args.type_3 = bullet_id;
+                                    args.type_2 = bullet_id;
                                     instruction->val->push_back(args);
                                     bullet_id++;
                                     engine::log_debug("(type=%u, scriptID=%u, speed=%f, angle=%f)", type, scriptID, speed, angle);
@@ -1485,7 +1485,7 @@ namespace Game {
                                     script->enemy_spawns->push_back(es);
 
                                     script_args args;
-                                    args.type_3 = enemy_id;
+                                    args.type_2 = enemy_id;
                                     instruction->val->push_back(args);
                                     enemy_id++;
                                     engine::log_debug("(type=%u, scriptID=%u, x=%f, y=%f)", type, scriptID, loc_x, loc_y);

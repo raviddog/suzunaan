@@ -67,10 +67,10 @@ namespace Game {
         }
         //  compiled stuff
         // run_instructions = nullptr;
-        storage[0].u = 0;
-        storage[1].u = 0;
-        storage[2].u = 0;
-        storage[3].u = 0;
+        storage[0].i = 0;
+        storage[1].i = 0;
+        storage[2].i = 0;
+        storage[3].i = 0;
     }
 
     void bullet_s::setPos(float x_pos, float y_pos) {
@@ -217,7 +217,7 @@ namespace Game {
                         case 6:
                         {
                             //  if this removes an element before the current instruction, need to decrement i
-                            size_t result = instr_stop(args.type_3);
+                            size_t result = instr_stop(args.type_2);
                             if(result != active_instructions->size()) {
                                 if(result < i) {
                                     i--;
@@ -231,7 +231,7 @@ namespace Game {
                             break;   
                         }
                         case 7:
-                            instr_start(args.type_3);
+                            instr_start(args.type_2);
                             break;
                         case 8:
                         {
@@ -246,7 +246,7 @@ namespace Game {
                             break;
                         }
                         case 10:
-                            instr_stopInterval(args.type_3);
+                            instr_stopInterval(args.type_2);
                             break;
                         case 11:
                             instr_angle_atPlayer();

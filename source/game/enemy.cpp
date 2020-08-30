@@ -214,7 +214,7 @@ namespace Game{
                             instr_accel(args.type_1);
                             break;
                         case 4:
-                            instr_bullet(args.type_3);
+                            instr_bullet(args.type_2);
                             break;
                         case 5:
                             instr_setHP(args.type_2);
@@ -222,7 +222,7 @@ namespace Game{
                         case 6:
                         {
                             //  if this removes an element before the current instruction, need to decrement i
-                            size_t result = instr_stop(args.type_3);
+                            size_t result = instr_stop(args.type_2);
                             if(result != active_instructions->size()) {
                                 if(result < i) {
                                     i--;
@@ -236,7 +236,7 @@ namespace Game{
                             break;   
                         }
                         case 7:
-                            instr_start(args.type_3);
+                            instr_start(args.type_2);
                             break;
                         case 8:
                         {
@@ -251,10 +251,10 @@ namespace Game{
                             break;
                         }
                         case 10:
-                            instr_stopInterval(args.type_3);
+                            instr_stopInterval(args.type_2);
                             break;
                         case 11:
-                            instr_enemy(args.type_3);
+                            instr_enemy(args.type_2);
                             break;
                         case 12:
                             instr_angle_change(args.type_1);

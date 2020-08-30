@@ -14,8 +14,8 @@ namespace Game {
     union script_args{
         //  type_0 is no argument
         float type_1;
-        int32_t type_2;
-        uint32_t type_3;
+        int type_2;
+        // uint32_t type_3;
         uint64_t type_4;    //  two unsigned ints
         uint64_t type_5;    //  two floats
         // std::unique_ptr<std::tuple<float, int>> type_3;

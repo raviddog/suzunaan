@@ -108,8 +108,7 @@ namespace Game {
             //  compiled scripts shouldn't need instruction maps
             //  instead just provide some storage variables
             union storage_u {
-                uint32_t u;
-                int32_t i;
+                int i;
                 float f;
                 bool b;
             };
