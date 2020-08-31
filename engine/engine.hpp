@@ -91,6 +91,8 @@ namespace engine {
             static void useShaderInvert();
             static void useShaderNormal();
     };
+
+    
 }
 
 #endif

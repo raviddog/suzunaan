@@ -305,17 +305,16 @@ namespace engine {
         SDL_GLContext maincontext;
 
         VAO::VAO() {
-            ID = new GLuint();
-            glGenVertexArrays(1, ID);
+            ID = GLuint();
+            glGenVertexArrays(1, &ID);
         }
 
         VAO::~VAO() {
-            glDeleteVertexArrays(1, ID);
-            delete ID;
+            glDeleteVertexArrays(1, &ID);
         }
 
         void VAO::bind() {
-            glBindVertexArray(*ID);
+            glBindVertexArray(ID);
         }
 
         void VAO::unbind() {
@@ -323,25 +322,23 @@ namespace engine {
         }
 
         VBO::VBO() {
-            ID_VBO = new GLuint();
-            ID_EBO = new GLuint();
-            glGenBuffers(1, ID_VBO);
-            glGenBuffers(1, ID_EBO);
+            ID_VBO = GLuint();
+            ID_EBO = GLuint();
+            glGenBuffers(1, &ID_VBO);
+            glGenBuffers(1, &ID_EBO);
             vertexAttribs = -1;
             bufferSizeVert = 0;
             bufferSizeInd = 0;
         }
 
         VBO::~VBO() {
-            glDeleteBuffers(1, ID_VBO);
-            glDeleteBuffers(1, ID_EBO);
-            delete ID_VBO;
-            delete ID_EBO;
+            glDeleteBuffers(1, &ID_VBO);
+            glDeleteBuffers(1, &ID_EBO);
         }
 
         void VBO::bind() {
-            glBindBuffer(GL_ARRAY_BUFFER, *ID_VBO);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ID_EBO);
+            glBindBuffer(GL_ARRAY_BUFFER, ID_VBO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID_EBO);
         }
 
         void VBO::unbind() {
@@ -392,27 +389,79 @@ namespace engine {
         }
 
         FBO::FBO() {
-            ID_FBO = new GLuint();
-            glGenFramebuffers(1, ID_FBO);
+            ID = GLuint();
+            glGenFramebuffers(1, &ID);
         }
 
         FBO::~FBO() {
-            glDeleteFramebuffers(1, ID_FBO);
-            delete ID_FBO;
+            glDeleteFramebuffers(1, &ID);
         }
 
         void FBO::bind() {
-            glBindFramebuffer(GL_FRAMEBUFFER, *ID_FBO);
+            glBindFramebuffer(GL_FRAMEBUFFER, ID);
         }
 
         void FBO::unbind() {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            
         }
 
-        void FBO::testmake() {
-            bind();
-
+        RBO::RBO() {
+            ID = GLuint();
+            glGenRenderbuffers(1, &ID);
         }
+
+        RBO::~RBO() {
+            glDeleteRenderbuffers(1, &ID);
+        }
+
+        void RBO::bind() {
+            glBindRenderbuffer(GL_RENDERBUFFER, ID);
+        }
+
+        void RBO::unbind() {
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        }
+
+        FrameBuffer::FrameBuffer(int w, int h) {
+            width = w;
+            height = h;
+            
+            fbo = new FBO();
+            rbo = new RBO();
+            tex = new Texture();
+
+            fbo->bind();
+            rbo->bind();
+            tex->bind();
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->ID, 0);
+            tex->unbind();
+
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo->ID);
+            rbo->unbind();
+            fbo->unbind();
+        }
+
+        FrameBuffer::~FrameBuffer() {
+            unbind();
+            delete tex;
+            delete rbo;
+            delete fbo;
+        }
+
+        void FrameBuffer::bind() {
+            glBindFramebuffer(GL_FRAMEBUFFER, fbo->ID);
+        }
+
+        void FrameBuffer::unbind() {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+
 
         RenderTarget::RenderTarget(int w, int h) {
             this->w = w;
@@ -462,20 +511,19 @@ namespace engine {
         }
 
         Texture::Texture() {
-            ID = new GLuint();
-            glGenTextures(1, ID);
+            ID = GLuint();
+            glGenTextures(1, &ID);
             srcWidth = 0;
             srcHeight = 0;
             srcChannels = 0;
         }
 
         Texture::~Texture() {
-            glDeleteTextures(1, ID);
-            delete ID;
+            glDeleteTextures(1, &ID);
         }
 
         void Texture::bind() {
-            glBindTexture(GL_TEXTURE_2D, *ID);
+            glBindTexture(GL_TEXTURE_2D, ID);
         }
 
         void Texture::unbind() {
@@ -582,6 +630,11 @@ namespace engine {
 
         void Shader::use()
         {
+            if(currentShader != this) {
+                glUseProgram(ID);
+                currentShader = this;
+                // log_debug("switched to shader %u\n", ID);
+            }
             glUseProgram(ID);
         }
 

@@ -38,7 +38,7 @@ namespace engine {
 
         class VAO {
             public:
-                GLuint *ID;
+                GLuint ID;
                 VAO();
                 ~VAO();
                 void bind();
@@ -47,7 +47,7 @@ namespace engine {
 
         class VBO {
             public:
-                GLuint *ID_VBO, *ID_EBO;
+                GLuint ID_VBO, ID_EBO;
                 int vertexAttribs;
                 size_t bufferSizeVert, bufferSizeInd;
                 VBO();
@@ -71,15 +71,52 @@ namespace engine {
         class FBO
         {
             public:
-                GLuint *ID_FBO;
+                GLuint ID;
 
                 FBO();
                 ~FBO();
                 void bind();
                 static void unbind();
+        };
 
-                void testmake();
+        class RBO
+        {
+            public:
+                GLuint ID;
 
+                RBO();
+                ~RBO();
+                void bind();
+                static void unbind();
+        };
+
+        class Texture {
+            public:
+                GLuint ID;
+                int srcWidth, srcHeight, srcChannels;
+                Texture();
+                ~Texture();
+                void bind();
+                void load(const std::string &path);
+                static void unbind();
+        };
+
+        class FrameBuffer
+        {
+            public:
+                FrameBuffer(int w, int h);
+                ~FrameBuffer();
+                void bind();
+                static void unbind();
+
+                //  test
+                void draw();
+
+                Texture *tex;
+                FBO *fbo;
+                RBO *rbo;
+                int width, height;
+            
         };
 
         class RenderTarget
@@ -91,17 +128,6 @@ namespace engine {
                 RenderTarget(int w, int h);
                 ~RenderTarget();
                 void bind();
-                static void unbind();
-        };
-
-        class Texture {
-            public:
-                GLuint *ID;
-                int srcWidth, srcHeight, srcChannels;
-                Texture();
-                ~Texture();
-                void bind();
-                void load(const std::string &path);
                 static void unbind();
         };
 

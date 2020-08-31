@@ -32,9 +32,9 @@ namespace engine {
 
     static gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert;
 
-    gl::RenderTarget *plane;
     gl::VAO *gvao;
     gl::VBO *gvbo;
+    gl::FrameBuffer *fbuffer;
     gl::Shader *pshader;
 
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -232,6 +232,7 @@ namespace engine {
     }
 
     void SpriteSheet::draw() {
+        shaderSpriteSheet->use();
         vao->bind();
         tex->bind();
         glDrawElements(GL_TRIANGLES, indices_stored_size, GL_UNSIGNED_INT, (void*)0);
@@ -489,12 +490,14 @@ namespace engine {
         gvao->bind();
         gvbo = new gl::VBO();
         gvbo->bind();
-        plane = new gl::RenderTarget(1280, 960);
         gvbo->createVertexAttribPointer(2, GL_FLOAT, 4*sizeof(float), (void*)0);
         gvbo->createVertexAttribPointer(2, GL_FLOAT, 4*sizeof(float), (void*)(2*sizeof(float)));
         gvbo->bufferVerts(sizeof(quadVertices), quadVertices);
         gvbo->unbind();
         gvao->unbind();
+
+        fbuffer = new gl::FrameBuffer(1280, 960);
+        fbuffer->bind();
 
         pshader = new engine::gl::Shader();
         pshader->load("./shaders/test.vert", "./shaders/test.frag");
@@ -506,14 +509,14 @@ namespace engine {
     }
 
     void flip() {
-        plane->unbind();
+        fbuffer->unbind();
         pshader->use();
         gvao->bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glBindTexture(GL_TEXTURE_2D, *plane->ID_TEX);
+        glBindTexture(GL_TEXTURE_2D, fbuffer->tex->ID);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         gvao->unbind();
-        plane->bind();
+        fbuffer->bind();
         shaderSpriteSheet->use();
 
         
