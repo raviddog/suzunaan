@@ -32,6 +32,22 @@ namespace engine {
 
     static gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert;
 
+    gl::RenderTarget *plane;
+    gl::VAO *gvao;
+    gl::VBO *gvbo;
+    gl::Shader *pshader;
+
+    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+
     SpriteSheet::SpriteSheet(const std::string &path, int numSprites) {
         load(path, numSprites);
     }
@@ -322,7 +338,7 @@ namespace engine {
         frameTimeTicks = ticks;
         fps = 0u;
 
-        SDL_Init(SDL_INIT_EVERYTHING);
+        SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO);
         SDL_GL_LoadLibrary(NULL);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -467,9 +483,41 @@ namespace engine {
         shaderSpriteSheet->use();
         shaderSpriteSheet->setInt("txUnit", 0);
         shaderSpriteSheet->setVec2("res", scrRes);
+
+        //  test
+        gvao = new gl::VAO();
+        gvao->bind();
+        gvbo = new gl::VBO();
+        gvbo->bind();
+        plane = new gl::RenderTarget(1280, 960);
+        gvbo->createVertexAttribPointer(2, GL_FLOAT, 4*sizeof(float), (void*)0);
+        gvbo->createVertexAttribPointer(2, GL_FLOAT, 4*sizeof(float), (void*)(2*sizeof(float)));
+        gvbo->bufferVerts(sizeof(quadVertices), quadVertices);
+        gvbo->unbind();
+        gvao->unbind();
+
+        pshader = new engine::gl::Shader();
+        pshader->load("./shaders/test.vert", "./shaders/test.frag");
+        pshader->use();
+        pshader->setInt("screenTexture", 0);
+        
+        
+        shaderSpriteSheet->use();
     }
 
     void flip() {
+        plane->unbind();
+        pshader->use();
+        gvao->bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBindTexture(GL_TEXTURE_2D, *plane->ID_TEX);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        gvao->unbind();
+        plane->bind();
+        shaderSpriteSheet->use();
+
+        
+
         using namespace std::chrono;
         //  flip buffers
         SDL_GL_SwapWindow(gl::window);
@@ -533,6 +581,8 @@ namespace engine {
         frameTimeTicks = temp_ticks;
         #endif
         ++fps;
+
+        
     }
 
     void close() {

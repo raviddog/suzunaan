@@ -391,6 +391,76 @@ namespace engine {
             glEnableVertexAttribArray(vertexAttribs);
         }
 
+        FBO::FBO() {
+            ID_FBO = new GLuint();
+            glGenFramebuffers(1, ID_FBO);
+        }
+
+        FBO::~FBO() {
+            glDeleteFramebuffers(1, ID_FBO);
+            delete ID_FBO;
+        }
+
+        void FBO::bind() {
+            glBindFramebuffer(GL_FRAMEBUFFER, *ID_FBO);
+        }
+
+        void FBO::unbind() {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+
+        void FBO::testmake() {
+            bind();
+
+        }
+
+        RenderTarget::RenderTarget(int w, int h) {
+            this->w = w;
+            this->h = h;
+            ID_FBO = new GLuint();
+            glGenFramebuffers(1, ID_FBO);
+            glBindFramebuffer(GL_FRAMEBUFFER, *ID_FBO);
+
+            ID_TEX = new GLuint();
+            glGenTextures(1, ID_TEX);
+            glBindTexture(GL_TEXTURE_2D, *ID_TEX);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *ID_TEX, 0);
+
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            ID_RBO = new GLuint();
+            glGenRenderbuffers(1, ID_RBO);
+            glBindRenderbuffer(GL_RENDERBUFFER, *ID_RBO);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *ID_RBO);
+                        
+            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+                log_debug("ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n");
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+        }
+
+        RenderTarget::~RenderTarget() {
+            glDeleteRenderbuffers(1, ID_RBO);
+            glDeleteTextures(1, ID_TEX);
+            glDeleteFramebuffers(1, ID_FBO);
+            delete ID_RBO;
+            delete ID_TEX;
+            delete ID_FBO;
+        }
+
+        void RenderTarget::bind() {
+            glBindFramebuffer(GL_FRAMEBUFFER, *ID_FBO);
+        }
+
+        void RenderTarget::unbind() {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+
         Texture::Texture() {
             ID = new GLuint();
             glGenTextures(1, ID);
@@ -512,11 +582,7 @@ namespace engine {
 
         void Shader::use()
         {
-            if(currentShader != this) {
-                glUseProgram(ID);
-                currentShader = this;
-                log_debug("switched to shader %u\n", ID);
-            }
+            glUseProgram(ID);
         }
 
         void Shader::setBool(const std::string &name, bool value) const

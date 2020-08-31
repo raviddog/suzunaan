@@ -68,6 +68,32 @@ namespace engine {
 
         };
 
+        class FBO
+        {
+            public:
+                GLuint *ID_FBO;
+
+                FBO();
+                ~FBO();
+                void bind();
+                static void unbind();
+
+                void testmake();
+
+        };
+
+        class RenderTarget
+        {
+            public:
+                int w, h;
+                GLuint *ID_FBO, *ID_TEX, *ID_RBO;
+
+                RenderTarget(int w, int h);
+                ~RenderTarget();
+                void bind();
+                static void unbind();
+        };
+
         class Texture {
             public:
                 GLuint *ID;
@@ -103,7 +129,6 @@ namespace engine {
                 void setMat3(const std::string &name, const glm::mat3 &value) const;
                 void setMat4(const std::string &name, const glm::mat4 &value) const;
         };
-
     }    
 }
 
