@@ -13,6 +13,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 namespace engine {
 
@@ -35,6 +36,11 @@ namespace engine {
         extern SDL_Window *window;
         extern SDL_GLContext maincontext;
 
+        struct modelVertex {
+            glm::vec3 Position;
+            glm::vec3 Normal;
+            glm::vec2 TexCoords;
+        };
 
         class VAO {
             public:
@@ -60,6 +66,8 @@ namespace engine {
 
                 void bufferVerts(size_t vertsize, float *verts);
                 void bufferVerts(size_t vertsize, float *verts, size_t indsize, uint32_t *indices);
+                void bufferVerts(size_t vertsize, modelVertex *verts);
+                void bufferVerts(size_t vertsize, modelVertex *verts, size_t indsize, uint32_t *indices);
                 void bufferSubVerts(size_t vertsize, float *verts);
                 void bufferSubVerts(size_t vertsize, float *verts, size_t indsize, uint32_t *indices);
                 
@@ -91,13 +99,21 @@ namespace engine {
         };
 
         class Texture {
+            private:
+                // static int curTxUnit;
             public:
                 GLuint ID;
                 int srcWidth, srcHeight, srcChannels;
+                std::string type;
+                std::string path;
                 Texture();
                 ~Texture();
                 void bind();
+                void bind(int txUnit);
                 void load(const std::string &path);
+
+                static void activateUnit(int txUnit);
+                // static int getActiveUnit();
                 static void unbind();
         };
 
@@ -116,20 +132,54 @@ namespace engine {
                 FBO *fbo;
                 RBO *rbo;
                 int width, height;
-            
         };
 
-        class RenderTarget
-        {
+        
+
+        
+
+
+        
+
+
+        //--------------------------------
+        /*
+        class ModelDataStatic {
             public:
-                int w, h;
-                GLuint *ID_FBO, *ID_TEX, *ID_RBO;
+                float *verts = nullptr;
+                uint32_t *indices = nullptr;
 
-                RenderTarget(int w, int h);
-                ~RenderTarget();
-                void bind();
-                static void unbind();
+                size_t vsize, isize;
         };
+
+        class ModelDataDynamic {
+            public:
+                std::vector<float> *verts;
+                std::vector<uint32_t> *indices;
+                size_t indices_stored_size;
+
+                ModelDataDynamic();
+                ~ModelDataDynamic();
+
+                void createBuffers();
+                void buffer();
+
+                // uint32_t Add(float *verts, size_t vsize, uint32_t *inds, size_t isize);
+        };
+        class RenderObject2DQuad : public RenderObject {
+            public:
+                Texture *tex;
+                ModelDataStatic *data;
+
+                RenderObject2DQuad();
+                ~RenderObject2DQuad();
+
+                
+                void Bind();
+
+        };
+    `   */
+        //---------------------------------------
 
         class Shader
         {

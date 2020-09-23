@@ -17,6 +17,7 @@
 #endif
 
 namespace engine {
+    
 
     int scrWidth, scrHeight, drawWidth, drawHeight;
     int viewport[4], scrMode;
@@ -30,12 +31,9 @@ namespace engine {
     std::chrono::high_resolution_clock::time_point cur_time, next_time;
     #define _ENGINE_NOVSYNC_DELAY_MICROSECONDS 16666
 
-    static gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert;
+    gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert, *shaderUI, *pshader, *shader3d;
 
-    gl::VAO *gvao;
-    gl::VBO *gvbo;
-    gl::FrameBuffer *fbuffer;
-    gl::Shader *pshader;
+    static Drawmode currentDrawmode;
 
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // positions   // texCoords
@@ -47,6 +45,168 @@ namespace engine {
          1.0f, -1.0f,  1.0f, 0.0f,
          1.0f,  1.0f,  1.0f, 1.0f
     };
+
+    Mesh::Mesh(std::vector<gl::modelVertex> vertices, std::vector<uint32_t> indices, std::vector<gl::Texture*> textures)
+    {
+        this->vertices = vertices;
+        this->indices = indices;
+        this->textures = textures;
+
+        setupMesh();
+    }
+
+    void Mesh::setupMesh() {
+        vao = new gl::VAO();
+        vbo = new gl::VBO();
+
+        vao->bind();
+        vbo->bind();
+
+        vbo->bufferVerts(vertices.size(), vertices.data(), indices.size(), indices.data());
+
+        vbo->createVertexAttribPointer(3, GL_FLOAT, sizeof(gl::modelVertex), (void*)0);
+        vbo->createVertexAttribPointer(3, GL_FLOAT, sizeof(gl::modelVertex), (void*)offsetof(gl::modelVertex, Normal));
+        vbo->createVertexAttribPointer(2, GL_FLOAT, sizeof(gl::modelVertex), (void*)offsetof(gl::modelVertex, TexCoords));
+
+        vao->unbind();
+    }
+
+    void Mesh::draw() {
+        //  something about bind textures
+        //  optional bunch of textures for like different shit
+        unsigned int diffuseNr = 1;
+        unsigned int specularNr = 1;
+        for(unsigned int i = 0; i < textures.size(); i++)
+        {
+            glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
+            // retrieve texture number (the N in diffuse_textureN)
+            std::string number;
+            std::string name = textures[i]->type;
+            if(name == "texture_diffuse")
+                number = std::to_string(diffuseNr++);
+            else if(name == "texture_specular")
+                number = std::to_string(specularNr++);
+            
+            //  3d shader
+            shader3d->setInt((name + number).c_str(), i);
+            textures[i]->bind();
+        }
+        glActiveTexture(GL_TEXTURE0);
+        
+        vao->bind();
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    }
+
+    void Model::draw() {
+        for(int i = 0; i < meshes.size(); i++) {
+            meshes[i]->draw();
+        }
+    }
+
+    void Model::loadModel(std::string path) {
+        Assimp::Importer importer;
+        // const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+        const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate);
+
+        if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+            printf("ERROR::ASSIMP:: %s", importer.GetErrorString());
+            return;
+        }
+        directory = path.substr(0, path.find_last_of('/'));
+        directory += '/';
+        
+        processNode(scene->mRootNode, scene);
+    }
+
+    void Model::processNode(aiNode *node, const aiScene *scene) {
+        //  process all node's meshes (if any)
+        for(int i = 0; i < node->mNumMeshes; i++) {
+            aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+            meshes.push_back(processMesh(mesh, scene));
+        }
+        //  call recursively for all children
+        for(int i = 0; i < node->mNumChildren; i++) {
+            processNode(node->mChildren[i], scene);
+        }
+    }
+
+    Mesh* Model::processMesh(aiMesh *mesh, const aiScene *scene) {
+        std::vector<gl::modelVertex> vertices;
+        std::vector<uint32_t> indices;
+        std::vector<gl::Texture*> textures;
+
+        //  process vertices
+        for(int i = 0; i < mesh->mNumVertices; i++) {
+            gl::modelVertex vertex;
+
+            glm::vec3 vector;
+            vector.x = mesh->mVertices[i].x;
+            vector.y = mesh->mVertices[i].y;
+            vector.z = mesh->mVertices[i].z;
+            vertex.Position = vector;
+
+            vector.x = mesh->mNormals[i].x;
+            vector.y = mesh->mNormals[i].y;
+            vector.z = mesh->mNormals[i].z;
+            vertex.Normal = vector; 
+            
+
+            if(mesh->mTextureCoords[0]) {
+                glm::vec2 vec;
+                vec.x = mesh->mTextureCoords[0][i].x; 
+                vec.y = mesh->mTextureCoords[0][i].y;
+                vertex.TexCoords = vec;
+            }
+            else {
+                vertex.TexCoords = glm::vec2(0.0f, 0.0f);  
+            }
+         
+            vertices.push_back(vertex);
+        }
+
+        for(int i = 0; i < mesh->mNumFaces; i++) {
+            aiFace face = mesh->mFaces[i];
+            for(int j = 0; j < face.mNumIndices; j++) {
+                indices.push_back(face.mIndices[j]);
+            }
+        }
+
+        if(mesh->mMaterialIndex >= 0) {
+            aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+            std::vector<gl::Texture*> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+            textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+            std::vector<gl::Texture*> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+            textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        }
+
+        return new Mesh(vertices, indices, textures);
+    }
+
+    std::vector<gl::Texture*> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName) {
+        std::vector<gl::Texture*> textures;
+        for(int i = 0; i < mat->GetTextureCount(type); i++) {
+            aiString str;
+            mat->GetTexture(type, i, &str);
+            bool skip = false;
+            for(int j = 0; j < loadedTextures.size(); j++) {
+                if(std::strcmp(loadedTextures[j]->path.data(), str.C_Str()) == 0) {
+                    textures.push_back(loadedTextures[j]);
+                    skip = true;
+                    break;
+                }
+            }
+            if(!skip) {
+                gl::Texture *texture = new gl::Texture();
+                texture->bind();
+                texture->load(directory + str.C_Str());
+                texture->type = typeName;
+                texture->path = str.C_Str();
+                textures.push_back(texture);
+                loadedTextures.push_back(texture);
+            }
+        }
+        return textures;
+    }
 
     SpriteSheet::SpriteSheet(const std::string &path, int numSprites) {
         load(path, numSprites);
@@ -232,7 +392,6 @@ namespace engine {
     }
 
     void SpriteSheet::draw() {
-        shaderSpriteSheet->use();
         vao->bind();
         tex->bind();
         glDrawElements(GL_TRIANGLES, indices_stored_size, GL_UNSIGNED_INT, (void*)0);
@@ -246,6 +405,131 @@ namespace engine {
     void SpriteSheet::useShaderNormal() {
         shaderSpriteSheet->use();
     }
+
+    SpriteInstance::SpriteInstance() {
+        vao = new gl::VAO();
+        vbo = new gl::VBO();
+
+        vao->bind();
+        vbo->bind();
+        vbo->createVertexAttribPointer(2, GL_FLOAT, 4*sizeof(float), (void*)0);
+        vbo->createVertexAttribPointer(2, GL_FLOAT, 4*sizeof(float), (void*)(2*sizeof(float)));
+        vbo->unbind();
+        vao->unbind();
+
+        data = new SpriteData();
+    }
+
+    SpriteInstance::~SpriteInstance() {
+        delete data;
+        delete vbo;
+        delete vao;
+    }
+
+    void SpriteInstance::bind() {
+        //  what's this for?
+        vao->bind();
+    }
+
+    void SpriteInstance::unbind() {
+        gl::VAO::unbind();
+    }
+
+    void SpriteInstance::bufferVerts(size_t vertsize, float *verts) {
+        vao->bind();
+        vbo->bind();
+        vbo->bufferVerts(vertsize, verts);
+        vbo->unbind();
+    }
+
+    void SpriteInstance::draw(int triangles) {
+        glDrawArrays(GL_TRIANGLES, 0, triangles * 3);
+    }
+
+
+
+
+    
+
+    void InitialiseDrawmodes() {
+        //  load draw modes (shaders)
+        //  static gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert, *shaderUI;
+        
+        glm::vec2 scrRes = glm::vec2((float)drawWidth, (float)drawHeight);
+
+        shaderSpriteSheetInvert = new gl::Shader();
+        shaderSpriteSheetInvert->load("./shaders/spritesheet.vert", "./shaders/spritesheet_invert.frag");
+        shaderSpriteSheetInvert->use();
+        shaderSpriteSheetInvert->setInt("txUnit", 0);
+        shaderSpriteSheetInvert->setVec2("res", scrRes);
+
+        shaderSpriteSheet = new gl::Shader();
+        shaderSpriteSheet->load("./shaders/spritesheet.vert", "./shaders/spritesheet.frag");
+        shaderSpriteSheet->use();
+        shaderSpriteSheet->setInt("txUnit", 0);
+        shaderSpriteSheet->setVec2("res", scrRes);
+
+        shader3d = new gl::Shader();
+        shader3d->load("./shaders/model.vert", "shaders/model.frag");
+        
+        pshader = new gl::Shader();
+        pshader->load("./shaders/test.vert", "./shaders/test.frag");
+        pshader->use();
+        pshader->setInt("screenTexture", 0);
+
+
+        currentDrawmode = DrawmodeUI;
+
+    }
+
+    void SetDrawmode(Drawmode dmode) {
+        if(dmode != currentDrawmode) {
+            switch(dmode) {
+                case DrawmodeSprite:
+                    shaderSpriteSheet->use();
+                    currentDrawmode = DrawmodeSprite;
+                    glDisable(GL_DEPTH_TEST);
+                    break;
+                case Drawmode3D:
+                    shader3d->use();
+                    currentDrawmode = Drawmode3D;
+                    glEnable(GL_DEPTH_TEST);
+                    break;
+                case DrawmodeUI:
+                    pshader->use();
+                    currentDrawmode = DrawmodeUI;
+                default:
+                    break;
+            }
+        }
+    }
+
+    //  configure the resolution setting of the current drawmode
+    void ConfigureDrawmodeSpriteResolution(int x, int y) {
+        glm::vec2 scrRes = glm::vec2((float)drawWidth, (float)drawHeight);
+        shaderSpriteSheet->setVec2("res", scrRes);
+    }
+
+    void ConfigureDrawmodeSpriteTexture(int txunit) {
+        shaderSpriteSheet->setInt("txUnit", txunit);
+    }
+
+    void ConfigureDrawmodeUITexture(int txunit) {
+        pshader->setInt("screenTexture", txunit);
+    }
+
+    
+    
+
+    
+
+
+
+
+
+
+
+
 
     //  load settings from file
     bool init(const char *title, const char *settingsPath) {
@@ -471,55 +755,12 @@ namespace engine {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // stbi_set_flip_vertically_on_load(true);  // don't need this because the shader i wrote accounts for it
-        glm::vec2 scrRes = glm::vec2((float)width_draw, (float)height_draw);
         
-        shaderSpriteSheetInvert = new gl::Shader();
-        shaderSpriteSheetInvert->load("./shaders/spritesheet.vert", "./shaders/spritesheet_invert.frag");
-        shaderSpriteSheetInvert->use();
-        shaderSpriteSheetInvert->setInt("txUnit", 0);
-        shaderSpriteSheetInvert->setVec2("res", scrRes);
-
-        shaderSpriteSheet = new gl::Shader();
-        shaderSpriteSheet->load("./shaders/spritesheet.vert", "./shaders/spritesheet.frag");
-        shaderSpriteSheet->use();
-        shaderSpriteSheet->setInt("txUnit", 0);
-        shaderSpriteSheet->setVec2("res", scrRes);
-
-        //  test
-        gvao = new gl::VAO();
-        gvao->bind();
-        gvbo = new gl::VBO();
-        gvbo->bind();
-        gvbo->createVertexAttribPointer(2, GL_FLOAT, 4*sizeof(float), (void*)0);
-        gvbo->createVertexAttribPointer(2, GL_FLOAT, 4*sizeof(float), (void*)(2*sizeof(float)));
-        gvbo->bufferVerts(sizeof(quadVertices), quadVertices);
-        gvbo->unbind();
-        gvao->unbind();
-
-        fbuffer = new gl::FrameBuffer(1280, 960);
-        fbuffer->bind();
-
-        pshader = new engine::gl::Shader();
-        pshader->load("./shaders/test.vert", "./shaders/test.frag");
-        pshader->use();
-        pshader->setInt("screenTexture", 0);
-        
-        
-        shaderSpriteSheet->use();
+        InitialiseDrawmodes(); 
+        SetDrawmode(DrawmodeSprite);
     }
 
-    void flip() {
-        fbuffer->unbind();
-        pshader->use();
-        gvao->bind();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glBindTexture(GL_TEXTURE_2D, fbuffer->tex->ID);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        gvao->unbind();
-        fbuffer->bind();
-        shaderSpriteSheet->use();
-
-        
+    void flip() {       
 
         using namespace std::chrono;
         //  flip buffers
@@ -610,7 +851,7 @@ namespace engine {
                     viewport[1] + (int)(scaley * (float)y),
                     (int)(scalex * (float)w),
                     (int)(scaley * (float)h));
-        glm::vec2 scrRes = glm::vec2((float)w, (float)h);
+        glm::vec2 scrRes = glm::vec2((float)(w - x), (float)(h - y));
         shaderSpriteSheet->setVec2("res", scrRes);
     }
 

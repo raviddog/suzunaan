@@ -12,7 +12,6 @@ layout (location = 3) in float rotation;
 
 out vec2 txCoord;
 
-uniform mat4 scrProjection;
 uniform vec2 res;
 
 void main()

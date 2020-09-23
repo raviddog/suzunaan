@@ -30,10 +30,26 @@ namespace Game {
     std::vector<int> *freebullets;
     int frames;
 
-    bullet_script *toziko, *miko;
+    //  test framebuffer draws
+    engine::gl::FrameBuffer *fbuffer;
+    engine::SpriteInstance *destrect;
 
+    engine::Model *backpack;
 
+    glm::mat4 shader3d_projection, shader3d_view;
+    glm::vec3 shader3d_eye, shader3d_up, shader3d_direction;
+    float shader3d_angle = 0.0f;
 
+    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
 
     stage_script *stagescript = nullptr;
     std::map<int, std::shared_ptr<bullet_script>> *bullet_scripts = nullptr;
@@ -233,6 +249,32 @@ void Stage::logic() {
 
 void Stage::draw() {
     using namespace Game;
+    engine::SetDrawmode(engine::DrawmodeSprite);
+
+    engine::setViewport();
+    img_guibg->draw();
+
+    engine::SetDrawmode(engine::Drawmode3D);
+    fbuffer->bind();
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+    engine::shader3d->setMat4("model", model);
+    backpack->draw();
+
+    fbuffer->unbind();
+    
+    engine::SetDrawmode(engine::DrawmodeUI);
+    
+    engine::setViewport(32, 16, 384, 448);
+    destrect->bind();
+    fbuffer->tex->bind();
+    destrect->draw(2);
+
+    // engine::setViewport();    
+    engine::SetDrawmode(engine::DrawmodeSprite);
 
     //  buffer player bullets
     for(int i = 0; i < Game::player_s::player_bullet_max; i++) {
@@ -241,9 +283,7 @@ void Stage::draw() {
         }
     }
 
-    img_guibg->draw();
 
-    engine::setViewport(32, 16, 384, 448);
 
     img_enemy->buffer();
     img_enemy->draw();
@@ -267,7 +307,7 @@ void Stage::draw() {
         img_player_eff->draw();
     }
 
-    engine::setViewport();
+    
 }
 
 Stage::Stage() {
@@ -361,6 +401,24 @@ Stage::Stage() {
     bullet_scripts = *bullet_scripts_ptr;
 
     spawn_enemies = new std::vector<enemy_s*>();
+
+    destrect = new engine::SpriteInstance();
+    destrect->bind();
+    destrect->bufferVerts(sizeof(quadVertices), quadVertices);
+    destrect->unbind();
+
+    fbuffer = new engine::gl::FrameBuffer(352, 432);
+
+    backpack = new engine::Model("./data/model/backpack.obj");
+    shader3d_projection = glm::perspective(glm::radians(90.0f), (float)640 / (float)480, 0.1f, 100.0f);
+    shader3d_up = glm::vec3(0.0f, 1.0f, 0.0f);
+    shader3d_eye = glm::vec3(0.0f, 0.0f, 2.0f);
+    shader3d_direction = glm::vec3(sin(glm::radians(shader3d_angle)), 0.0f, cos(glm::radians(shader3d_angle)));
+    shader3d_direction = glm::normalize(shader3d_direction);
+    shader3d_view = glm::lookAt(shader3d_eye, shader3d_eye + shader3d_direction, shader3d_up);
+
+    engine::shader3d->setMat4("projection", shader3d_projection);
+    engine::shader3d->setMat4("view", shader3d_view);
 }
 
 Stage::~Stage() {

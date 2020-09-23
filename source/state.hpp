@@ -32,6 +32,14 @@ class Stage : public State {
         void draw() override;
 };
 
+class Test3D : public State {
+    public:
+        Test3D();
+        ~Test3D();
+        void logic() override;
+        void draw() override;
+};
+
 
 
 

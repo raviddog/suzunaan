@@ -298,11 +298,13 @@ namespace engine {
         }
     } 
 
-    void *currentShader = NULL;
+    void *currentShader = nullptr;
 
     namespace gl {
         SDL_Window *window;
         SDL_GLContext maincontext;
+
+        
 
         VAO::VAO() {
             ID = GLuint();
@@ -365,6 +367,15 @@ namespace engine {
         void VBO::bufferVerts(size_t vertsize, float *verts, size_t indsize, uint32_t *indices) {
             glBufferData(GL_ARRAY_BUFFER, vertsize, verts, GL_DYNAMIC_DRAW);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indsize, indices, GL_DYNAMIC_DRAW);
+        }
+
+        void VBO::bufferVerts(size_t vertsize, modelVertex *verts) {
+            glBufferData(GL_ARRAY_BUFFER, vertsize * sizeof(modelVertex), &verts[0], GL_DYNAMIC_DRAW);
+        }
+
+        void VBO::bufferVerts(size_t vertsize, modelVertex *verts, size_t indsize, uint32_t *indices) {
+            glBufferData(GL_ARRAY_BUFFER, vertsize * sizeof(modelVertex), &verts[0], GL_DYNAMIC_DRAW);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indsize * sizeof(uint32_t), indices, GL_DYNAMIC_DRAW);
         }
 
         void VBO::bufferSubVerts(size_t vertsize, float *verts) {
@@ -462,53 +473,27 @@ namespace engine {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
+        
 
-        RenderTarget::RenderTarget(int w, int h) {
-            this->w = w;
-            this->h = h;
-            ID_FBO = new GLuint();
-            glGenFramebuffers(1, ID_FBO);
-            glBindFramebuffer(GL_FRAMEBUFFER, *ID_FBO);
+        /*
 
-            ID_TEX = new GLuint();
-            glGenTextures(1, ID_TEX);
-            glBindTexture(GL_TEXTURE_2D, *ID_TEX);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *ID_TEX, 0);
+        ModelDataDynamic::ModelDataDynamic() {
+            verts = new std::vector<float>();
+            indices = new std::vector<uint32_t>();
 
-            glBindTexture(GL_TEXTURE_2D, 0);
-
-            ID_RBO = new GLuint();
-            glGenRenderbuffers(1, ID_RBO);
-            glBindRenderbuffer(GL_RENDERBUFFER, *ID_RBO);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
-            glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *ID_RBO);
-                        
-            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-                log_debug("ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n");
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+            indices_stored_size = 0;
         }
 
-        RenderTarget::~RenderTarget() {
-            glDeleteRenderbuffers(1, ID_RBO);
-            glDeleteTextures(1, ID_TEX);
-            glDeleteFramebuffers(1, ID_FBO);
-            delete ID_RBO;
-            delete ID_TEX;
-            delete ID_FBO;
+        ModelDataDynamic::~ModelDataDynamic() {
+            delete verts;
+            delete indices;
         }
 
-        void RenderTarget::bind() {
-            glBindFramebuffer(GL_FRAMEBUFFER, *ID_FBO);
+        RenderObject2DQuad::~RenderObject2DQuad() {
+            // if(tex) delete tex;
+            // if(data) delete data;
         }
-
-        void RenderTarget::unbind() {
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
+        */
 
         Texture::Texture() {
             ID = GLuint();
@@ -526,6 +511,20 @@ namespace engine {
             glBindTexture(GL_TEXTURE_2D, ID);
         }
 
+        void Texture::bind(int txUnit) {
+            glActiveTexture(GL_TEXTURE0 + txUnit);
+            glBindTexture(GL_TEXTURE_2D, ID);
+        }
+
+        void Texture::activateUnit(int txUnit) {
+            glActiveTexture(GL_TEXTURE0 + txUnit);
+            // curTxUnit = txUnit;
+        }
+
+        // int Texture::getActiveUnit() {
+        //     return curTxUnit;
+        // }
+
         void Texture::unbind() {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -533,7 +532,14 @@ namespace engine {
         void Texture::load(const std::string &path) {
             unsigned char *data = stbi_load(path.c_str(), &srcWidth, &srcHeight, &srcChannels, 0);
             if(data) {
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, srcWidth, srcHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+                switch(srcChannels) {
+                    case 3:
+                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, srcWidth, srcHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+                        break;
+                    case 4:
+                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, srcWidth, srcHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+                        break;
+                }
                 glGenerateMipmap(GL_TEXTURE_2D);
                 stbi_image_free(data);
 

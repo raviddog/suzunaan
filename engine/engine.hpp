@@ -2,6 +2,9 @@
 #define _ENGINE_H
 
 #include "engine_gl.hpp"
+#include "assimp/Importer.hpp"
+#include "assimp/scene.h"
+#include "assimp/postprocess.h"
 
 #include <vector>
 
@@ -13,6 +16,15 @@ namespace engine {
         inputFire, inputFocus, inputBomb, inputPause,
         inputQuit, inputRestart, inputSkip
     };
+
+    enum Drawmode {
+        DrawmodeSprite,
+        DrawmodeUI,
+        Drawmode3D
+    };
+
+    extern gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert, *shaderUI, *pshader, *shader3d;
+
     bool checkKey(int key);
     bool checkKeyPressed(int key);
 
@@ -25,6 +37,10 @@ namespace engine {
 
     void setViewport();
     void setViewport(int x, int y, int w, int h);
+
+    // void InitialiseDrawmodes();
+    void SetDrawmode(Drawmode dmode);
+
 
 
     // class Sprite {
@@ -45,6 +61,9 @@ namespace engine {
     //         void draw();
 
     // };
+
+    //  need texture manip functions
+
     struct Sprite {
         float x;
         float y;
@@ -52,6 +71,115 @@ namespace engine {
         float w;
         float width;
         float height;
+    };
+
+    class RenderObject {
+        public:
+            virtual void bind() =0;
+            // virtual void draw() =0;
+            void unbind();
+
+
+    };
+
+    class ModelData {
+        public:
+            float *verts = nullptr;
+            uint32_t *indices = nullptr;
+            gl::Texture *tex = nullptr;
+
+            size_t vsize, isize;
+    };
+
+    class SpriteData {
+        public:
+            gl::Texture *tex = nullptr;
+            
+    };
+
+    class SpriteInstance : public RenderObject {
+        //  single sprite/texture test
+        public:
+            SpriteData *data;
+
+            gl::VAO *vao;
+            gl::VBO *vbo;
+            //  other offset/rendering things
+
+            //  non resizeable for now
+            SpriteInstance();
+            ~SpriteInstance();
+
+            void bufferVerts(size_t vertsize, float *verts);
+
+            //  other parameters to set up bind function
+            void bind();
+            void draw(int triangles);
+            static void unbind();
+    };
+
+    
+
+    //  need a shader to draw to
+
+    class ModelInstance : public RenderObject {
+        public:
+            ModelData *model;
+            //  other offset/rendering things
+            
+
+            //  need other parameters to set up bind function
+            void bind();
+            void draw();
+            static void unbind();
+    };
+
+    class ModelGroup : public RenderObject {
+        public:
+            ModelData *models;
+            //  other offset/rendering things
+
+            
+
+            //  need other parameters to set up bind function
+            void bind();
+            void draw();
+            static void unbind();
+    };
+
+    class Mesh {
+        public:
+            //  mesh data
+            std::vector<gl::modelVertex> vertices;
+            std::vector<uint32_t> indices;
+            std::vector<gl::Texture*> textures;
+
+            Mesh(std::vector<gl::modelVertex> vertices, std::vector<uint32_t> indices, std::vector<gl::Texture*> textures);
+            void draw();    //  add shader
+        private:
+            //  render data
+            gl::VAO *vao;
+            gl::VBO *vbo;
+
+            void setupMesh();
+    };
+
+    class Model {
+        public:
+            Model(char *path) {
+                loadModel(path);
+            }
+            void draw();
+        private:
+            std::vector<Mesh*> meshes;
+            std::string directory;
+            std::vector<gl::Texture*> loadedTextures;
+
+            void loadModel(std::string path);
+            void processNode(aiNode *node, const aiScene *scene);
+            Mesh* processMesh(aiMesh *mesh, const aiScene *scene);
+            std::vector<gl::Texture*> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+
     };
 
     class SpriteSheet {
@@ -90,6 +218,8 @@ namespace engine {
             //  more temp or game specific
             static void useShaderInvert();
             static void useShaderNormal();
+            //  prepare stuff for drawing sprites
+            // static void prepareDraw();
     };
 
     

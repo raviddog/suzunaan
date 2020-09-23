@@ -24,6 +24,9 @@ void logic() {
             case 1:
                 currentState = new Stage();
                 break;
+            case 2:
+                currentState = new Test3D();
+                break;
         }
         newState = -1;
 

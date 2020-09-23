@@ -37,7 +37,8 @@ void Menu::logic() {
 
         if(engine::checkKey(engine::inputFire)) {
             if(opt_selected == 0) {
-                changeState(1);
+                // changeState(1);
+                changeState(2);
             } else if(opt_selected == 1) {
                 engine::quit = true;
             }
