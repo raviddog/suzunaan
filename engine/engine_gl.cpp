@@ -473,28 +473,6 @@ namespace engine {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
-        
-
-        /*
-
-        ModelDataDynamic::ModelDataDynamic() {
-            verts = new std::vector<float>();
-            indices = new std::vector<uint32_t>();
-
-            indices_stored_size = 0;
-        }
-
-        ModelDataDynamic::~ModelDataDynamic() {
-            delete verts;
-            delete indices;
-        }
-
-        RenderObject2DQuad::~RenderObject2DQuad() {
-            // if(tex) delete tex;
-            // if(data) delete data;
-        }
-        */
-
         Texture::Texture() {
             ID = GLuint();
             glGenTextures(1, &ID);

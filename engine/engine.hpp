@@ -43,27 +43,6 @@ namespace engine {
     // void InitialiseDrawmodes();
     void SetDrawmode(Drawmode dmode);
 
-
-
-    // class Sprite {
-    //     private:
-    //         std::vector<float> *verts;
-    //         std::vector<uint32_t> *indices;
-    //         uint32_t indices_stored_size;
-    //     public:
-    //         gl::VAO *vao;
-    //         gl::VBO *vbo;
-    //         gl::Texture *tex;
-    //         int width, height;
-
-    //         void load(const std::string&);
-    //         void unload();
-    //         void drawSpriteCentered(float, float);
-    //         void buffer();
-    //         void draw();
-
-    // };
-
     //  need texture manip functions
 
     struct Sprite {
@@ -138,9 +117,6 @@ namespace engine {
             ~ObjModel();
             void draw();
     };
-
-    
-
 
     class SpriteSheet {
         private:
