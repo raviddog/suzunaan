@@ -19,7 +19,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_link_libraries(engine winmm.lib)
 endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_link_libraries(engine -lmingw32 -lSDL2main -lSDL2 -lassimp)
+    target_link_libraries(engine -lmingw32 -lSDL2main -lSDL2)
     
     #cool way
     #find_package(ASSIMP CONFIG REQUIRED)

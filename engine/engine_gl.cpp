@@ -507,6 +507,25 @@ namespace engine {
             glDeleteTextures(1, &ID);
         }
 
+        Texture::Texture(Texture&& t) {
+            *this = std::move(t);
+        }
+
+        Texture& Texture::operator=(Texture&& t) {
+            if(this != &t) {
+                ID = t.ID;
+                srcWidth = t.srcWidth;
+                srcHeight = t.srcHeight;
+                srcChannels = t.srcChannels;
+                type = t.type;
+                path = t.path;
+
+                t.ID = GLuint();
+                t.path = std::string();
+            }
+            return *this;
+        }
+
         void Texture::bind() {
             glBindTexture(GL_TEXTURE_2D, ID);
         }
@@ -529,6 +548,7 @@ namespace engine {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
+        //  need to make more of these for different settings and shit
         void Texture::load(const std::string &path) {
             unsigned char *data = stbi_load(path.c_str(), &srcWidth, &srcHeight, &srcChannels, 0);
             if(data) {
@@ -543,9 +563,10 @@ namespace engine {
                 glGenerateMipmap(GL_TEXTURE_2D);
                 stbi_image_free(data);
 
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
+                //  this part in particular needs to be changed per thing
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
                 log_debug("loaded texture %s\n", path.c_str());

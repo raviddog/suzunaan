@@ -34,7 +34,6 @@ namespace Game {
     engine::gl::FrameBuffer *fbuffer;
     engine::SpriteInstance *destrect;
 
-    engine::Model *backpack;
 
     glm::mat4 shader3d_projection, shader3d_view;
     glm::vec3 shader3d_eye, shader3d_up, shader3d_direction;
@@ -262,8 +261,7 @@ void Stage::draw() {
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
     model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
     engine::shader3d->setMat4("model", model);
-    backpack->draw();
-
+    
     fbuffer->unbind();
     
     engine::SetDrawmode(engine::DrawmodeUI);
@@ -409,7 +407,6 @@ Stage::Stage() {
 
     fbuffer = new engine::gl::FrameBuffer(352, 432);
 
-    backpack = new engine::Model("./data/model/backpack.obj");
     shader3d_projection = glm::perspective(glm::radians(90.0f), (float)640 / (float)480, 0.1f, 100.0f);
     shader3d_up = glm::vec3(0.0f, 1.0f, 0.0f);
     shader3d_eye = glm::vec3(0.0f, 0.0f, 2.0f);

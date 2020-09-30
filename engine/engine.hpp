@@ -7,6 +7,8 @@
 #include "assimp/postprocess.h"
 
 #include <vector>
+#include <memory>
+#include <unordered_map>
 
 namespace engine {
 
@@ -73,31 +75,13 @@ namespace engine {
         float height;
     };
 
-    class RenderObject {
-        public:
-            virtual void bind() =0;
-            // virtual void draw() =0;
-            void unbind();
-
-
-    };
-
-    class ModelData {
-        public:
-            float *verts = nullptr;
-            uint32_t *indices = nullptr;
-            gl::Texture *tex = nullptr;
-
-            size_t vsize, isize;
-    };
-
     class SpriteData {
         public:
             gl::Texture *tex = nullptr;
             
     };
 
-    class SpriteInstance : public RenderObject {
+    class SpriteInstance {
         //  single sprite/texture test
         public:
             SpriteData *data;
@@ -118,69 +102,45 @@ namespace engine {
             static void unbind();
     };
 
+    class ObjModel {
+        public:
+            struct Material_t {
+                std::string name;
+                glm::vec3 colourAmbient;    //  ambient colour
+                glm::vec3 colourDiffuse;    //  diffuse colour
+                glm::vec3 colourSpecular;   //  specular colour
+                
+                float specularExponent;
+                float opticalDensity;
+                float dissolve;
+                int illumination;
+                
+                std::string texname_ambientMap;
+                std::string texname_diffuseMap;
+                std::string texname_specularMap;
+                std::string texname_alpha;
+                std::string texname_bump;
+            };
+
+            struct Mesh_t {
+                std::string name;
+                std::shared_ptr<gl::VAO> vao;
+                std::shared_ptr<gl::VBO> vbo;
+                size_t indices;
+                Material_t *material;
+            };
+
+            std::vector<Material_t> *materials;
+            std::vector<Mesh_t> *meshes;
+            std::unordered_map<std::string, std::shared_ptr<gl::Texture>> *textures;
+            
+            ObjModel(const char *rawpath);
+            ~ObjModel();
+            void draw();
+    };
+
     
 
-    //  need a shader to draw to
-
-    class ModelInstance : public RenderObject {
-        public:
-            ModelData *model;
-            //  other offset/rendering things
-            
-
-            //  need other parameters to set up bind function
-            void bind();
-            void draw();
-            static void unbind();
-    };
-
-    class ModelGroup : public RenderObject {
-        public:
-            ModelData *models;
-            //  other offset/rendering things
-
-            
-
-            //  need other parameters to set up bind function
-            void bind();
-            void draw();
-            static void unbind();
-    };
-
-    class Mesh {
-        public:
-            //  mesh data
-            std::vector<gl::modelVertex> vertices;
-            std::vector<uint32_t> indices;
-            std::vector<gl::Texture*> textures;
-
-            Mesh(std::vector<gl::modelVertex> vertices, std::vector<uint32_t> indices, std::vector<gl::Texture*> textures);
-            void draw();    //  add shader
-        private:
-            //  render data
-            gl::VAO *vao;
-            gl::VBO *vbo;
-
-            void setupMesh();
-    };
-
-    class Model {
-        public:
-            Model(char *path) {
-                loadModel(path);
-            }
-            void draw();
-        private:
-            std::vector<Mesh*> meshes;
-            std::string directory;
-            std::vector<gl::Texture*> loadedTextures;
-
-            void loadModel(std::string path);
-            void processNode(aiNode *node, const aiScene *scene);
-            Mesh* processMesh(aiMesh *mesh, const aiScene *scene);
-            std::vector<gl::Texture*> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
-
-    };
 
     class SpriteSheet {
         private:

@@ -102,12 +102,16 @@ namespace engine {
             private:
                 // static int curTxUnit;
             public:
+                Texture();
+                ~Texture();
+                Texture(Texture&& t);
+                Texture& operator=(Texture&& t);
+
                 GLuint ID;
                 int srcWidth, srcHeight, srcChannels;
                 std::string type;
                 std::string path;
-                Texture();
-                ~Texture();
+                
                 void bind();
                 void bind(int txUnit);
                 void load(const std::string &path);

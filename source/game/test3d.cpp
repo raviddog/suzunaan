@@ -5,7 +5,7 @@
 
 engine::gl::FrameBuffer *fbuffer;
 engine::SpriteInstance *destrect;
-engine::Model *backpack;
+engine::ObjModel *backpack;
 
 glm::mat4 shader3d_projection, shader3d_view;
 glm::vec3 shader3d_eye, shader3d_up, shader3d_direction;
@@ -22,7 +22,6 @@ float quadVertices[] = { // vertex attributes for a quad that fills the entire s
         1.0f, -1.0f,  1.0f, 0.0f,
         1.0f,  1.0f,  1.0f, 1.0f
 };
-
 
 void Test3D::logic() {
     if(engine::checkKey(engine::inputUp)) {
@@ -57,14 +56,15 @@ void Test3D::draw() {
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
     model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
     engine::shader3d->setMat4("model", model);
+    engine::shader3d->setInt("texture_diffuse1", 0);
     backpack->draw();
 }
 
 Test3D::Test3D() {
-    backpack = new engine::Model("./data/model/backpack.obj");
+    backpack = new engine::ObjModel("./data/model/backpack.obj");
     shader3d_projection = glm::perspective(glm::radians(90.0f), (float)640 / (float)480, 0.1f, 100.0f);
     shader3d_up = glm::vec3(0.0f, 1.0f, 0.0f);
-    shader3d_eye = glm::vec3(0.0f, 0.0f, 2.0f);
+    shader3d_eye = glm::vec3(0.0f, 0.0f, 0.0f);
     shader3d_direction = glm::vec3(sin(glm::radians(shader3d_angle)), 0.0f, cos(glm::radians(shader3d_angle)));
     shader3d_direction = glm::normalize(shader3d_direction);
     shader3d_view = glm::lookAt(shader3d_eye, shader3d_eye + shader3d_direction, shader3d_up);

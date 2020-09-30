@@ -16,6 +16,8 @@
 #include "pthread.h"
 #endif
 
+#include "OBJ_Loader.h"
+
 namespace engine {
     
 
@@ -46,6 +48,145 @@ namespace engine {
          1.0f,  1.0f,  1.0f, 1.0f
     };
 
+    ObjModel::ObjModel(const char *rawpath) {
+        materials = new std::vector<Material_t>();
+        meshes = new std::vector<Mesh_t>();
+        //  texture map
+        textures = new std::unordered_map<std::string, std::shared_ptr<gl::Texture>>();
+
+        std::string path = rawpath;
+        std::string directory = path.substr(0, path.find_last_of('/'));
+        directory += '/';
+
+        objl::Loader loader;
+        if(loader.LoadFile(path.c_str())) {
+
+            //  loop through and pull loaded materials
+            //  also load textures as we go
+            for(auto loadedMat = loader.LoadedMaterials.begin(); loadedMat != loader.LoadedMaterials.end(); loadedMat++) {
+                //  load material
+                Material_t material;
+                material.name = loadedMat->name;
+                material.colourAmbient = glm::vec3(loadedMat->Ka.X, loadedMat->Ka.Y, loadedMat->Ka.Z);
+                material.colourDiffuse = glm::vec3(loadedMat->Kd.X, loadedMat->Kd.Y, loadedMat->Kd.Z);
+                material.colourSpecular = glm::vec3(loadedMat->Ks.X, loadedMat->Ks.Y, loadedMat->Ks.Z);
+                material.specularExponent = loadedMat->Ns;
+                material.opticalDensity = loadedMat->Ni;
+                material.dissolve = loadedMat->d;
+                material.illumination = loadedMat->illum;
+                material.texname_ambientMap = loadedMat->map_Ka;
+                material.texname_diffuseMap = loadedMat->map_Kd;
+                material.texname_specularMap = loadedMat->map_Ks;
+                material.texname_alpha = loadedMat->map_d;
+                material.texname_bump = loadedMat->map_bump;
+
+                //  check if textures are loaded and if not, load them
+                if(material.texname_ambientMap != "" && textures->count(material.texname_ambientMap) == 0) {
+                    gl::Texture *tex = new gl::Texture();
+                    tex->bind();
+                    tex->load(directory + material.texname_ambientMap);
+                    textures->insert(std::make_pair(material.texname_ambientMap, std::shared_ptr<gl::Texture>(tex)));
+                }
+                if(material.texname_diffuseMap != "" && textures->count(material.texname_diffuseMap) == 0) {
+                    gl::Texture *tex = new gl::Texture();
+                    tex->bind();
+                    tex->load(directory + material.texname_diffuseMap);
+                    textures->insert(std::make_pair(material.texname_diffuseMap, std::shared_ptr<gl::Texture>(tex)));
+                }
+                if(material.texname_specularMap != "" && textures->count(material.texname_specularMap) == 0) {
+                    gl::Texture *tex = new gl::Texture();
+                    tex->bind();
+                    tex->load(directory + material.texname_specularMap);
+                    textures->insert(std::make_pair(material.texname_specularMap, std::shared_ptr<gl::Texture>(tex)));
+                }
+                if(material.texname_alpha != "" && textures->count(material.texname_alpha) == 0) {
+                    gl::Texture *tex = new gl::Texture();
+                    tex->bind();
+                    tex->load(directory + material.texname_alpha);
+                    textures->insert(std::make_pair(material.texname_alpha, std::shared_ptr<gl::Texture>(tex)));
+                }
+                if(material.texname_bump != "" && textures->count(material.texname_bump) == 0) {
+                    gl::Texture *tex = new gl::Texture();
+                    tex->bind();
+                    tex->load(directory + material.texname_bump);
+                    textures->insert(std::make_pair(material.texname_bump, std::shared_ptr<gl::Texture>(tex)));
+                }
+                
+                materials->push_back(material);
+            }
+
+            //  loop through meshes and do stuff?
+            // for(auto loadedMesh = loader.LoadedMeshes.begin(); loadedMesh != loader.LoadedMeshes.end(); loadedMesh++) {
+            for(uint32_t i = 0u; i < loader.LoadedMeshes.size(); i++) {
+                auto loadedMesh = &loader.LoadedMeshes[i];
+
+                Mesh_t mesh;
+                mesh.name = loadedMesh->MeshName;
+                mesh.vao = std::shared_ptr<gl::VAO>(new gl::VAO);
+                mesh.vao->bind();
+                mesh.vbo = std::shared_ptr<gl::VBO>(new gl::VBO);
+                mesh.vbo->bind();
+                mesh.vbo->createVertexAttribPointer(3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+                mesh.vbo->createVertexAttribPointer(3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+                mesh.vbo->createVertexAttribPointer(2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
+                //  build vector of floats to buffer
+                std::vector<float> vertices;
+                std::vector<uint32_t> indices;
+                // for(auto vertex = loadedMesh->Vertices.begin(); vertex != loadedMesh->Vertices.end(); vertex++) {
+                for(uint32_t j = 0u; j < loadedMesh->Vertices.size(); j++) {
+                    auto vertex = &loadedMesh->Vertices[j];
+                    vertices.push_back(vertex->Position.X);
+                    vertices.push_back(vertex->Position.Y);
+                    vertices.push_back(vertex->Position.Z);
+                    vertices.push_back(vertex->Normal.X);
+                    vertices.push_back(vertex->Normal.Y);
+                    vertices.push_back(vertex->Normal.Z);
+                    vertices.push_back(vertex->TextureCoordinate.X);
+                    vertices.push_back(vertex->TextureCoordinate.Y);
+
+                    indices.push_back(j);
+                }
+                
+                mesh.vbo->bufferVerts(  sizeof(float) * vertices.size(),
+                                        vertices.data(),
+                                        sizeof(uint32_t) * indices.size(),
+                                        indices.data());
+
+
+                mesh.vao->unbind();
+                //  save number of indices
+                mesh.indices = indices.size();
+                //  find material name in vector
+                int matCount = 0;
+                for(; matCount < materials->size() && materials->at(matCount).name != loadedMesh->MeshMaterial.name; matCount++);
+                if(matCount < materials->size()) {
+                    //  material found
+                    mesh.material = &materials->at(matCount);
+                } else {
+                    mesh.material = nullptr;
+                }
+                
+                meshes->push_back(mesh);
+            }
+            gl::VAO::unbind();
+
+
+        } else {
+            //  load failed, error something
+        }
+    }
+
+    void ObjModel::draw() {
+        for(auto i = meshes->begin(); i != meshes->end(); i++) {
+            i->vao->bind();
+            if(i->material) {
+                textures->at(i->material->texname_diffuseMap)->bind(0);
+            }
+            glDrawElements(GL_TRIANGLES, i->indices, GL_UNSIGNED_INT, (void*)0);
+        }
+    }
+/*
     Mesh::Mesh(std::vector<gl::modelVertex> vertices, std::vector<uint32_t> indices, std::vector<gl::Texture*> textures)
     {
         this->vertices = vertices;
@@ -207,7 +348,7 @@ namespace engine {
         }
         return textures;
     }
-
+*/
     SpriteSheet::SpriteSheet(const std::string &path, int numSprites) {
         load(path, numSprites);
     }
@@ -749,7 +890,8 @@ namespace engine {
             #endif
         }
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glEnable(GL_BLEND);
         //glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
