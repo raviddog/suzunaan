@@ -25,11 +25,13 @@ void Test3D::logic() {
         camera->mov_dir_lf -= cameraSpeed;
     }
     if (engine::checkKey(engine::inputFire)) {
-        camera->angle += cameraSpeed * 45;
+        camera->mov_up += cameraSpeed;
     }
     if (engine::checkKey(engine::inputBomb)) {
-        camera->angle -= cameraSpeed * 45;
+        camera->mov_up -= cameraSpeed;
     }
+    camera->angle_h -= engine::mouseMoveX * cameraSpeed;
+    camera->angle_v -= engine::mouseMoveY * cameraSpeed;
     camera->update();
     
 }

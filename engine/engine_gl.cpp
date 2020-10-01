@@ -3,17 +3,26 @@
 #include "debug.hpp"
 
 namespace engine {
+
+    int mouseX, mouseY, mouseMoveX, mouseMoveY;
     bool quit;
     bool keyState[83];
     bool keyPressed[83];
     bool keyStateTest[83];
 
     void inputs() {
+        
+        // SDL_GetMouseState(&mouseX, &mouseY);
+        SDL_GetRelativeMouseState(&mouseMoveX, &mouseMoveY);
+        // mouseMoveX = 0;
+        // mouseMoveY = 0;
+
+
         static SDL_Event e;
         
         if(SDL_GetWindowFlags(gl::window) && SDL_WINDOW_INPUT_FOCUS != 0u) {
             while(SDL_PollEvent(&e) != 0)
-            {
+            {     
                 static bool curState = false;
 
                 if(e.type == SDL_QUIT) {
@@ -22,8 +31,12 @@ namespace engine {
                     curState = true;
                 } else if(e.type == SDL_KEYUP) {
                     curState = false;
+                } else if(e.type == SDL_MOUSEMOTION) {
+                    //  relative mode
+                    // SDL_WarpMouseInWindow(gl::window, 100, 100);
+                    // int a, b;
+                    // SDL_GetRelativeMouseState(&a, &b);   //  flush the warp movement state
                 }
-
 
                 switch(e.key.keysym.sym)
                 {

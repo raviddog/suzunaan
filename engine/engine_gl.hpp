@@ -17,6 +17,7 @@
 
 namespace engine {
 
+    extern int mouseX, mouseY, mouseMoveX, mouseMoveY;
     extern bool quit;
     extern bool keyState[83];
     extern bool keyPressed[83];
@@ -137,53 +138,6 @@ namespace engine {
                 RBO *rbo;
                 int width, height;
         };
-
-        
-
-        
-
-
-        
-
-
-        //--------------------------------
-        /*
-        class ModelDataStatic {
-            public:
-                float *verts = nullptr;
-                uint32_t *indices = nullptr;
-
-                size_t vsize, isize;
-        };
-
-        class ModelDataDynamic {
-            public:
-                std::vector<float> *verts;
-                std::vector<uint32_t> *indices;
-                size_t indices_stored_size;
-
-                ModelDataDynamic();
-                ~ModelDataDynamic();
-
-                void createBuffers();
-                void buffer();
-
-                // uint32_t Add(float *verts, size_t vsize, uint32_t *inds, size_t isize);
-        };
-        class RenderObject2DQuad : public RenderObject {
-            public:
-                Texture *tex;
-                ModelDataStatic *data;
-
-                RenderObject2DQuad();
-                ~RenderObject2DQuad();
-
-                
-                void Bind();
-
-        };
-    `   */
-        //---------------------------------------
 
         class Shader
         {

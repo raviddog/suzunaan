@@ -163,9 +163,9 @@ namespace engine {
             glm::mat4 projection, view;
         public:
             //  need to store a look direction and a world space direction
-            float angle;
-            float mov_x, mov_y, mov_z;
-            float mov_dir_fw, mov_dir_lf, mov_dir_up;
+            float angle_h, angle_v;
+            float mov_fw, mov_up, mov_lf;
+            float mov_dir_fw, mov_dir_lf;
 
             void update();
 

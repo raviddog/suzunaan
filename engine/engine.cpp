@@ -514,13 +514,13 @@ namespace engine {
         Drawmode dmode = currentDrawmode;
         SetDrawmode(Drawmode3D);
 
-        angle = 0.f;
-        mov_x = 0.f;
-        mov_y = 0.f;
-        mov_z = 0.f;
+        angle_h = 0.f;
+        angle_v = 0.f;
+        mov_fw = 0.f;
+        mov_up = 0.f;
+        mov_lf = 0.f;
         mov_dir_fw = 0.f;
         mov_dir_lf = 0.f;
-        mov_dir_up = 0.f;
 
         dir_x = glm::vec3(1.f, 0.f, 0.f);
         dir_y = glm::vec3(0.f, 1.f, 0.f);
@@ -529,7 +529,7 @@ namespace engine {
         //  todo add settings to this shit
         projection = glm::perspective(glm::radians(90.f), 640.f / 480.f, 0.1f, 100.f);
         eye = glm::vec3(0.f, 0.f, 0.f);
-        direction = glm::vec3(sin(glm::radians(angle)), 0.f, cos(glm::radians(angle)));
+        direction = glm::vec3(sin(glm::radians(angle_h)), sin(glm::radians(angle_v)), cos(glm::radians(angle_h)));
         direction = glm::normalize(direction);
         view = glm::lookAt(eye, eye + direction, dir_y);
         
@@ -541,25 +541,29 @@ namespace engine {
     }
 
     void Camera::update() {
-        eye += dir_x * mov_x;
-        eye += dir_y * mov_y;
-        eye += dir_z * mov_z;
+        eye += dir_x * mov_fw;
+        eye += dir_y * mov_up;
+        eye += dir_z * mov_lf;
 
-        direction = glm::vec3(sin(glm::radians(angle)), 0.f, cos(glm::radians(angle)));
+        //  cap up and down so far
+        //  need to do trig on this shit for the up and down looking, fuck
+        //  do it later
+        if(angle_v > 90.f) angle_v = 90.f;
+        if(angle_v < -90.f) angle_v = -90.f;
+
+        direction = glm::vec3(sin(glm::radians(angle_h)), sin(glm::radians(angle_v)), cos(glm::radians(angle_h)));
         direction = glm::normalize(direction);
 
         eye += direction * mov_dir_fw;
-        eye += glm::vec3(direction.y, direction.x, direction.z) * mov_dir_up;
-        eye += glm::vec3(direction.z, direction.y, -direction.x) * mov_dir_lf;
+        eye += glm::vec3(direction.z, 0.f, -direction.x) * mov_dir_lf;
 
         view = glm::lookAt(eye, eye + direction, dir_y);
 
-        mov_x = 0.f;
-        mov_y = 0.f;
-        mov_z = 0.f;
+        mov_fw = 0.f;
+        mov_up = 0.f;
+        mov_lf = 0.f;
 
         mov_dir_fw = 0.f;
-        mov_dir_up = 0.f;
         mov_dir_lf = 0.f;
 
         Drawmode dmode = currentDrawmode;
@@ -796,6 +800,12 @@ namespace engine {
         
         InitialiseDrawmodes(); 
         SetDrawmode(DrawmodeSprite);
+
+        //  temp
+        //  test grab cursor
+        // SDL_ShowCursor(SDL_DISABLE);
+        // SDL_SetWindowGrab(gl::window, SDL_TRUE);
+        SDL_SetRelativeMouseMode(SDL_TRUE);
     }
 
     void flip() {       
