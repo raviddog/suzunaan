@@ -2,9 +2,6 @@
 #define _ENGINE_H
 
 #include "engine_gl.hpp"
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
-#include "assimp/postprocess.h"
 
 #include <vector>
 #include <memory>
@@ -21,6 +18,7 @@ namespace engine {
 
     enum Drawmode {
         DrawmodeSprite,
+        DrawmodeSpriteInvert,
         DrawmodeUI,
         Drawmode3D
     };
@@ -155,10 +153,24 @@ namespace engine {
             static void useShaderInvert();
             static void useShaderNormal();
             //  prepare stuff for drawing sprites
-            // static void prepareDraw();
+            //  static void prepareDraw();
     };
 
-    
+    class Camera {
+        private:
+            glm::vec3 dir_x, dir_y, dir_z;
+            glm::vec3 eye, direction;
+            glm::mat4 projection, view;
+        public:
+            //  need to store a look direction and a world space direction
+            float angle;
+            float mov_x, mov_y, mov_z;
+            float mov_dir_fw, mov_dir_lf, mov_dir_up;
+
+            void update();
+
+            Camera();
+    };
 }
 
 #endif

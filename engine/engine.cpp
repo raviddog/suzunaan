@@ -153,7 +153,6 @@ namespace engine {
                                         sizeof(uint32_t) * indices.size(),
                                         indices.data());
 
-
                 mesh.vao->unbind();
                 //  save number of indices
                 mesh.indices = indices.size();
@@ -185,6 +184,13 @@ namespace engine {
             }
             glDrawElements(GL_TRIANGLES, i->indices, GL_UNSIGNED_INT, (void*)0);
         }
+    }
+
+    ObjModel::~ObjModel() {
+        gl::VAO::unbind();
+        delete meshes;
+        delete materials;
+        delete textures;
     }
 
     SpriteSheet::SpriteSheet(const std::string &path, int numSprites) {
@@ -378,11 +384,11 @@ namespace engine {
     }
 
     void SpriteSheet::useShaderInvert() {
-        shaderSpriteSheetInvert->use();
+        SetDrawmode(DrawmodeSpriteInvert);
     }
 
     void SpriteSheet::useShaderNormal() {
-        shaderSpriteSheet->use();
+        SetDrawmode(DrawmodeSprite);
     }
 
     SpriteInstance::SpriteInstance() {
@@ -469,6 +475,11 @@ namespace engine {
                     currentDrawmode = DrawmodeSprite;
                     glDisable(GL_DEPTH_TEST);
                     break;
+                case DrawmodeSpriteInvert:
+                    shaderSpriteSheetInvert->use();
+                    currentDrawmode = DrawmodeSpriteInvert;
+                    glDisable(GL_DEPTH_TEST);
+                    break;
                 case Drawmode3D:
                     shader3d->use();
                     currentDrawmode = Drawmode3D;
@@ -477,6 +488,8 @@ namespace engine {
                 case DrawmodeUI:
                     pshader->use();
                     currentDrawmode = DrawmodeUI;
+                    glDisable(GL_DEPTH_TEST);
+                    break;
                 default:
                     break;
             }
@@ -495,6 +508,64 @@ namespace engine {
 
     void ConfigureDrawmodeUITexture(int txunit) {
         pshader->setInt("screenTexture", txunit);
+    }
+
+    Camera::Camera() {
+        Drawmode dmode = currentDrawmode;
+        SetDrawmode(Drawmode3D);
+
+        angle = 0.f;
+        mov_x = 0.f;
+        mov_y = 0.f;
+        mov_z = 0.f;
+        mov_dir_fw = 0.f;
+        mov_dir_lf = 0.f;
+        mov_dir_up = 0.f;
+
+        dir_x = glm::vec3(1.f, 0.f, 0.f);
+        dir_y = glm::vec3(0.f, 1.f, 0.f);
+        dir_z = glm::vec3(0.f, 0.f, 1.f);
+
+        //  todo add settings to this shit
+        projection = glm::perspective(glm::radians(90.f), 640.f / 480.f, 0.1f, 100.f);
+        eye = glm::vec3(0.f, 0.f, 0.f);
+        direction = glm::vec3(sin(glm::radians(angle)), 0.f, cos(glm::radians(angle)));
+        direction = glm::normalize(direction);
+        view = glm::lookAt(eye, eye + direction, dir_y);
+        
+        // shader3d temp
+        shader3d->setMat4("projection", projection);
+        shader3d->setMat4("view", view);
+
+        SetDrawmode(dmode);
+    }
+
+    void Camera::update() {
+        eye += dir_x * mov_x;
+        eye += dir_y * mov_y;
+        eye += dir_z * mov_z;
+
+        direction = glm::vec3(sin(glm::radians(angle)), 0.f, cos(glm::radians(angle)));
+        direction = glm::normalize(direction);
+
+        eye += direction * mov_dir_fw;
+        eye += glm::vec3(direction.y, direction.x, direction.z) * mov_dir_up;
+        eye += glm::vec3(direction.z, direction.y, -direction.x) * mov_dir_lf;
+
+        view = glm::lookAt(eye, eye + direction, dir_y);
+
+        mov_x = 0.f;
+        mov_y = 0.f;
+        mov_z = 0.f;
+
+        mov_dir_fw = 0.f;
+        mov_dir_up = 0.f;
+        mov_dir_lf = 0.f;
+
+        Drawmode dmode = currentDrawmode;
+        SetDrawmode(Drawmode3D);
+        shader3d->setMat4("view", view);
+        SetDrawmode(dmode);
     }
 
     //  load settings from file
