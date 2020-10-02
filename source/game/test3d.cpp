@@ -49,6 +49,8 @@ Test3D::Test3D() {
     backpack = new engine::ObjModel("./data/model/backpack.obj");
     camera = new engine::Camera();
     engine::shader3d->setInt("texture_diffuse1", 0);
+    
+    engine::mouseCapture();
 }
 
 Test3D::~Test3D() {

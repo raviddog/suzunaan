@@ -800,12 +800,6 @@ namespace engine {
         
         InitialiseDrawmodes(); 
         SetDrawmode(DrawmodeSprite);
-
-        //  temp
-        //  test grab cursor
-        // SDL_ShowCursor(SDL_DISABLE);
-        // SDL_SetWindowGrab(gl::window, SDL_TRUE);
-        SDL_SetRelativeMouseMode(SDL_TRUE);
     }
 
     void flip() {       
@@ -909,6 +903,14 @@ namespace engine {
 
     bool checkKeyPressed(int key) {
         return keyPressed[controls[key]];
+    }
+
+    void mouseCapture() {
+        SDL_SetRelativeMouseMode(SDL_TRUE);
+    }
+
+    void mouseRelease() {
+        SDL_SetRelativeMouseMode(SDL_FALSE);
     }
 
 }
