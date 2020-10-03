@@ -610,7 +610,7 @@ namespace engine {
             const int width_draw = 640, height_draw = 480;
 
             while(settings.peek() != EOF) {
-                if(settings.peek() == '[' || settings.peek() == ';') {
+                if(settings.peek() == '[' || settings.peek() == ';' || settings.peek() == '\n') {
                     settings.ignore(512, '\n');
                 } else {
                     std::string id;
@@ -631,7 +631,6 @@ namespace engine {
                         if(id == "fullscreen") screenMode = 2;
                     } else {
                         //  check if its an input setting
-                        std::getline(settings, id);
                         int x = 0;
                         while(x < inputSkip && id != inputStrings[x]) {
                             ++x;
@@ -640,6 +639,7 @@ namespace engine {
                         if(x < inputSkip) {
                             //  found
                             //  https://wiki.libsdl.org/SDLScancodeLookup
+                            std::getline(settings, id);
                             controls[x] = stoul(id);
                         }
                     }

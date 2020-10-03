@@ -9,6 +9,8 @@ namespace engine {
     bool keyPressed[kb::KeycodesLength];
     bool keyStateTest[kb::KeycodesLength];
 
+    void *currentShader = nullptr;
+    
     void inputs() {
         
         // SDL_GetMouseState(&mouseX, &mouseY);
@@ -18,9 +20,7 @@ namespace engine {
         
         if(SDL_GetWindowFlags(gl::window) && SDL_WINDOW_INPUT_FOCUS != 0u) {
             while(SDL_PollEvent(&e) != 0)
-            {     
-                static bool curState = false;
-
+            {
                 if(e.type == SDL_QUIT) {
                     quit = true;
                 } else if(e.type == SDL_KEYDOWN) {
@@ -47,7 +47,6 @@ namespace engine {
         }
     } 
 
-    void *currentShader = nullptr;
 
     namespace gl {
         SDL_Window *window;
