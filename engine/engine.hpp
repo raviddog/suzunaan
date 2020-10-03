@@ -82,7 +82,7 @@ namespace engine {
             static void unbind();
     };
 
-    class ObjModel {
+    class Model {
         public:
             struct Material_t {
                 std::string name;
@@ -114,8 +114,8 @@ namespace engine {
             std::vector<Mesh_t> *meshes;
             std::unordered_map<std::string, std::shared_ptr<gl::Texture>> *textures;
             
-            ObjModel(const char *rawpath);
-            ~ObjModel();
+            Model(const char *rawpath);
+            ~Model();
             void draw();
     };
 
@@ -159,8 +159,9 @@ namespace engine {
             //  static void prepareDraw();
     };
 
-    class Camera {
+    class Camera3D {
         private:
+            static Camera3D *bound;
             glm::vec3 dir_x, dir_y, dir_z;
             glm::vec3 eye, direction;
             glm::mat4 projection, view;
@@ -171,8 +172,9 @@ namespace engine {
             float mov_dir_fw, mov_dir_lf;
 
             void update();
+            void bind();
 
-            Camera();
+            Camera3D();
     };
 }
 

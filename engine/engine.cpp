@@ -19,7 +19,7 @@
 #include "OBJ_Loader.h"
 
 namespace engine {
-    
+    Camera3D *Camera3D::bound = nullptr;
 
     int scrWidth, scrHeight, drawWidth, drawHeight;
     int viewport[4], scrMode;
@@ -48,7 +48,7 @@ namespace engine {
          1.0f,  1.0f,  1.0f, 1.0f
     };
 
-    ObjModel::ObjModel(const char *rawpath) {
+    Model::Model(const char *rawpath) {
         materials = new std::vector<Material_t>();
         meshes = new std::vector<Mesh_t>();
         //  texture map
@@ -176,7 +176,7 @@ namespace engine {
         }
     }
 
-    void ObjModel::draw() {
+    void Model::draw() {
         for(auto i = meshes->begin(); i != meshes->end(); i++) {
             i->vao->bind();
             if(i->material) {
@@ -186,7 +186,7 @@ namespace engine {
         }
     }
 
-    ObjModel::~ObjModel() {
+    Model::~Model() {
         gl::VAO::unbind();
         delete meshes;
         delete materials;
@@ -510,10 +510,7 @@ namespace engine {
         pshader->setInt("screenTexture", txunit);
     }
 
-    Camera::Camera() {
-        Drawmode dmode = currentDrawmode;
-        SetDrawmode(Drawmode3D);
-
+    Camera3D::Camera3D() {
         angle_h = 0.f;
         angle_v = 0.f;
         mov_fw = 0.f;
@@ -532,15 +529,9 @@ namespace engine {
         direction = glm::vec3(sin(glm::radians(angle_h)), sin(glm::radians(angle_v)), cos(glm::radians(angle_h)));
         direction = glm::normalize(direction);
         view = glm::lookAt(eye, eye + direction, dir_y);
-        
-        // shader3d temp
-        shader3d->setMat4("projection", projection);
-        shader3d->setMat4("view", view);
-
-        SetDrawmode(dmode);
     }
 
-    void Camera::update() {
+    void Camera3D::update() {
         eye += dir_x * mov_fw;
         eye += dir_y * mov_up;
         eye += dir_z * mov_lf;
@@ -566,10 +557,16 @@ namespace engine {
         mov_dir_fw = 0.f;
         mov_dir_lf = 0.f;
 
-        Drawmode dmode = currentDrawmode;
-        SetDrawmode(Drawmode3D);
+        if(bound == this) {
+            shader3d->setMat4("view", view);
+        }
+    }
+
+    void Camera3D::bind() {
+        bound = this;
+        // shader3d temp
+        shader3d->setMat4("projection", projection);
         shader3d->setMat4("view", view);
-        SetDrawmode(dmode);
     }
 
     //  load settings from file

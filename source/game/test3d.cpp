@@ -5,9 +5,9 @@
 
 engine::gl::FrameBuffer *fbuffer;
 engine::SpriteInstance *destrect;
-engine::ObjModel *backpack;
+engine::Model *backpack;
 
-engine::Camera *camera;
+engine::Camera3D *camera;
 float cameraSpeed = 0.05f;
 
 
@@ -37,17 +37,18 @@ void Test3D::logic() {
 }
 
 void Test3D::draw() {
-    engine::SetDrawmode(engine::Drawmode3D);
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.0f)); // translate it down so it's at the center of the scene
     model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
     engine::shader3d->setMat4("model", model);
     backpack->draw();
 }
 
 Test3D::Test3D() {
-    backpack = new engine::ObjModel("./data/model/backpack.obj");
-    camera = new engine::Camera();
+    engine::SetDrawmode(engine::Drawmode3D);
+    backpack = new engine::Model("./data/model/backpack.obj");
+    camera = new engine::Camera3D();
+    camera->bind();
     engine::shader3d->setInt("texture_diffuse1", 0);
     
     engine::mouseCapture();
