@@ -574,17 +574,17 @@ namespace engine {
         debug_init();
 
         //  default controls if there's none in config
-        controls[inputUp] = 2;
-        controls[inputDown] = 3;
-        controls[inputLeft] = 0;
-        controls[inputRight] = 1;
-        controls[inputFire] = 58;
-        controls[inputFocus] = 57;
-        controls[inputBomb] = 59;
-        controls[inputPause] = 4;
-        controls[inputQuit] = 32;
-        controls[inputRestart] = 35;
-        controls[inputSkip] = 69;
+        controls[inputUp] = 82;
+        controls[inputDown] = 81;
+        controls[inputLeft] = 80;
+        controls[inputRight] = 79;
+        controls[inputFire] = 29;
+        controls[inputFocus] = 225;
+        controls[inputBomb] = 27;
+        controls[inputPause] = 41;
+        controls[inputQuit] = 20;
+        controls[inputRestart] = 21;
+        controls[inputSkip] = 224;
 
         std::string inputStrings[] = {
             "Up",
@@ -639,6 +639,7 @@ namespace engine {
 
                         if(x < inputSkip) {
                             //  found
+                            //  https://wiki.libsdl.org/SDLScancodeLookup
                             controls[x] = stoul(id);
                         }
                     }

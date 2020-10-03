@@ -16,22 +16,34 @@
 #include <vector>
 
 namespace engine {
+    namespace kb {
+        enum keyCodes{
+            Unknown = 0,
+            A = 4, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+            k1, k2, k3, k4, k5, k6, k7, k8, k9, k0,
+            Return, Escape, Backspace, Tab, Space, Minus, Equals, Leftbracket, Rightbracket, Backslash,
+            NonUSHash, Semicolon, Apostrophe, Grave, Comma, Period, Slash, Capslock,
+            F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
+            Printscreen, Scrolllock, Pause, Insert, Home, Pageup, Delete, End, Pagedown,
+            Right, Left, Down, Up, Numlockclear,
+            nDivide, nMultiplly, nMinus, nPlus, nEnter,
+            n1, n2, n3, n4, n5, n6, n7, n8, n9, n0,
+            nPeriod, NonUSBackslash, Application, Power, nEquals,
+            F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24,
+            Execute, Help, Menu, Select, Stop, Again, Undo, Cut, Copy, Paste, Find, Mute,
+            VolumeUp, VolumeDown,
+            nComma = 133, nEqualsAs400,
+            LCtrl = 224, LShift, LAlt, LGUI, RCtrl, RShift, RAlt, RGUI,
+
+            KeycodesLength = 284
+        };
+    }
 
     extern int mouseX, mouseY, mouseMoveX, mouseMoveY;
     extern bool quit;
-    extern bool keyState[83];
-    extern bool keyPressed[83];
+    extern bool keyState[kb::KeycodesLength];
+    extern bool keyPressed[kb::KeycodesLength];
     void inputs();
-    enum keyCodes{
-        kbLeft, kbRight, kbUp, kbDown,
-        kbEscape, kbF1, kbF2, kbF3, kbF4, kbF5, kbF6, kbF7, kbF8, kbF9, kbF10, kbF11, kbF12,
-        kbTilde, kb1, kb2, kb3, kb4, kb5, kb6, kb7, kb8, kb9, kb0, kbMinus, kbEquals, kbBackspace,
-        kbTab, kbQ, kbW, kbE, kbR, kbT, kbY, kbU, kbI, kbO, kbP, kbLBracket, kbRBracket, kbBackslash,
-        kbA, kbS, kbD, kbF, kbG, kbH, kbJ, kbK, kbL, kbColon, kbQuote, kbEnter,
-        kbLShift, kbZ, kbX, kbC, kbV, kbB, kbN, kbM, kbPeriod, kbComma, kbSlash, kbRShift,
-        kbLCtrl, kbLWin, kbLAlt, kbSpace, kbRAlt, kbRWin, kbMenu, kbRCtrl,
-        kbInsert, kbHome, kbPgup, kbDelete, kbEnd, kbPgdn
-    };
 
     namespace gl {
         extern SDL_Window *window;

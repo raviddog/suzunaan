@@ -3,20 +3,16 @@
 #include "debug.hpp"
 
 namespace engine {
-
     int mouseX, mouseY, mouseMoveX, mouseMoveY;
     bool quit;
-    bool keyState[83];
-    bool keyPressed[83];
-    bool keyStateTest[83];
+    bool keyState[kb::KeycodesLength];
+    bool keyPressed[kb::KeycodesLength];
+    bool keyStateTest[kb::KeycodesLength];
 
     void inputs() {
         
         // SDL_GetMouseState(&mouseX, &mouseY);
         SDL_GetRelativeMouseState(&mouseMoveX, &mouseMoveY);
-        // mouseMoveX = 0;
-        // mouseMoveY = 0;
-
 
         static SDL_Event e;
         
@@ -28,273 +24,13 @@ namespace engine {
                 if(e.type == SDL_QUIT) {
                     quit = true;
                 } else if(e.type == SDL_KEYDOWN) {
-                    curState = true;
+                    keyState[e.key.keysym.scancode] = true;
                 } else if(e.type == SDL_KEYUP) {
-                    curState = false;
-                } else if(e.type == SDL_MOUSEMOTION) {
-                    //  relative mode
-                    // SDL_WarpMouseInWindow(gl::window, 100, 100);
-                    // int a, b;
-                    // SDL_GetRelativeMouseState(&a, &b);   //  flush the warp movement state
-                }
-
-                switch(e.key.keysym.sym)
-                {
-                    case SDLK_LEFT:
-                        keyState[kbLeft] = curState;
-                        break;
-                    case SDLK_RIGHT:
-                        keyState[kbRight] = curState;
-                        break;
-                    case SDLK_UP:
-                        keyState[kbUp] = curState;
-                        break;
-                    case SDLK_DOWN:
-                        keyState[kbDown] = curState;
-                        break;
-                    case SDLK_ESCAPE:
-                        keyState[kbEscape] = curState;
-                        break;
-                    case SDLK_F1:
-                        keyState[kbF1] = curState;
-                        break;
-                    case SDLK_F2:
-                        keyState[kbF2] = curState;
-                        break;
-                    case SDLK_F3:
-                        keyState[kbF3] = curState;
-                        break;
-                    case SDLK_F4:
-                        keyState[kbF4] = curState;
-                        break;
-                    case SDLK_F5:
-                        keyState[kbF5] = curState;
-                        break;
-                    case SDLK_F6:
-                        keyState[kbF6] = curState;
-                        break;
-                    case SDLK_F7:
-                        keyState[kbF7] = curState;
-                        break;
-                    case SDLK_F8:
-                        keyState[kbF8] = curState;
-                        break;
-                    case SDLK_F9:
-                        keyState[kbF9] = curState;
-                        break;
-                    case SDLK_F10:
-                        keyState[kbF10] = curState;
-                        break;
-                    case SDLK_F11:
-                        keyState[kbF11] = curState;
-                        break;
-                    case SDLK_F12:
-                        keyState[kbF12] = curState;
-                        break;
-                    case SDLK_BACKQUOTE:
-                        keyState[kbTilde] = curState;
-                        break;
-                    case SDLK_1:
-                        keyState[kb1] = curState;
-                        break;
-                    case SDLK_2:
-                        keyState[kb2] = curState;
-                        break;
-                    case SDLK_3:
-                        keyState[kb3] = curState;
-                        break;
-                    case SDLK_4:
-                        keyState[kb4] = curState;
-                        break;
-                    case SDLK_5:
-                        keyState[kb5] = curState;
-                        break;
-                    case SDLK_6:
-                        keyState[kb6] = curState;
-                        break;
-                    case SDLK_7:
-                        keyState[kb7] = curState;
-                        break;
-                    case SDLK_8:
-                        keyState[kb8] = curState;
-                        break;
-                    case SDLK_9:
-                        keyState[kb9] = curState;
-                        break;
-                    case SDLK_0:
-                        keyState[kb0] = curState;
-                        break;
-                    case SDLK_MINUS:
-                        keyState[kbMinus] = curState;
-                        break;
-                    case SDLK_EQUALS:
-                        keyState[kbEquals] = curState;
-                        break;
-                    case SDLK_BACKSPACE:
-                        keyState[kbBackspace] = curState;
-                        break;
-                    case SDLK_TAB:
-                        keyState[kbTab] = curState;
-                        break;
-                    case SDLK_q:
-                        keyState[kbQ] = curState;
-                        break;
-                    case SDLK_w:
-                        keyState[kbW] = curState;
-                        break;
-                    case SDLK_e:
-                        keyState[kbE] = curState;
-                        break;
-                    case SDLK_r:
-                        keyState[kbR] = curState;
-                        break;
-                    case SDLK_t:
-                        keyState[kbT] = curState;
-                        break;
-                    case SDLK_y:
-                        keyState[kbY] = curState;
-                        break;
-                    case SDLK_u:
-                        keyState[kbU] = curState;
-                        break;
-                    case SDLK_i:
-                        keyState[kbI] = curState;
-                        break;
-                    case SDLK_o:
-                        keyState[kbO] = curState;
-                        break;
-                    case SDLK_p:
-                        keyState[kbP] = curState;
-                        break;
-                    case SDLK_LEFTBRACKET:
-                        keyState[kbLBracket] = curState;
-                        break;
-                    case SDLK_RIGHTPAREN:
-                        keyState[kbRBracket] = curState;
-                        break;
-                    case SDLK_BACKSLASH:
-                        keyState[kbBackslash] = curState;
-                        break;
-                    case SDLK_a:
-                        keyState[kbA] = curState;
-                        break;
-                    case SDLK_s:
-                        keyState[kbS] = curState;
-                        break;
-                    case SDLK_d:
-                        keyState[kbD] = curState;
-                        break;
-                    case SDLK_f:
-                        keyState[kbF] = curState;
-                        break;
-                    case SDLK_g:
-                        keyState[kbG] = curState;
-                        break;
-                    case SDLK_h:
-                        keyState[kbH] = curState;
-                        break;
-                    case SDLK_j:
-                        keyState[kbJ] = curState;
-                        break;
-                    case SDLK_k:
-                        keyState[kbK] = curState;
-                        break;
-                    case SDLK_l:
-                        keyState[kbL] = curState;
-                        break;
-                    case SDLK_SEMICOLON:
-                        keyState[kbColon] = curState;
-                        break;
-                    case SDLK_QUOTE:
-                        keyState[kbQuote] = curState;
-                        break;
-                    case SDLK_RETURN:
-                        keyState[kbEnter] = curState;
-                        break;
-                    case SDLK_LSHIFT:
-                        keyState[kbLShift] = curState;
-                        break;
-                    case SDLK_z:
-                        keyState[kbZ] = curState;
-                        break;
-                    case SDLK_x:
-                        keyState[kbX] = curState;
-                        break;
-                    case SDLK_c:
-                        keyState[kbC] = curState;
-                        break;
-                    case SDLK_v:
-                        keyState[kbV] = curState;
-                        break;
-                    case SDLK_b:
-                        keyState[kbB] = curState;
-                        break;
-                    case SDLK_n:
-                        keyState[kbN] = curState;
-                        break;
-                    case SDLK_m:
-                        keyState[kbM] = curState;
-                        break;
-                    case SDLK_COMMA:
-                        keyState[kbComma] = curState;
-                        break;
-                    case SDLK_PERIOD:
-                        keyState[kbPeriod] = curState;
-                        break;
-                    case SDLK_SLASH:
-                        keyState[kbSlash] = curState;
-                        break;
-                    case SDLK_RSHIFT:
-                        keyState[kbRShift] = curState;
-                        break;
-                    case SDLK_LCTRL:
-                        keyState[kbLCtrl] = curState;
-                        break;
-                    case SDLK_LGUI:
-                        keyState[kbLWin] = curState;
-                        break;
-                    case SDLK_LALT:
-                        keyState[kbLAlt] = curState;
-                        break;
-                    case SDLK_SPACE:
-                        keyState[kbSpace] = curState;
-                        break;
-                    case SDLK_RALT:
-                        keyState[kbRAlt] = curState;
-                        break;
-                    case SDLK_RGUI:
-                        keyState[kbRWin] = curState;
-                        break;
-                    case SDLK_MENU:
-                        keyState[kbMenu] = curState;
-                        break;
-                    case SDLK_RCTRL:
-                        keyState[kbRCtrl] = curState;
-                        break;
-                    case SDLK_INSERT:
-                        keyState[kbInsert] = curState;
-                        break;
-                    case SDLK_HOME:
-                        keyState[kbHome] = curState;
-                        break;
-                    case SDLK_PAGEUP:
-                        keyState[kbPgup] = curState;
-                        break;
-                    case SDLK_DELETE:
-                        keyState[kbDelete] = curState;
-                        break;
-                    case SDLK_END:
-                        keyState[kbEnd] = curState;
-                        break;
-                    case SDLK_PAGEDOWN:
-                        keyState[kbPgdn] = curState;
-                        break;
-                    default:
-                        break;
+                    keyState[e.key.keysym.scancode] = false;
                 }
             }
             
-            for(int i=0;i<82;i++) {
+            for(int i=0;i<kb::KeycodesLength;i++) {
                 if(keyState[i] && !(keyStateTest[i])) {
                     keyPressed[i] = true;
                 } else {
@@ -303,7 +39,7 @@ namespace engine {
                 keyStateTest[i] = keyState[i];
             }
         } else {
-            for(int i=0;i<82;i++) {
+            for(int i=0;i<kb::KeycodesLength;i++) {
                 keyState[i] = false;
                 keyPressed[i] = false;
                 keyStateTest[i] = false;;
