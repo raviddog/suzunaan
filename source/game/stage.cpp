@@ -21,6 +21,7 @@ std::vector<Game::enemy_s*> *Game::enemy_s::enemy_draw;
 namespace Game {
     const int BULLET_MAX = 120000;
     float bullet_hitbox_radius_temp = 4.27f;
+    float cameraSpeed = 0.05f;
 
     engine::SpriteSheet *img_player, *img_player_b, *img_player_eff, *img_bullet, *img_enemy;
     engine::SpriteSheet *img_guibg;
@@ -34,10 +35,8 @@ namespace Game {
     engine::gl::FrameBuffer *fbuffer;
     engine::SpriteInstance *destrect;
 
-
-    glm::mat4 shader3d_projection, shader3d_view;
-    glm::vec3 shader3d_eye, shader3d_up, shader3d_direction;
-    float shader3d_angle = 0.0f;
+    engine::Camera3D *camera;
+    engine::Model *model;
 
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // positions   // texCoords
@@ -249,24 +248,21 @@ void Stage::logic() {
 void Stage::draw() {
     using namespace Game;
     engine::SetDrawmode(engine::DrawmodeSprite);
-
     engine::setViewport();
     img_guibg->draw();
 
     engine::SetDrawmode(engine::Drawmode3D);
+    glViewport(0, 0, 352, 432);
     fbuffer->bind();
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    model->draw();
 
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-    engine::shader3d->setMat4("model", model);
-    
     fbuffer->unbind();
-    
+    engine::SetDrawmode(engine::DrawmodeSprite);
+    engine::setViewport(32, 16, 384, 448);
     engine::SetDrawmode(engine::DrawmodeUI);
     
-    engine::setViewport(32, 16, 384, 448);
+    
     destrect->bind();
     fbuffer->tex->bind();
     destrect->draw(2);
@@ -305,7 +301,7 @@ void Stage::draw() {
         img_player_eff->draw();
     }
 
-    
+    engine::setViewport();
 }
 
 Stage::Stage() {
@@ -358,7 +354,7 @@ Stage::Stage() {
     }
 
     //  center at 0,0 sprite is 32x48
-    player.init(8.f, 16.f, 376.f, 432.f);
+    player.init(8.f, 8.f, 368.f, 432.f);
     player.hitbox_radius = 1.f;
 
     img_bullet = new engine::SpriteSheet("./data/bullet1.png", 200, BULLET_MAX);
@@ -407,15 +403,19 @@ Stage::Stage() {
 
     fbuffer = new engine::gl::FrameBuffer(352, 432);
 
-    shader3d_projection = glm::perspective(glm::radians(90.0f), (float)640 / (float)480, 0.1f, 100.0f);
-    shader3d_up = glm::vec3(0.0f, 1.0f, 0.0f);
-    shader3d_eye = glm::vec3(0.0f, 0.0f, 2.0f);
-    shader3d_direction = glm::vec3(sin(glm::radians(shader3d_angle)), 0.0f, cos(glm::radians(shader3d_angle)));
-    shader3d_direction = glm::normalize(shader3d_direction);
-    shader3d_view = glm::lookAt(shader3d_eye, shader3d_eye + shader3d_direction, shader3d_up);
+    engine::SetDrawmode(engine::Drawmode3D);
+    camera = new engine::Camera3D();
+    camera->mov_dir_fw -= 3.f;
+    camera->update();
+    camera->bind();
 
-    engine::shader3d->setMat4("projection", shader3d_projection);
-    engine::shader3d->setMat4("view", shader3d_view);
+    model = new engine::Model("./data/model/backpack.obj");
+    engine::shader3d->setInt("texture_diffuse1", 0);
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 4.0f)); // translate it down so it's at the center of the scene
+    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+    engine::shader3d->setMat4("model", model);
+    
 }
 
 Stage::~Stage() {

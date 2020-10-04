@@ -37,10 +37,10 @@ void Menu::logic() {
 
         if(engine::checkKey(engine::inputFire)) {
             if(opt_selected == 0) {
-                // changeState(1);
-                changeState(2);
+                changeState(1);
             } else if(opt_selected == 1) {
-                engine::quit = true;
+                changeState(2);
+                // engine::quit = true;
             }
         }
     }

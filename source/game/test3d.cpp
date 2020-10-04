@@ -10,6 +10,16 @@ engine::Model *backpack;
 engine::Camera3D *camera;
 float cameraSpeed = 0.05f;
 
+float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f,  1.0f,  1.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f
+    };
 
 void Test3D::logic() {
     if(engine::checkKey(engine::inputUp)) {
@@ -37,11 +47,26 @@ void Test3D::logic() {
 }
 
 void Test3D::draw() {
+    engine::SetDrawmode(engine::Drawmode3D);
+    glViewport(0, 0, 640, 480);
+    fbuffer->bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.0f)); // translate it down so it's at the center of the scene
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 4.0f)); // translate it down so it's at the center of the scene
     model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
     engine::shader3d->setMat4("model", model);
     backpack->draw();
+    fbuffer->unbind();
+    
+    engine::SetDrawmode(engine::DrawmodeUI);
+    engine::pshader->setInt("screenTexture", 0);
+    glViewport(640, 480, 640, 480);
+    destrect->bind();
+    fbuffer->tex->bind();
+    destrect->draw(2);
+    destrect->unbind();
+
+    engine::SetDrawmode(engine::Drawmode3D);
 }
 
 Test3D::Test3D() {
@@ -51,6 +76,12 @@ Test3D::Test3D() {
     camera->bind();
     engine::shader3d->setInt("texture_diffuse1", 0);
     
+    fbuffer = new engine::gl::FrameBuffer(1280, 960);
+    destrect = new engine::SpriteInstance();
+    destrect->bind();
+    destrect->bufferVerts(sizeof(quadVertices), quadVertices);
+    destrect->unbind();
+
     engine::mouseCapture();
 }
 
