@@ -171,6 +171,9 @@ namespace engine {
             float mov_fw, mov_up, mov_lf;
             float mov_dir_fw, mov_dir_lf;
 
+            //  hyper TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP
+            void updateShaderPosition();
+
             void update();
             void bind();
 

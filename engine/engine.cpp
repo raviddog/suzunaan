@@ -180,7 +180,16 @@ namespace engine {
         for(auto i = meshes->begin(); i != meshes->end(); i++) {
             i->vao->bind();
             if(i->material) {
-                textures->at(i->material->texname_diffuseMap)->bind(0);
+                if(textures->at(i->material->texname_diffuseMap)) {
+                    textures->at(i->material->texname_diffuseMap)->bind(0);
+                }
+                if(textures->at(i->material->texname_specularMap)) {
+                    textures->at(i->material->texname_specularMap)->bind(1);
+                }
+                // if(textures->at(i->material->texname_ambientMap)) {
+                //     textures->at(i->material->texname_ambientMap)->bind(2);
+                // }
+                gl::Texture::activateUnit(0);
             }
             glDrawElements(GL_TRIANGLES, i->indices, GL_UNSIGNED_INT, (void*)0);
         }
@@ -559,6 +568,7 @@ namespace engine {
 
         if(bound == this) {
             shader3d->setMat4("view", view);
+            engine::shader3d->setVec3("viewPos", eye.x, eye.y, eye.z);
         }
     }
 
@@ -567,6 +577,10 @@ namespace engine {
         // shader3d temp
         shader3d->setMat4("projection", projection);
         shader3d->setMat4("view", view);
+    }
+
+    void Camera3D::updateShaderPosition() {
+        engine::shader3d->setVec3("viewPos", eye.x, eye.y, eye.z);
     }
 
     //  load settings from file

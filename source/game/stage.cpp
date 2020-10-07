@@ -98,6 +98,27 @@ void Stage::logic() {
         if(checkKeyPressed(inputQuit)) changeState(0);
     }
 
+    if(engine::checkKey(engine::inputUp)) {
+        camera->mov_dir_fw += cameraSpeed;
+    }
+    if(engine::checkKey(engine::inputDown)) {
+        camera->mov_dir_fw -= cameraSpeed;
+    }
+    if(engine::checkKey(engine::inputLeft)) {
+        camera->mov_dir_lf += cameraSpeed;
+    }
+    if(engine::checkKey(engine::inputRight)) {
+        camera->mov_dir_lf -= cameraSpeed;
+    }
+    if (engine::checkKey(engine::inputFire)) {
+        camera->mov_up += cameraSpeed;
+    }
+    if (engine::checkKey(engine::inputBomb)) {
+        camera->mov_up -= cameraSpeed;
+    }
+    camera->angle_h -= engine::mouseMoveX * cameraSpeed;
+    camera->angle_v -= engine::mouseMoveY * cameraSpeed;
+
     if(stagescript) {
         if(stagescript->frame_triggers->count(frames) > 0) {
             script_instruction *instr = stagescript->frame_triggers->at(frames);
@@ -249,12 +270,17 @@ void Stage::draw() {
     using namespace Game;
     engine::SetDrawmode(engine::DrawmodeSprite);
     engine::setViewport();
+
+
     img_guibg->draw();
 
     engine::SetDrawmode(engine::Drawmode3D);
     glViewport(0, 0, 352, 432);
     fbuffer->bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    engine::shader3d->setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+    camera->update();    
     model->draw();
 
     fbuffer->unbind();
@@ -411,11 +437,17 @@ Stage::Stage() {
 
     model = new engine::Model("./data/model/backpack.obj");
     engine::shader3d->setInt("texture_diffuse1", 0);
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 4.0f)); // translate it down so it's at the center of the scene
-    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-    engine::shader3d->setMat4("model", model);
+    glm::mat4 modelM = glm::mat4(1.0f);
+    modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 4.0f)); // translate it down so it's at the center of the scene
+    modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+    engine::shader3d->setMat4("model", modelM);
+
+    engine::shader3d->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+    engine::shader3d->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+    engine::shader3d->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    engine::shader3d->setFloat("material.shininess", 128.f);
     
+    engine::mouseCapture();
 }
 
 Stage::~Stage() {
