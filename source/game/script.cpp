@@ -1355,7 +1355,7 @@ namespace Game {
                 offset = 0;
 
                 if(instruction) {
-                    bool abort = false;
+                    // bool abort = false;
                     //  read functions until semicolon terminator
 
                     while(next < length && content[next] != ';') {
