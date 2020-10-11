@@ -37,6 +37,7 @@ namespace Game {
 
     engine::Camera3D *camera;
     engine::Model *model;
+    engine::ModelInstance *modelI;
 
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // positions   // texCoords
@@ -437,15 +438,14 @@ Stage::Stage() {
 
     model = new engine::Model("./data/model/backpack.obj");
     engine::shader3d->setInt("texture_diffuse1", 0);
-    glm::mat4 modelM = glm::mat4(1.0f);
-    modelM = glm::translate(modelM, glm::vec3(0.0f, 0.0f, 4.0f)); // translate it down so it's at the center of the scene
-    modelM = glm::scale(modelM, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-    engine::shader3d->setMat4("model", modelM);
+    modelI = new engine::ModelInstance();
+    modelI->translate(0.f, 0.f, 4.f);
+    modelI->bind();
 
     engine::shader3d->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
     engine::shader3d->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     engine::shader3d->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-    engine::shader3d->setFloat("material.shininess", 128.f);
+    engine::shader3d->setFloat("material.shininess", 32.f);
     
     engine::mouseCapture();
 }

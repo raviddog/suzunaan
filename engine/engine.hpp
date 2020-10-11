@@ -119,6 +119,17 @@ namespace engine {
             void draw();
     };
 
+    class ModelInstance {
+        public:
+            glm::mat4 model;
+
+            ModelInstance();
+            void bind();
+            void translate(float x, float y, float z);
+            void scale(float x, float y, float z);
+            void rotate(float degrees, float axis_x, float axis_y, float axis_z);
+    };
+
     class SpriteSheet {
         private:
             std::vector<float> *verts;

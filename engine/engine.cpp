@@ -583,6 +583,26 @@ namespace engine {
         engine::shader3d->setVec3("viewPos", eye.x, eye.y, eye.z);
     }
 
+    ModelInstance::ModelInstance() {
+        model = glm::mat4(1.f);
+    }
+
+    void ModelInstance::translate(float x, float y, float z) {
+        model = glm::translate(model, glm::vec3(x, y, z));
+    }
+
+    void ModelInstance::scale(float x, float y, float z) {
+        model = glm::scale(model, glm::vec3(x, y, z));
+    }
+
+    void ModelInstance::rotate(float degrees, float axis_x, float axis_y, float axis_z) {
+        model = glm::rotate(model, glm::radians(degrees), glm::vec3(axis_x, axis_y, axis_z));
+    }
+
+    void ModelInstance::bind() {
+        shader3d->setMat4("model", model);
+    }
+
     //  load settings from file
     bool init(const char *title, const char *settingsPath) {
         debug_init();
