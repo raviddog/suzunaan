@@ -123,7 +123,7 @@ void Stage::logic() {
     if(stagescript) {
         if(stagescript->frame_triggers->count(frames) > 0) {
             script_instruction *instr = stagescript->frame_triggers->at(frames);
-            for(int i = 0; i < instr->instruct->size(); i++) {
+            for(int i = 0; i < int(instr->instruct->size()); i++) {
                 int type = instr->instruct->at(i);
                 script_args args = instr->val->at(i);
 

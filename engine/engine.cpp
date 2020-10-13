@@ -157,7 +157,7 @@ namespace engine {
                 //  save number of indices
                 mesh.indices = indices.size();
                 //  find material name in vector
-                int matCount = 0;
+                size_t matCount = 0;
                 for(; matCount < materials->size() && materials->at(matCount).name != loadedMesh->MeshMaterial.name; matCount++);
                 if(matCount < materials->size()) {
                     //  material found
@@ -507,7 +507,7 @@ namespace engine {
 
     //  configure the resolution setting of the current drawmode
     void ConfigureDrawmodeSpriteResolution(int x, int y) {
-        glm::vec2 scrRes = glm::vec2((float)drawWidth, (float)drawHeight);
+        glm::vec2 scrRes = glm::vec2((float)x, (float)y);
         shaderSpriteSheet->setVec2("res", scrRes);
     }
 
