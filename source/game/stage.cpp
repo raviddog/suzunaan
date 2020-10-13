@@ -174,6 +174,12 @@ void Stage::logic() {
             //  delete enemy from memory
             delete enemy;
             //  remove from draw vector
+            //  loop through enemies once again to remove spawners
+            for(auto i = enemy_s::enemy_draw->begin(); i != enemy_s::enemy_draw->end(); ++i) {
+                if((*i)->type == -1 && (*i)->owner == enemy->id) {
+                    (*i)->active = false;
+                }
+            }
             //  will invalidate enemy pointer
             iteratorE = Game::enemy_s::enemy_draw->erase(iteratorE);
         } else if(enemy->type >= 0) {
@@ -446,8 +452,6 @@ Stage::Stage() {
     engine::shader3d->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     engine::shader3d->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
     engine::shader3d->setFloat("material.shininess", 32.f);
-    
-    engine::mouseCapture();
 }
 
 Stage::~Stage() {
