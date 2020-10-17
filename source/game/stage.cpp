@@ -387,7 +387,8 @@ Stage::Stage() {
     }
 
     //  center at 0,0 sprite is 32x48
-    player.init(8.f, 8.f, 368.f, 432.f);
+    //  play area size is 352x432
+    player.init(6.f, 8.f, 346.f, 426.f);
     player.hitbox_radius = 1.f;
 
     img_bullet = new engine::SpriteSheet("./data/bullet1.png", 200, BULLET_MAX);
