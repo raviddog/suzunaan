@@ -14,9 +14,9 @@ namespace Game{
     // std::vector<enemy_s*> *enemy_s::enemy_draw = nullptr;
 
     //  #FIX 1
-    float   enem_bounds_x = -8.f,
-            enem_bounds_y = 0.f,
-            enem_bounds_xmax = 392.f,
+    float   enem_bounds_x = -16.f,
+            enem_bounds_y = -16.f,
+            enem_bounds_xmax = 368.f,
             enem_bounds_ymax = 448.f;
     
 
