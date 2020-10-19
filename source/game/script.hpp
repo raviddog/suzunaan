@@ -15,8 +15,8 @@ namespace Game {
         //  type_0 is no argument
         float type_1;
         int type_2;
-        // uint32_t type_3;
-        uint64_t type_4;    //  two unsigned ints
+        // uint32_t type_3;    //  two ints
+        uint64_t type_4;    //  two ints
         uint64_t type_5;    //  two floats
         // std::unique_ptr<std::tuple<float, int>> type_3;
         // std::tuple<float, int> *type_3;

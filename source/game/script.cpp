@@ -69,6 +69,7 @@ namespace Game {
             enemy_instr->insert({"stopInterval", std::make_pair(10, 3)});
             enemy_instr->insert({"enemy", std::make_pair(11, 200)});
             enemy_instr->insert({"angle_change", std::make_pair(12, 1)});
+            enemy_instr->insert({"bullet_ring", std::make_pair(13, 101)});
         }
 
         if(stage_instr == nullptr) {
@@ -1194,7 +1195,54 @@ namespace Game {
                                     success = false;
                                     engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
                                 }
+                            } else if(function_info.second == 101) {
+                                try {
+                                    //  get function arguments
+                                    int type = std::stol(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    int scriptID = std::stol(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    float speed = std::stof(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    int num = std::stol(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    
+                                    //  set bullet spawn properties
+                                    bullet_spawn bs;
+                                    bs.type = type;
+                                    bs.scriptID = scriptID;
+                                    bs.speed = speed;
+                                    script->bullet_spawns->insert({bullet_id, bs});
 
+                                    script_args args;
+                                    args.type_4 = script_setIntInt(bullet_id, num);
+                                    instruction->val->push_back(args);
+                                    bullet_id++;
+                                    engine::log_debug("(type=%u, scriptID=%u, speed=%f, num=%d)", type, scriptID, speed, num);
+                                } catch (std::invalid_argument &ex) {
+                                    success = false;
+                                    engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
+                                }
                             } else if(function_info.second == 200) {
                                 //  enemy spawning function
                                 try {

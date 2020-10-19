@@ -259,6 +259,12 @@ namespace Game{
                         case 12:
                             instr_angle_change(args.type_1);
                             break;
+                        case 13:
+                        {
+                            std::pair<int, int> val = script_getIntInt(args.type_4);
+                            instr_bullet_ring(val.first, val.second);
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -310,8 +316,36 @@ namespace Game{
 
                 if(bs.scriptID > 0) {
                     if(bullet_scripts->count(bs.scriptID) > 0) {
-                        //  temp, replace with proper smart pointers later
                         bullet->instructions = (bullet_scripts->at(bs.scriptID)).get();
+                    }
+                }
+            }
+        }
+    }
+
+    void enemy_s::instr_bullet_ring(int spawnID, int num) {
+        if(instructions->bullet_spawns->count(spawnID) > 0) {
+            bullet_spawn bs = instructions->bullet_spawns->at(spawnID);
+            float initAngle = this->angle;
+            float angleStep = 360.f / (float)num;
+            for(int i = 0; i < num; i++) {
+                bullet_s *bullet = getBullet();
+                if(bullet) {
+                    //  initialise bullet with spawn values
+                    bullet->type = bs.type;
+                    bullet->x_pos = x_pos + bs.x_offset;
+                    bullet->y_pos = y_pos + bs.y_offset;
+                    bullet->speed = bs.speed;
+                    bullet->angle = bs.angle + (i * angleStep);
+                    bullet->accel = bs.accel;
+                    bullet->angle_change = bs.angle_change;
+                    bullet->instructions = nullptr;
+                    bullet->owner = id;
+
+                    if(bs.scriptID > 0) {
+                        if(bullet_scripts->count(bs.scriptID) > 0) {
+                            bullet->instructions = (bullet_scripts->at(bs.scriptID)).get();
+                        }
                     }
                 }
             }
