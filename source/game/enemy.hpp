@@ -33,6 +33,7 @@ namespace Game {
             void instr_enemy(int);
             void instr_angle_change(float);
             void instr_bullet_ring(int, int);
+            void instr_moveToParent();
         public:
             enemy_s();
             enemy_s(float x_pos, float y_pos, int type, int hp);

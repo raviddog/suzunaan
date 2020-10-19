@@ -70,6 +70,7 @@ namespace Game {
             enemy_instr->insert({"enemy", std::make_pair(11, 200)});
             enemy_instr->insert({"angle_change", std::make_pair(12, 1)});
             enemy_instr->insert({"bullet_ring", std::make_pair(13, 101)});
+            enemy_instr->insert({"moveToParent", std::make_pair(14, 0)});
         }
 
         if(stage_instr == nullptr) {

@@ -276,6 +276,9 @@ namespace Game{
                             instr_bullet_ring(val.first, val.second);
                             break;
                         }
+                        case 14:
+                            instr_moveToParent();
+                            break;
                         default:
                             break;
                     }
@@ -441,5 +444,17 @@ namespace Game{
 
     void enemy_s::instr_angle_change(float val) {
         angle += val;
+    }
+
+    void enemy_s::instr_moveToParent() {
+        int i = 0;
+        while(i < enemy_draw->size() && enemy_draw->at(i)->id != this->owner) {
+            ++i;
+        }
+        if(i < enemy_draw->size()) {
+            enemy_s *parent = enemy_draw->at(i);
+            this->x_pos = parent->x_pos;
+            this->y_pos = parent->y_pos;
+        }
     }
 }
