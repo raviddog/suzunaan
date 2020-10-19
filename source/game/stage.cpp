@@ -143,7 +143,9 @@ void Stage::logic() {
                         testenemy->speed = es.speed;
                         testenemy->angle = es.angle;
                         testenemy->accel = es.accel;
-                        testenemy->instructions = enemy_scripts->at(es.scriptID).get();
+                        if(es.scriptID > 0) {
+                            testenemy->instructions = enemy_scripts->at(es.scriptID).get();
+                        }
                         testenemy->activate();
                         break;
                     }
