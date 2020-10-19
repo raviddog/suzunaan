@@ -116,6 +116,17 @@ namespace Game{
                 
             } else {
                 active = false;
+                if(listener_triggers) {
+                    if(listener_triggers->count(3u) > 0) {
+                        auto range = listener_triggers->equal_range(3u);
+                        auto it = range.first;
+                        while(it != range.second) {
+                            //  activate all
+                            active_instructions->push_back(it->second.second);
+                            it = listener_triggers->erase(it);
+                        }
+                    }
+                }
             }
 
             run_instructions();

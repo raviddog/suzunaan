@@ -32,6 +32,9 @@ a trigger that is called just before the enemy is activated
 you can use it to set things like initial position, hp, etc
 technically you can chain instructions off of this one
 
+death()
+trigger called when hp is set to 0
+
 none()
 trigger by id only
 single run instrucction
