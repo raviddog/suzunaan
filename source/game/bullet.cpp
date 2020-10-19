@@ -5,10 +5,9 @@
 #include <cmath>
 
 namespace Game {
-    //  #FIX 1
-    float   bullet_bounds_x = -8.f,
-            bullet_bounds_y = 0.f,
-            bullet_bounds_xmax = 392.f,
+    float   bullet_bounds_x = -16.f,
+            bullet_bounds_y = -16.f,
+            bullet_bounds_xmax = 368.f,
             bullet_bounds_ymax = 448.f;
     
     template <class T>

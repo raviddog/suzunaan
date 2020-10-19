@@ -9,9 +9,7 @@
 
 //#include <stdint.h>
 
-namespace Game {
-    extern float bullet_bounds_x, bullet_bounds_y, bullet_bounds_xmax, bullet_bounds_ymax;
-    
+namespace Game {    
     enum BulletTypes {
             BTLaser = 0,
             BTArrowhead = 16,

@@ -415,10 +415,6 @@ Stage::Stage() {
 
     Game::enemy_s::enemy_draw = new std::vector<Game::enemy_s*>();
     Game::enemy_s::getBullet = Game::getFreeBulletPointer;
-    Game::bullet_bounds_x = -32.f;
-    Game::bullet_bounds_xmax = 672.f;
-    Game::bullet_bounds_y = -32.f;
-    Game::bullet_bounds_ymax = 512.f;
     Game::bullet_s::player = &player;
 
     //  load scripts
