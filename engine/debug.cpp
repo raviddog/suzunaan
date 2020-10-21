@@ -18,7 +18,7 @@ namespace engine {
         freopen("./debug.log", "w", stderr);
         #endif
         #ifdef _MSG_DEBUG_ENABLED_VER
-        log_debug("Touhou Suzunaan ver d.0.0.2\n\n");
+        log_debug(_MSG_DEBUG_ENABLED_VER);
         #endif
     }
 

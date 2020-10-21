@@ -7,7 +7,7 @@
 #define _MSG_DEBUG_ENABLED
 #define _MSG_RELEASE_ENABLED
 
-#define _MSG_DEBUG_ENABLED_VER
+#define _MSG_DEBUG_ENABLED_VER "Touhou Suzunaan ver d.0.0.2\n\n"
 // #define _MSG_DEBUG_ENABLED_SPRITE
 #define _MSG_DEBUG_ENABLED_FPS
 #define _MSG_DEBUG_ENABLED_BULLETCOUNT
