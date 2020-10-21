@@ -10,11 +10,17 @@
 
 namespace Game {
 
-    struct enem_data {
-        int type;
-        float hitbox;
-    };
+    // struct enem_data {
+    //     int type;
+    //     float hitbox;
+    // };
     
+    extern float enem_hitbox_xUpper[];
+    extern float enem_hitbox_xLower[];
+    extern float enem_hitbox_yUpper[];
+    extern float enem_hitbox_yLower[];
+
+
     class enemy_s {
         private:
             void run_instructions();

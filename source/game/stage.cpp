@@ -190,10 +190,10 @@ void Stage::logic() {
                 if(player.bullet[i].active_frame == 1) {
                     //  SUPER TEMP
                     //  enemy has hitbox 40 wide and 60 long
-                    if(player.bullet[i].x_pos > enemy->x_pos - 20.f
-                    && player.bullet[i].x_pos < enemy->x_pos + 20.f
-                    && player.bullet[i].y_pos > enemy->y_pos - 20.f
-                    && player.bullet[i].y_pos < enemy->y_pos + 40.f) {
+                    if(player.bullet[i].x_pos > enemy->x_pos - Game::enem_hitbox_xUpper[enemy->type]
+                    && player.bullet[i].x_pos < enemy->x_pos + Game::enem_hitbox_xLower[enemy->type]
+                    && player.bullet[i].y_pos > enemy->y_pos - Game::enem_hitbox_yUpper[enemy->type]
+                    && player.bullet[i].y_pos < enemy->y_pos + Game::enem_hitbox_yLower[enemy->type]) {
                         enemy->hp -= player.bullet[i].dmg;
                         player.bullet[i].active_frame++;
                     }

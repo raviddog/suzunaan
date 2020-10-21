@@ -1,8 +1,7 @@
 type: enemy
 
-init(): setHP(10);
-frame(20):angle(90) speed(1);
+init(): setHP(100) angle(90) speed(2);
 2:intervalStart(1, 1):angle_change(5);
 frame(30):accel(0);
-1:intervalStart(15, 1): bullet_ring(120, 0, 0.5, 10);
+1:intervalStart(60, 60): bullet_ring(120, 0, 0.5, 10);
 //frame(20):enemy(1, 1, 0, 0);

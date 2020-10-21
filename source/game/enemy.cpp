@@ -13,7 +13,22 @@ namespace Game{
     extern std::vector<enemy_s*> *spawn_enemies;
     // std::vector<enemy_s*> *enemy_s::enemy_draw = nullptr;
 
-    //  #FIX 1
+    float enem_hitbox_xUpper[] = {
+        10.f,10.f, 10.f, 10.f, 20.f
+    };
+
+    float enem_hitbox_xLower[] = {
+        10.f, 10.f, 10.f, 10.f, 20.f
+    };
+
+    float enem_hitbox_yUpper[] = {
+        10.f, 10.f, 10.f, 10.f, 20.f
+    };
+
+    float enem_hitbox_yLower[] = {
+        20.f, 20.f, 20.f, 20.f, 40.f
+    };
+
     float   enem_bounds_x = -16.f,
             enem_bounds_y = -16.f,
             enem_bounds_xmax = 368.f,

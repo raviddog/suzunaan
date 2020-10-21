@@ -3,7 +3,6 @@ id:trigger:instructions
 bullets start on frame 0, so frame 0 instructions can be used to set initial properties
 you can also skip this and implement them in enemy scripts if you want, in order to make the bullet script more flexible
 
-id is an unsigned integer, so it must be non-negative
 it'll probably work if you use negatives but dont
 the id is optional but some recurring triggers need it in order to stop their instructions
 instructions aren't restricted to one per line, or one line per trigger,
