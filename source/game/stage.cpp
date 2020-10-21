@@ -387,6 +387,11 @@ Stage::Stage() {
     for(int i = 0; i < 8; i++) {
         img_enemy->setSprite(48 + i, i * 64, 384, 64, 64);
     }
+    img_enemy->setSprite(56, 384, 256, 64, 64);
+    img_enemy->setSprite(57, 448, 256, 64, 64);
+    img_enemy->setSprite(58, 384, 320, 64, 64);
+    img_enemy->setSprite(59, 448, 320, 64, 64);
+
 
     //  center at 0,0 sprite is 32x48
     //  play area size is 352x432
