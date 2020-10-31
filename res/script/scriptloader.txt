@@ -1,4 +1,4 @@
-type: stageloader
+type: scriploader
 
 #stage
 teststage.txt
