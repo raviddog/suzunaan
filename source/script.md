@@ -67,11 +67,44 @@ I think multiple lines can contain the same frame and it shouldn't crash.
 
 - enemy(int type, int scriptID, float x, float y)
   - Spawns an enemy with given type and attached enemy script, at location (x, y)
-  - For type info, see the *Enemy script* section.
+  - The type determines the sprite used, hitbox size, [TODO] and the starting HP
 
 ## Enemy script
 
+Enemy scripts contain behaviour and spawn instructions for most non-bullet entities.
+
 ### Triggers
+
+- init()
+  - a trigger that is called just before the enemy is activated
+  - you can use it to set things like intial hp, speed, etc
+
+- death()
+  - trigger called when hp reaches 0
+
+none()
+  - trigger by ID only
+  - single run instruction
+
+noneCont()
+  - trigger by ID only
+  - runs until stopped by ID
+
+frame(int frame)
+  - runs on specified frame
+  - single run instruction
+
+frameCont(int frame)
+  - runs every frame starting at specified frame
+  - runs until stopped by ID
+
+interval(int frames)
+  - run every x frames
+  - start with ID
+
+intervalStart(int start, int frames)
+  - starting from specified frame, run every x frames
+  - cancel with ID
 
 ### Instruction list
 
