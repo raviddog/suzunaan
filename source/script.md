@@ -84,9 +84,14 @@ I think multiple lines can contain the same frame and it shouldn't crash.
 
 Enemy scripts contain behaviour and spawn instructions for most non-bullet entities.
 
-Each script line is split into three parts: an (optional) instruction ID, a trigger that determines when the instruction is called, and the actual instructions to be executed. These sections are separated with a colon `:`.
+The script lines are laid out like this:
 
-The instruction ID is used to refer to this set of instructions.
+`[ID]:[trigger(arguments)]:[instruction1(arguments)] [instruction2(arguments)]`
+
+Each script line is split into three parts: an (optional) instruction ID, a trigger that determines when the 
+instruction is called, and the actual instructions to be executed. These sections are separated with a colon `:`.
+
+The instruction ID is used to refer to this set of instructions, and each instruction set can have unlimited instructions.
 
 ### Enemy Triggers
 
@@ -171,6 +176,14 @@ The instruction ID is used to refer to this set of instructions.
   - moves the location of this unit to the location of its owner, based on owner ID
 
 ## Bullet script
+
+Bullet scripts contain behaviour and spawn instructions for bullets.
+
+The script lines are formatted the same as enemy scripts, but with a slightly different instruction and trigger set.
+
+`[ID]:[trigger(arguments)]:[instruction1(arguments)] [instruction2(arguments)]`
+
+
 
 ### Bullet Triggers
 
