@@ -173,7 +173,7 @@ namespace Game {
         } else if(script_type == "bullet") {
             engine::log_debug("bullet script detected instead, aborting");
             return -1;
-        } else if(script_type != "scriploader") {
+        } else if(script_type != "scriptloader") {
             engine::log_debug("unknown script type, aborting\n");
             return -1;
         }
