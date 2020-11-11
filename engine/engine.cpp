@@ -886,12 +886,14 @@ namespace engine {
         //  print debug fps data
         uint32_t temp_ticks = SDL_GetTicks();
         if(temp_ticks > ticks + 1000) {
+            std::stringstream d;
+            d << "Frame time: " << temp_ticks - frameTimeTicks << "ms | ";
+            d << "FPS: " << fps;
             if(!_vsync) {
-                log_debug("slept for %u ms ", slept);
-                log_debug("spun %d times ", temp);
+                d << " | Slept: " << slept << "ms | ";
+                d << "Spun: " << temp;
             }
-            log_debug("frame time: %ums, ", temp_ticks - frameTimeTicks);
-            log_debug("fps: %u\n", fps);
+            SDL_SetWindowTitle(gl::window, d.str().c_str());
             fps = 0u;
             ticks = temp_ticks;
             temp = 0u;
