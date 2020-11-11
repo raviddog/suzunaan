@@ -355,7 +355,7 @@ namespace Game{
     void enemy_s::instr_bullet_ring(int spawnID, int num) {
         if(instructions->bullet_spawns->count(spawnID) > 0) {
             bullet_spawn bs = instructions->bullet_spawns->at(spawnID);
-            float initAngle = this->angle;
+            // float initAngle = this->angle;
             float angleStep = 360.f / (float)num;
             for(int i = 0; i < num; i++) {
                 bullet_s *bullet = getBullet();
@@ -365,7 +365,7 @@ namespace Game{
                     bullet->x_pos = x_pos + bs.x_offset;
                     bullet->y_pos = y_pos + bs.y_offset;
                     bullet->speed = bs.speed;
-                    bullet->angle = bs.angle + (i * angleStep);
+                    bullet->angle = this->angle + (i * angleStep);
                     bullet->accel = bs.accel;
                     bullet->angle_change = bs.angle_change;
                     bullet->instructions = nullptr;
@@ -463,10 +463,10 @@ namespace Game{
 
     void enemy_s::instr_moveToParent() {
         int i = 0;
-        while(i < enemy_draw->size() && enemy_draw->at(i)->id != this->owner) {
+        while(i < (int)enemy_draw->size() && enemy_draw->at(i)->id != this->owner) {
             ++i;
         }
-        if(i < enemy_draw->size()) {
+        if(i < (int)enemy_draw->size()) {
             enemy_s *parent = enemy_draw->at(i);
             this->x_pos = parent->x_pos;
             this->y_pos = parent->y_pos;
