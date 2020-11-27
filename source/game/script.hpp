@@ -93,6 +93,16 @@ namespace Game {
         std::map<int, script_instruction*> *frame_triggers;
     };
 
+    struct boss_data {
+        int splits;
+        struct split_data_t {
+            int type;
+            int hp_length;
+            int script_index;
+        } *split_data;
+        std::vector<enemy_script> *scripts;
+    };
+
     void script_init();
     void script_cleanup();
     int loadScript(const std::string &path, stage_script **stageptr, std::map<int, std::shared_ptr<enemy_script>> **enemy_scripts_ptr, std::map<int, std::shared_ptr<bullet_script>> **bullet_scripts_ptr);

@@ -1,0 +1,12 @@
+type: boss
+
+#splits
+
+
+
+
+
+#scripts
+
+
+#enemy behaviour something

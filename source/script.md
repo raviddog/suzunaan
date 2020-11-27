@@ -74,6 +74,24 @@ The script lines are laid out like this:
 
 I think multiple lines can contain the same frame and it shouldn't crash.
 
+An example stage script looks like this.
+
+```
+type: scriploader
+
+#stage
+teststage.txt
+
+#enemy
+1:testenemy.txt
+2:testenemy2.txt
+
+#bullet
+1:b.txt
+2:b2.txt
+
+```
+
 ### Stage Instruction list
 
 - enemy(int type, int scriptID, float x, float y)
