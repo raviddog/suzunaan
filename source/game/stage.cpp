@@ -39,6 +39,7 @@ namespace Game {
     engine::Model *model;
     engine::ModelInstance *modelI;
 
+    bool boss = false;
 
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // positions   // texCoords
@@ -160,7 +161,9 @@ void Stage::logic() {
     //  spawn enemies that need to be spawned
     while(spawn_enemies->size() > 0) {
         enemy_s *enem = spawn_enemies->back();
-        enem->activate();
+        if(!boss) {
+            enem->activate();
+        }
         spawn_enemies->pop_back();
     }
     
