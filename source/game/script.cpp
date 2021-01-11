@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <cstring>
 // #include <iostream>
 
 namespace Game {
