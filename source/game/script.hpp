@@ -71,6 +71,12 @@ namespace Game {
         float accel = 0.f;
     };
 
+    struct boss_spawn {
+        int id = -1;
+        float x_spawn = 0.f;
+        float y_spawn = 0.f;
+    };
+
     struct enemy_script {
         enemy_script();
         ~enemy_script();
@@ -90,6 +96,7 @@ namespace Game {
         // std::map<int, bullet_spawn> *bullet_spawns;
         std::vector<bullet_spawn> *bullet_spawns;
         std::vector<enemy_spawn> *enemy_spawns;
+        std::vector<boss_spawn> *boss_spawns;
         std::map<int, script_instruction*> *frame_triggers;
     };
 

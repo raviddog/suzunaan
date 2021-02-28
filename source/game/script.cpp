@@ -78,6 +78,7 @@ namespace Game {
             stage_instr = new std::map<std::string, std::pair<int, int>>();
             stage_instr->insert({"bullet", std::make_pair(1, 100)});
             stage_instr->insert({"enemy", std::make_pair(2, 200)});
+            stage_instr->insert({"boss", std::make_pair(3, 300)});
         }
 
     }
@@ -1377,7 +1378,7 @@ namespace Game {
         }
 
         stage_script *script = new stage_script();
-        int bullet_id = 0, enemy_id = 0;
+        int bullet_id = 0, enemy_id = 0, boss_id = 0;
 
         next += offset + 1;
         offset = 0;
@@ -1559,6 +1560,48 @@ namespace Game {
                                     success = false;
                                     engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
                                 }
+                            } else if(function_info.second == 300) {
+                                //  boss spawning function
+                                //  pretty much copy pasted from enemy
+                                try {
+                                    int id = std::stol(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    float spawn_x = std::stof(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+                                    float spawn_y = std::stof(content.substr(next, offset), nullptr);
+                                    while(content[next] != ',' && offset > 0) {
+                                        next++;
+                                        offset--;
+                                    }
+                                    next++;
+                                    offset--;
+
+                                    boss_spawn bs;
+                                    bs.id = id;
+                                    bs.x_spawn = spawn_x;
+                                    bs.y_spawn = spawn_y;
+                                    script->boss_spawns->push_back(bs);
+
+                                    script_args args;
+                                    args.type_2 = boss_id;
+                                    instruction->val->push_back(args);
+                                    boss_id++;
+                                    engine::log_debug("(boss id = %u, spawn_x=%f, spawn_y=%f)", id, spawn_x, spawn_y);
+
+                                } catch(std::invalid_argument &ex) {
+                                    success = false;
+                                    engine::log_debug(", can't read argument in function %s, line %d", ex.what(), line);
+                                }
                             }
                             if(success) {
                                 if(instruction) instruction->instruct->push_back(function_info.first);
@@ -1684,12 +1727,14 @@ namespace Game {
     stage_script::stage_script() {
         bullet_spawns = new std::vector<bullet_spawn>();
         enemy_spawns = new std::vector<enemy_spawn>();
+        boss_spawns = new std::vector<boss_spawn>();
         frame_triggers = new std::map<int, script_instruction*>();
     }
 
     stage_script::~stage_script() {
         delete bullet_spawns;
         delete enemy_spawns;
+        delete boss_spawns;
         delete frame_triggers;
 
         bullet_spawns = nullptr;

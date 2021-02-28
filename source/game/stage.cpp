@@ -151,6 +151,10 @@ void Stage::logic() {
                         testenemy->activate();
                         break;
                     }
+                    case 3:
+                    {
+                        //  spawn boss
+                    }
                     default:
                         break;
                 }
@@ -450,7 +454,8 @@ Stage::Stage() {
     camera->update();
     camera->bind();
 
-    model = new engine::Model("./data/model/backpack.obj");
+    // model = new engine::Model("./data/model/backpack.obj");
+    model = engine::LoadModel("./data/model/backpack.obj");
     engine::shader3d->setInt("texture_diffuse1", 0);
     modelI = new engine::ModelInstance();
     modelI->translate(0.f, 0.f, 4.f);
