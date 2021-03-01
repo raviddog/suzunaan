@@ -35,8 +35,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     #target_link_libraries(engine -lmingw32 -lSDL2main -lSDL2 -lassimp-vc142-mt.lib)
 endif()
 
-add_library(game STATIC source/game/bullet.cpp source/game/enemy.cpp source/game/menu.cpp source/game/player.cpp source/game/stage.cpp source/game/script.cpp source/game/test3d.cpp)
-target_include_directories(game PUBLIC . ./engine ./source ./source/script/test)
+add_library(game STATIC source/game/bullet.cpp source/game/enemy.cpp source/game/menu.cpp source/game/player.cpp source/game/stage.cpp source/game/script.cpp source/game/test3d.cpp source/game/background.cpp)
+target_include_directories(game PUBLIC . ./engine ./source)
 set_property(TARGET game PROPERTY CXX_STANDARD 17)
 set_property(TARGET game PROPERTY CXX_STANDARD_REQUIRED ON)
 
