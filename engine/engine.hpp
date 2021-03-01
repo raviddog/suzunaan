@@ -114,6 +114,8 @@ namespace engine {
             std::vector<Mesh_t> *meshes;
             std::unordered_map<std::string, std::shared_ptr<gl::Texture>> *textures;
             
+            std::string path;
+
             Model(const char *rawpath);
             ~Model();
             void draw();
@@ -121,7 +123,8 @@ namespace engine {
 
     class ModelInstance {
         public:
-            glm::mat4 model;
+            glm::mat4 modelmat;
+            Model* model;
 
             ModelInstance();
             void bind();
@@ -190,6 +193,10 @@ namespace engine {
 
             Camera3D();
     };
+
+    Model* LoadModel(const std::string&);
+    void UnloadModel(const std::string&);
+    void UnloadModel(Model*);
 }
 
 #endif

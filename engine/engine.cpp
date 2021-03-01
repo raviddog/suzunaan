@@ -6,6 +6,7 @@
 #include <thread>
 #include <string>
 #include <fstream>
+#include <unordered_map>
 
 #ifdef _MSC_VER
 #include "windows.h"
@@ -37,6 +38,55 @@ namespace engine {
 
     static Drawmode currentDrawmode;
 
+
+//  managed model loading stuff
+    class ManagedModel {
+        public:
+            int count = 1;
+            Model *model;
+
+            ManagedModel(const std::string&);
+            ~ManagedModel();
+    };
+
+    ManagedModel::ManagedModel(const std::string &path) {
+        model = new Model(path.c_str());
+        count = 1;
+    }
+
+    ManagedModel::~ManagedModel() {
+        delete model;
+    }
+
+    std::unordered_map<std::string, ManagedModel*> *loadedModels;
+
+    Model* LoadModel(const std::string &path) {
+        if(loadedModels->count(path)) {
+            ManagedModel *tm = loadedModels->at(path);
+            tm->count++;
+            return tm->model;
+        } else {
+            ManagedModel *tm = new ManagedModel(path);
+            loadedModels->insert(std::make_pair(path, tm));
+            return tm->model;
+        }
+    }
+
+    void UnloadModel(const std::string &path) {
+        if(loadedModels->count(path)) {
+            ManagedModel *tm = loadedModels->at(path);
+            tm->count--;
+            if(tm->count == 0) {
+                delete tm;
+                loadedModels->erase(path);
+            }
+        } 
+    }
+
+    void UnloadModel(Model* md) {
+        UnloadModel(md->path);
+    }
+
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // positions   // texCoords
         -1.0f,  1.0f,  0.0f, 1.0f,
@@ -49,12 +99,13 @@ namespace engine {
     };
 
     Model::Model(const char *rawpath) {
+        path = std::string(rawpath);
+
         materials = new std::vector<Material_t>();
         meshes = new std::vector<Mesh_t>();
         //  texture map
         textures = new std::unordered_map<std::string, std::shared_ptr<gl::Texture>>();
 
-        std::string path = rawpath;
         std::string directory = path.substr(0, path.find_last_of('/'));
         directory += '/';
 
@@ -584,23 +635,23 @@ namespace engine {
     }
 
     ModelInstance::ModelInstance() {
-        model = glm::mat4(1.f);
+        modelmat = glm::mat4(1.f);
     }
 
     void ModelInstance::translate(float x, float y, float z) {
-        model = glm::translate(model, glm::vec3(x, y, z));
+        modelmat = glm::translate(modelmat, glm::vec3(x, y, z));
     }
 
     void ModelInstance::scale(float x, float y, float z) {
-        model = glm::scale(model, glm::vec3(x, y, z));
+        modelmat = glm::scale(modelmat, glm::vec3(x, y, z));
     }
 
     void ModelInstance::rotate(float degrees, float axis_x, float axis_y, float axis_z) {
-        model = glm::rotate(model, glm::radians(degrees), glm::vec3(axis_x, axis_y, axis_z));
+        modelmat = glm::rotate(modelmat, glm::radians(degrees), glm::vec3(axis_x, axis_y, axis_z));
     }
 
     void ModelInstance::bind() {
-        shader3d->setMat4("model", model);
+        shader3d->setMat4("model", modelmat);
     }
 
     //  load settings from file
@@ -832,6 +883,8 @@ namespace engine {
         
         InitialiseDrawmodes(); 
         SetDrawmode(DrawmodeSprite);
+
+        loadedModels = new std::unordered_map<std::string, ManagedModel*>();
     }
 
     void flip() {       
