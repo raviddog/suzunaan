@@ -474,14 +474,20 @@ Stage::~Stage() {
     delete img_player_b;
     delete img_player_eff;
     delete img_bullet;
+    delete img_enemy;
     delete[] bullets;
+    delete freebullets;
     delete bullet_draw_order;
-    delete spawn_enemies;
+    // delete spawn_enemies;
     delete img_guibg;
+    
+    engine::deleteVector(enemy_s::enemy_draw);
+    engine::deleteVector(spawn_enemies);
 
-    for(auto it = enemy_s::enemy_draw->begin(); it != enemy_s::enemy_draw->end();) {
-        delete *it;
-        it = enemy_s::enemy_draw->erase(it);
-    }
-    delete Game::enemy_s::enemy_draw;
+    delete destrect;
+    fbuffer->unbind();
+    delete fbuffer;
+    delete camera;
+    delete modelI;
+
 }
