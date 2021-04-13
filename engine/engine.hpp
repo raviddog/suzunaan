@@ -2,6 +2,7 @@
 #define _ENGINE_H
 
 #include "engine_gl.hpp"
+#include "engine_helper.h"
 
 #include <vector>
 #include <memory>
