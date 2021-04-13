@@ -55,7 +55,7 @@ namespace engine {
         
 
         VAO::VAO() {
-            ID = GLuint();
+            ID = (GLuint)0u;
             glGenVertexArrays(1, &ID);
         }
 
@@ -72,8 +72,8 @@ namespace engine {
         }
 
         VBO::VBO() {
-            ID_VBO = GLuint();
-            ID_EBO = GLuint();
+            ID_VBO = (GLuint)0u;
+            ID_EBO = (GLuint)0u;
             glGenBuffers(1, &ID_VBO);
             glGenBuffers(1, &ID_EBO);
             vertexAttribs = -1;
@@ -148,7 +148,7 @@ namespace engine {
         }
 
         FBO::FBO() {
-            ID = GLuint();
+            ID = (GLuint)0u;
             glGenFramebuffers(1, &ID);
         }
 
@@ -166,7 +166,7 @@ namespace engine {
         }
 
         RBO::RBO() {
-            ID = GLuint();
+            ID = (GLuint)0u;
             glGenRenderbuffers(1, &ID);
         }
 
@@ -222,7 +222,7 @@ namespace engine {
         }
 
         Texture::Texture() {
-            ID = GLuint();
+            ID = (GLuint)0u;
             glGenTextures(1, &ID);
             srcWidth = 0;
             srcHeight = 0;
@@ -246,7 +246,7 @@ namespace engine {
                 type = t.type;
                 path = t.path;
 
-                t.ID = GLuint();
+                t.ID = (GLuint)0u;
                 t.path = std::string();
             }
             return *this;

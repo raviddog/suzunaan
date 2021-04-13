@@ -486,6 +486,8 @@ Stage::~Stage() {
     emptyContainer(spawn_enemies);
     delete spawn_enemies;
 
+    engine::UnloadModel(model);
+
     delete destrect;
     fbuffer->unbind();
     delete fbuffer;

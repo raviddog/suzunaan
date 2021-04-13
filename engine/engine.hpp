@@ -113,7 +113,7 @@ namespace engine {
 
             std::vector<Material_t> *materials;
             std::vector<Mesh_t> *meshes;
-            std::unordered_map<std::string, std::shared_ptr<gl::Texture>> *textures;
+            std::unordered_map<std::string, gl::Texture*> *textures;
             
             std::string path;
 

@@ -76,9 +76,9 @@ namespace engine {
         if(loadedModels->count(path)) {
             ManagedModel *tm = loadedModels->at(path);
             tm->count--;
-            if(tm->count == 0) {
-                delete tm;
+            if(tm->count <= 0) {
                 loadedModels->erase(path);
+                delete tm;
             }
         } 
     }
@@ -104,7 +104,7 @@ namespace engine {
         materials = new std::vector<Material_t>();
         meshes = new std::vector<Mesh_t>();
         //  texture map
-        textures = new std::unordered_map<std::string, std::shared_ptr<gl::Texture>>();
+        textures = new std::unordered_map<std::string, gl::Texture*>();
 
         std::string directory = path.substr(0, path.find_last_of('/'));
         directory += '/';
@@ -136,31 +136,31 @@ namespace engine {
                     gl::Texture *tex = new gl::Texture();
                     tex->bind();
                     tex->load(directory + material.texname_ambientMap);
-                    textures->insert(std::make_pair(material.texname_ambientMap, std::shared_ptr<gl::Texture>(tex)));
+                    textures->insert(std::make_pair(material.texname_ambientMap, tex));
                 }
                 if(material.texname_diffuseMap != "" && textures->count(material.texname_diffuseMap) == 0) {
                     gl::Texture *tex = new gl::Texture();
                     tex->bind();
                     tex->load(directory + material.texname_diffuseMap);
-                    textures->insert(std::make_pair(material.texname_diffuseMap, std::shared_ptr<gl::Texture>(tex)));
+                    textures->insert(std::make_pair(material.texname_diffuseMap, tex));
                 }
                 if(material.texname_specularMap != "" && textures->count(material.texname_specularMap) == 0) {
                     gl::Texture *tex = new gl::Texture();
                     tex->bind();
                     tex->load(directory + material.texname_specularMap);
-                    textures->insert(std::make_pair(material.texname_specularMap, std::shared_ptr<gl::Texture>(tex)));
+                    textures->insert(std::make_pair(material.texname_specularMap, tex));
                 }
                 if(material.texname_alpha != "" && textures->count(material.texname_alpha) == 0) {
                     gl::Texture *tex = new gl::Texture();
                     tex->bind();
                     tex->load(directory + material.texname_alpha);
-                    textures->insert(std::make_pair(material.texname_alpha, std::shared_ptr<gl::Texture>(tex)));
+                    textures->insert(std::make_pair(material.texname_alpha, tex));
                 }
                 if(material.texname_bump != "" && textures->count(material.texname_bump) == 0) {
                     gl::Texture *tex = new gl::Texture();
                     tex->bind();
                     tex->load(directory + material.texname_bump);
-                    textures->insert(std::make_pair(material.texname_bump, std::shared_ptr<gl::Texture>(tex)));
+                    textures->insert(std::make_pair(material.texname_bump, tex));
                 }
                 
                 materials->push_back(material);
@@ -250,6 +250,7 @@ namespace engine {
         gl::VAO::unbind();
         delete meshes;
         delete materials;
+        emptyMap(textures);
         delete textures;
     }
 
