@@ -2,7 +2,7 @@
 #define _ENGINE_H
 
 #include "engine_gl.hpp"
-#include "engine_helper.h"
+#include "engine_helper.hpp"
 
 #include <vector>
 #include <memory>

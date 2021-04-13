@@ -481,8 +481,10 @@ Stage::~Stage() {
     // delete spawn_enemies;
     delete img_guibg;
     
-    engine::deleteVector(enemy_s::enemy_draw);
-    engine::deleteVector(spawn_enemies);
+    emptyContainer(Game::enemy_s::enemy_draw);
+    delete enemy_s::enemy_draw;
+    emptyContainer(spawn_enemies);
+    delete spawn_enemies;
 
     delete destrect;
     fbuffer->unbind();

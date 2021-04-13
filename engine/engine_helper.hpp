@@ -1,0 +1,1 @@
+#define emptyContainer(ptr) for(auto it = ptr->begin(); it != ptr->end(); it++) { delete *it; }
