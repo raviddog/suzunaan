@@ -229,7 +229,6 @@ void Stage::logic() {
                         img_enemy->drawSpriteCentered(48 + enemy->animFrame, enemy->x_pos, enemy->y_pos);
                     }
                     break;
-                    break;
                 default:
                     break;
             }
