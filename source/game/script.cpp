@@ -6,6 +6,8 @@
 #include <cstring>
 // #include <iostream>
 
+#include "engine/engine_helper.hpp"
+
 namespace Game {
 
     uint64_t script_setIntInt(int, int);
@@ -97,7 +99,6 @@ namespace Game {
         //  path to stage loader script
         //  load the stage script and the listed enemy and bullet scripts
         //  should be the only thing needed to be called from stage.cpp
-        //  TODO pass in bullet script array thingy and enemy shit to stage load into thing  blabla
 
         
         script_init();
@@ -1666,20 +1667,10 @@ namespace Game {
     }
 
     bullet_script::~bullet_script() {
-        //  iterators, not sure what format these are
-        auto fit_begin = frame_triggers->begin();
-        auto fit_end = frame_triggers->end();
-        while(fit_begin != fit_end) {
-            delete fit_begin->second;
-            fit_begin++;
-        }
+        emptyMap(frame_triggers);
+        emptyMap(instructions);
+
         delete frame_triggers;
-        auto iit_begin = instructions->begin();
-        auto iit_end = instructions->end();
-        while(iit_begin != iit_end) {
-            delete iit_begin->second;
-            iit_begin++;
-        }
         delete instructions;
         delete listeners;
     }
@@ -1693,20 +1684,10 @@ namespace Game {
     }
 
     enemy_script::~enemy_script() {
-        //  iterators, not sure what format these are
-        auto fit_begin = frame_triggers->begin();
-        auto fit_end = frame_triggers->end();
-        while(fit_begin != fit_end) {
-            delete fit_begin->second;
-            fit_begin++;
-        }
+        emptyMap(frame_triggers);
+        emptyMap(instructions);
+
         delete frame_triggers;
-        auto iit_begin = instructions->begin();
-        auto iit_end = instructions->end();
-        while(iit_begin != iit_end) {
-            delete iit_begin->second;
-            iit_begin++;
-        }
         delete instructions;
         delete bullet_spawns;
         delete enemy_spawns;
@@ -1735,6 +1716,8 @@ namespace Game {
         delete bullet_spawns;
         delete enemy_spawns;
         delete boss_spawns;
+
+        emptyMap(frame_triggers);
         delete frame_triggers;
 
         bullet_spawns = nullptr;
