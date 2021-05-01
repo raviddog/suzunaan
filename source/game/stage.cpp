@@ -196,8 +196,6 @@ void Stage::logic() {
             //  check collision with player bullets
             for(int i = 0; i < Game::player_s::player_bullet_max; i++) {
                 if(player.bullet[i].active_frame == 1) {
-                    //  SUPER TEMP
-                    //  enemy has hitbox 40 wide and 60 long
                     if(player.bullet[i].x_pos > enemy->x_pos - Game::enem_hitbox_xUpper[enemy->type]
                     && player.bullet[i].x_pos < enemy->x_pos + Game::enem_hitbox_xLower[enemy->type]
                     && player.bullet[i].y_pos > enemy->y_pos - Game::enem_hitbox_yUpper[enemy->type]
@@ -246,10 +244,11 @@ void Stage::logic() {
 
         //  collision
         //  check distance between player and bullet
-        //  cache these values later
-        if(       (bullets[*iteratorB].y_pos - player.y_pos) * (bullets[*iteratorB].y_pos - player.y_pos)
-                + (bullets[*iteratorB].x_pos - player.x_pos) * (bullets[*iteratorB].x_pos - player.x_pos)
-                < (bullet_hitbox_radius_temp + player.hitbox_radius) * (bullet_hitbox_radius_temp + player.hitbox_radius))
+        float dist = (bullets[*iteratorB].y_pos - player.y_pos) * (bullets[*iteratorB].y_pos - player.y_pos)
+                   + (bullets[*iteratorB].x_pos - player.x_pos) * (bullets[*iteratorB].x_pos - player.x_pos);
+
+        //  add graze here later
+        if(dist < (bullet_hitbox_radius_temp + player.hitbox_radius) * (bullet_hitbox_radius_temp + player.hitbox_radius))
         {
             //  collided
             //  for now just remove bullet
