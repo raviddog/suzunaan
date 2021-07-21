@@ -271,12 +271,6 @@ void Stage::logic() {
             ++iteratorB;
         }
     }
-    
-    #ifdef _MSG_DEBUG_ENABLED_BULLETCOUNT
-    if(frames % 60 == 0) {
-        engine::log_debug("bullets: %d ", count);
-    }
-    #endif
 
     ++frames;
 }

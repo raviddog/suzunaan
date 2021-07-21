@@ -14,7 +14,7 @@
 namespace engine {
     void debug_init() {
         //  find a better way of versioning
-        #ifdef _MSG_DEBUG_ENABLED_LOG
+        #if defined(_MSG_DEBUG_ENABLED_LOG) || defined(_MSG_RELEASE_ENABLED)
         freopen("./debug.log", "w", stderr);
         #endif
         #ifdef _MSG_DEBUG_ENABLED_VER
@@ -26,13 +26,12 @@ namespace engine {
         #ifdef _MSG_DEBUG_ENABLED
         va_list args;
         va_start(args, text);
-        #ifdef _MSG_DEBUG_ENABLED_CONSOLE
-        vfprintf(stdout, text, args);
-        #endif
         #ifdef _MSG_DEBUG_ENABLED_LOG
         vfprintf(stderr, text, args);
-        #endif
         fflush(stderr);
+        #elif
+        vfprintf(stdout, text, args);
+        #endif
         va_end(args);
         #endif
     }
@@ -45,11 +44,9 @@ namespace engine {
         //  write release messages to console as well
         va_list args;
         va_start(args, text);
-        #ifdef _MSG_DEBUG_ENABLED_CONSOLE
-        vfprintf(stdout, text, args);
-        #endif
         #ifdef _MSG_DEBUG_ENABLED_LOG
         vfprintf(stderr, text, args);
+        fflush(stderr);
         #endif
         va_end(args);
         #endif
