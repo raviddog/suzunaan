@@ -30,7 +30,8 @@ namespace engine {
 
     //  framerate stuff
     static bool _vsync;
-    uint32_t ticks, fps, frameTimeTicks;
+    uint32_t fps;
+    double ticks, frameTimeTicks;
     std::chrono::high_resolution_clock::time_point cur_time, next_time;
     #define _ENGINE_NOVSYNC_DELAY_MICROSECONDS 16666
 
@@ -686,14 +687,18 @@ namespace engine {
             "Skip"
         };
 
-        std::ifstream settings(settingsPath, std::ifstream::in);
-        if(settings.good()) {
+        std::ifstream settings;//(settingsPath, std::ifstream::in);
+        settings.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+
+        try {
+            settings.open(settingsPath);
             
             //  settings
             int screenMode = 0;
             bool vsync = true;
             int width_win = 640, height_win = 480;
-            const int width_draw = 640, height_draw = 480;
+            const int width_draw = 640, height_draw = 480;  //  modify for non-static resolution shmup stuff
 
             while(settings.peek() != EOF) {
                 if(settings.peek() == '[' || settings.peek() == ';' || settings.peek() == '\n') {
@@ -712,7 +717,8 @@ namespace engine {
                         id == "true" ? vsync = true : vsync = false;
                     } else if(id == "ScreenMode") {
                         std::getline(settings, id);
-                        if(id == "windowed") screenMode = 0;
+                        //  edit this default for if res is supposed to be resizeable
+                        if(id == "windowed") screenMode = 4;
                         if(id == "borderless") screenMode = 1;
                         if(id == "fullscreen") screenMode = 2;
                     } else {
@@ -731,9 +737,13 @@ namespace engine {
                     }
                 }
             }
+            settings.close();
             init(title, screenMode, vsync, width_win, height_win, width_draw, height_draw);
             return true;
-        } else return false;
+        } catch (std::ifstream::failure &ex) {
+            engine::log_debug("failed to open file, %s\n%s",  strerror(errno), ex.what());
+            return false;
+        }
     }
 
     void init(const char *title, int screenMode, bool vsync, int width, int height) {
@@ -741,80 +751,86 @@ namespace engine {
     }
 
     void init(const char *title, int screenMode, bool vsync, int width_win, int height_win, int width_draw, int height_draw) {
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); //add option for this later
+
+
         drawWidth = width_draw;
         drawHeight = height_draw;
         scrMode = screenMode;
-        ticks = SDL_GetTicks();
         frameTimeTicks = ticks;
         fps = 0u;
-
-        SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO);
-        SDL_GL_LoadLibrary(NULL);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+        ticks = glfwGetTime();
 
         //  for borderless fullscreen calculation
-        SDL_DisplayMode *dmode = new SDL_DisplayMode();
-        SDL_GetCurrentDisplayMode(0, dmode);
+        const GLFWvidmode *dmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         switch(screenMode) {
             case 1:
                 //  borderless fullscreen
-                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, dmode->w, dmode->h, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED);
-                scrWidth = dmode->w;
-                scrHeight = dmode->h;
+                glfwWindowHint(GLFW_RED_BITS, dmode->redBits);
+                glfwWindowHint(GLFW_GREEN_BITS, dmode->greenBits);
+                glfwWindowHint(GLFW_BLUE_BITS, dmode->blueBits);
+                glfwWindowHint(GLFW_REFRESH_RATE, dmode->refreshRate);
+                gl::window = glfwCreateWindow(dmode->width, dmode->height, title, glfwGetPrimaryMonitor(), NULL);
+                scrWidth = dmode->width;
+                scrHeight = dmode->height;
                 break;
             case 2:
                 //  fullscreen
-                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width_draw, height_draw, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+                gl::window = glfwCreateWindow(width_draw, height_draw, title, glfwGetPrimaryMonitor(), NULL);
                 scrWidth = width_draw;
                 scrHeight = height_draw;
                 break;
             case 3:
                 //  test, fullscreen but draw canvas mapped to screen res
-                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, dmode->w, dmode->h, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
-                scrWidth = dmode->w;
-                scrHeight = dmode->h;
+                gl::window = glfwCreateWindow(width_draw, height_draw, title, glfwGetPrimaryMonitor(), NULL);
+                scrWidth = width_draw;
+                scrHeight = height_draw;
                 break;
             case 0:
             default:
                 //  normal windowed
-                gl::window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width_win, height_win, SDL_WINDOW_OPENGL);
+                gl::window = glfwCreateWindow(width_win, height_win, title, NULL, NULL);
                 scrWidth = width_win;
                 scrHeight = height_win;
                 break;
         }
         
-        gl::maincontext = SDL_GL_CreateContext(gl::window);
-        gladLoadGLLoader(SDL_GL_GetProcAddress);
+        glfwMakeContextCurrent(gl::window);
+        gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+        glfwSetKeyCallback(gl::window, key_callback);
 
         switch(screenMode) {
             case 3:
             case 1:
             {
                 float draw_ratio = (float)width_draw / (float)height_draw;
-                float screen_ratio = (float)dmode->w / (float)dmode->h;
+                float screen_ratio = (float)dmode->width / (float)dmode->height;
                 if(draw_ratio > screen_ratio) {
                     //  draw area is wider than screen
-                    float y_scale = (float)dmode->w / (float)width_draw;
+                    float y_scale = (float)dmode->width / (float)width_draw;
                     float height = (float)height_draw * y_scale;
-                    int offset = (dmode->h - (int)height) / 2;
-                    glViewport(0, offset, dmode->w, (int)height);
+                    int offset = (dmode->height - (int)height) / 2;
+                    glViewport(0, offset, dmode->width, (int)height);
                     viewport[0] = 0;
                     viewport[1] = offset;
-                    viewport[2] = dmode->w;
+                    viewport[2] = dmode->width;
                     viewport[3] = (int)height;
                     break;
                 } else if(draw_ratio < screen_ratio) {
                     //  draw area is narrower than screen
-                    float x_scale = (float)dmode->h / (float)height_draw;
+                    float x_scale = (float)dmode->height / (float)height_draw;
                     float width = (float)width_draw * x_scale;
-                    int offset = (dmode->w - (int)width) / 2;
-                    glViewport(offset, 0, (int)width, dmode->h);
+                    int offset = (dmode->width - (int)width) / 2;
+                    glViewport(offset, 0, (int)width, dmode->height);
                     viewport[0] = offset;
                     viewport[1] = 0;
                     viewport[2] = (int)width;
-                    viewport[3] = dmode->h;
+                    viewport[3] = dmode->height;
                     break;
                 } else {
                     //  matches aspect ratio, although i probably need a way better way to check this
@@ -861,10 +877,10 @@ namespace engine {
 
         if(vsync) {
             _vsync = true;
-            SDL_GL_SetSwapInterval(1);
+            glfwSwapInterval(1);
         } else {
             _vsync = false;
-            SDL_GL_SetSwapInterval(0);
+            glfwSwapInterval(0);
 
             // cur_time = std::chrono::steady_clock::now();
             // next_time = cur_time + std::chrono::milliseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
@@ -892,7 +908,7 @@ namespace engine {
 
         using namespace std::chrono;
         //  flip buffers
-        SDL_GL_SwapWindow(gl::window);
+        glfwSwapBuffers(gl::window);
 
         //  clear new buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -938,8 +954,8 @@ namespace engine {
 
         #ifdef _MSG_DEBUG_ENABLED_FPS
         //  print debug fps data
-        uint32_t temp_ticks = SDL_GetTicks();
-        if(temp_ticks > ticks + 1000) {
+        double temp_ticks = glfwGetTime();
+        if(temp_ticks > ticks + 1.0) {
             std::stringstream d;
             d << "Frame time: " << temp_ticks - frameTimeTicks << "ms | ";
             d << "FPS: " << fps;
@@ -947,7 +963,7 @@ namespace engine {
                 d << " | Slept: " << slept << "ms | ";
                 d << "Spun: " << temp;
             }
-            SDL_SetWindowTitle(gl::window, d.str().c_str());
+            glfwSetWindowTitle(gl::window, d.str().c_str());
             fps = 0u;
             ticks = temp_ticks;
             temp = 0u;
@@ -963,9 +979,8 @@ namespace engine {
         #ifdef _MSC_VER
         if(!_vsync) timeEndPeriod(1);
         #endif
-        SDL_GL_DeleteContext(gl::maincontext);
-        SDL_DestroyWindow(gl::window);
-        SDL_Quit();
+        glfwDestroyWindow(gl::window);
+        glfwTerminate();
     }
 
     void setViewport() {
@@ -994,11 +1009,14 @@ namespace engine {
     }
 
     void mouseCapture() {
-        SDL_SetRelativeMouseMode(SDL_TRUE);
+        glfwSetInputMode(gl::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        if(glfwRawMouseMotionSupported()) {
+            glfwSetInputMode(gl::window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+        }
     }
 
     void mouseRelease() {
-        SDL_SetRelativeMouseMode(SDL_FALSE);
+        glfwSetInputMode(gl::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
 }

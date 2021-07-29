@@ -1,7 +1,3 @@
-#ifdef _MSC_VER
-#define SDL_MAIN_HANDLED
-#endif
-
 #include "engine/engine.hpp"
 #include "state.hpp"
 
@@ -9,7 +5,9 @@ const int scrWidth = 640;
 const int scrHeight = 480;
 
 int main(int argv, char** args) {
-    engine::init("touhou suzunaan", "./suzunaan.ini");
+    if (!engine::init("touhou suzunaan", "./suzunaan.ini")) {
+        return -1;
+    }
     init();
 
     while(!engine::quit) {

@@ -2,8 +2,10 @@
 #define _ENGINE_GL_H
 
 #include "glad/glad.h"
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_opengl.h"
+#include "GLFW/glfw3.h"
+
+// #include "SDL2/SDL.h"
+// #include "SDL2/SDL_opengl.h"
 #include "stb_image.h"
 
 #include "glm/glm.hpp"
@@ -39,15 +41,16 @@ namespace engine {
         };
     }
 
-    extern int mouseX, mouseY, mouseMoveX, mouseMoveY;
+    extern double mouseX, mouseY, mouseMoveX, mouseMoveY;
     extern bool quit;
     extern bool keyState[kb::KeycodesLength];
     extern bool keyPressed[kb::KeycodesLength];
+    extern void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
     void inputs();
 
     namespace gl {
-        extern SDL_Window *window;
-        extern SDL_GLContext maincontext;
+        extern GLFWwindow *window;
+        // extern SDL_GLContext maincontext;
 
         struct modelVertex {
             glm::vec3 Position;
@@ -57,7 +60,7 @@ namespace engine {
 
         class VAO {
             public:
-                GLuint ID;
+                GLuint *ID;
                 VAO();
                 ~VAO();
                 void bind();
@@ -66,7 +69,7 @@ namespace engine {
 
         class VBO {
             public:
-                GLuint ID_VBO, ID_EBO;
+                GLuint *ID_VBO, *ID_EBO;
                 int vertexAttribs;
                 size_t bufferSizeVert, bufferSizeInd;
                 VBO();
@@ -92,7 +95,7 @@ namespace engine {
         class FBO
         {
             public:
-                GLuint ID;
+                GLuint *ID;
 
                 FBO();
                 ~FBO();
@@ -103,7 +106,7 @@ namespace engine {
         class RBO
         {
             public:
-                GLuint ID;
+                GLuint *ID;
 
                 RBO();
                 ~RBO();
@@ -120,7 +123,7 @@ namespace engine {
                 Texture(Texture&& t);
                 Texture& operator=(Texture&& t);
 
-                GLuint ID;
+                GLuint *ID;
                 int srcWidth, srcHeight, srcChannels;
                 std::string type;
                 std::string path;

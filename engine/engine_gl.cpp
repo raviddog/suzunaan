@@ -3,7 +3,7 @@
 #include "debug.hpp"
 
 namespace engine {
-    int mouseX, mouseY, mouseMoveX, mouseMoveY;
+    double mouseX, mouseY, mouseXold = 0.0, mouseYold = 0.0, mouseMoveX, mouseMoveY;
     bool quit;
     bool keyState[kb::KeycodesLength];
     bool keyPressed[kb::KeycodesLength];
@@ -12,59 +12,50 @@ namespace engine {
     void *currentShader = nullptr;
     
     void inputs() {
-        
-        // SDL_GetMouseState(&mouseX, &mouseY);
-        SDL_GetRelativeMouseState(&mouseMoveX, &mouseMoveY);
 
-        static SDL_Event e;
-        
-        if(SDL_GetWindowFlags(gl::window) && SDL_WINDOW_INPUT_FOCUS != 0u) {
-            while(SDL_PollEvent(&e) != 0)
-            {
-                if(e.type == SDL_QUIT) {
-                    quit = true;
-                } else if(e.type == SDL_KEYDOWN) {
-                    keyState[e.key.keysym.scancode] = true;
-                } else if(e.type == SDL_KEYUP) {
-                    keyState[e.key.keysym.scancode] = false;
-                }
-            }
-            
-            for(int i=0;i<kb::KeycodesLength;i++) {
-                if(keyState[i] && !(keyStateTest[i])) {
-                    keyPressed[i] = true;
-                } else {
-                    keyPressed[i] = false;
-                }
-                keyStateTest[i] = keyState[i];
-            }
-        } else {
-            for(int i=0;i<kb::KeycodesLength;i++) {
-                keyState[i] = false;
-                keyPressed[i] = false;
-                keyStateTest[i] = false;;
-            }
+        if(glfwWindowShouldClose(gl::window)) {
+            quit = true;
         }
-    } 
 
+        glfwPollEvents();
+        glfwGetCursorPos(gl::window, &mouseX, &mouseY);
+        mouseMoveX = mouseX - mouseXold;
+        mouseMoveY = mouseY - mouseYold;
+        mouseXold = mouseX;
+        mouseYold = mouseY;
+
+        for(int i=0;i<kb::KeycodesLength;i++) {
+            if(keyState[i] && !(keyStateTest[i])) {
+                keyPressed[i] = true;
+            } else {
+                keyPressed[i] = false;
+            }
+            keyStateTest[i] = keyState[i];
+        }
+    }
+
+    void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+        keyState[scancode] = action == GLFW_PRESS ? true : false;
+    }
 
     namespace gl {
-        SDL_Window *window;
-        SDL_GLContext maincontext;
+        GLFWwindow *window;
+        // SDL_GLContext maincontext;
 
         
 
         VAO::VAO() {
-            ID = (GLuint)0u;
-            glGenVertexArrays(1, &ID);
+            ID = new GLuint;
+            glGenVertexArrays(1, ID);
         }
 
         VAO::~VAO() {
-            glDeleteVertexArrays(1, &ID);
+            glDeleteVertexArrays(1, ID);
+            delete ID;
         }
 
         void VAO::bind() {
-            glBindVertexArray(ID);
+            glBindVertexArray(*ID);
         }
 
         void VAO::unbind() {
@@ -72,23 +63,25 @@ namespace engine {
         }
 
         VBO::VBO() {
-            ID_VBO = (GLuint)0u;
-            ID_EBO = (GLuint)0u;
-            glGenBuffers(1, &ID_VBO);
-            glGenBuffers(1, &ID_EBO);
+            ID_VBO = new GLuint;
+            ID_EBO = new GLuint;
+            glGenBuffers(1, ID_VBO);
+            glGenBuffers(1, ID_EBO);
             vertexAttribs = -1;
             bufferSizeVert = 0;
             bufferSizeInd = 0;
         }
 
         VBO::~VBO() {
-            glDeleteBuffers(1, &ID_VBO);
-            glDeleteBuffers(1, &ID_EBO);
+            glDeleteBuffers(1, ID_VBO);
+            glDeleteBuffers(1, ID_EBO);
+            delete ID_VBO;
+            delete ID_EBO;
         }
 
         void VBO::bind() {
-            glBindBuffer(GL_ARRAY_BUFFER, ID_VBO);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID_EBO);
+            glBindBuffer(GL_ARRAY_BUFFER, *ID_VBO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ID_EBO);
         }
 
         void VBO::unbind() {
@@ -148,16 +141,17 @@ namespace engine {
         }
 
         FBO::FBO() {
-            ID = (GLuint)0u;
-            glGenFramebuffers(1, &ID);
+            ID = new GLuint;
+            glGenFramebuffers(1, ID);
         }
 
         FBO::~FBO() {
-            glDeleteFramebuffers(1, &ID);
+            glDeleteFramebuffers(1, ID);
+            delete ID;
         }
 
         void FBO::bind() {
-            glBindFramebuffer(GL_FRAMEBUFFER, ID);
+            glBindFramebuffer(GL_FRAMEBUFFER, *ID);
         }
 
         void FBO::unbind() {
@@ -166,16 +160,17 @@ namespace engine {
         }
 
         RBO::RBO() {
-            ID = (GLuint)0u;
-            glGenRenderbuffers(1, &ID);
+            ID = new GLuint;
+            glGenRenderbuffers(1, ID);
         }
 
         RBO::~RBO() {
-            glDeleteRenderbuffers(1, &ID);
+            glDeleteRenderbuffers(1, ID);
+            delete ID;
         }
 
         void RBO::bind() {
-            glBindRenderbuffer(GL_RENDERBUFFER, ID);
+            glBindRenderbuffer(GL_RENDERBUFFER, *ID);
         }
 
         void RBO::unbind() {
@@ -197,11 +192,11 @@ namespace engine {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->ID, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *tex->ID, 0);
             // tex->unbind();
 
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo->ID);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *rbo->ID);
             // rbo->unbind();
             fbo->unbind();
         }
@@ -214,7 +209,7 @@ namespace engine {
         }
 
         void FrameBuffer::bind() {
-            glBindFramebuffer(GL_FRAMEBUFFER, fbo->ID);
+            glBindFramebuffer(GL_FRAMEBUFFER, *fbo->ID);
         }
 
         void FrameBuffer::unbind() {
@@ -222,15 +217,16 @@ namespace engine {
         }
 
         Texture::Texture() {
-            ID = (GLuint)0u;
-            glGenTextures(1, &ID);
+            ID = new GLuint;
+            glGenTextures(1, ID);
             srcWidth = 0;
             srcHeight = 0;
             srcChannels = 0;
         }
 
         Texture::~Texture() {
-            glDeleteTextures(1, &ID);
+            glDeleteTextures(1, ID);
+            delete ID;
         }
 
         Texture::Texture(Texture&& t) {
@@ -246,19 +242,19 @@ namespace engine {
                 type = t.type;
                 path = t.path;
 
-                t.ID = (GLuint)0u;
+                t.ID = new GLuint;
                 t.path = std::string();
             }
             return *this;
         }
 
         void Texture::bind() {
-            glBindTexture(GL_TEXTURE_2D, ID);
+            glBindTexture(GL_TEXTURE_2D, *ID);
         }
 
         void Texture::bind(int txUnit) {
             glActiveTexture(GL_TEXTURE0 + txUnit);
-            glBindTexture(GL_TEXTURE_2D, ID);
+            glBindTexture(GL_TEXTURE_2D, *ID);
         }
 
         void Texture::activateUnit(int txUnit) {
