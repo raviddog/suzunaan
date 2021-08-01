@@ -855,8 +855,6 @@ namespace engine {
                 break;
         }
 
-        delete dmode;
-
         //  precalculate stuff for setviewport
         //  set viewport to specified rectangle (inside draw area)
         //  need to calculate x and y based off of the existing draw area
