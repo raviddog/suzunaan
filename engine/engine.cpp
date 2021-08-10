@@ -687,63 +687,86 @@ namespace engine {
             "Skip"
         };
 
-        std::ifstream settings;//(settingsPath, std::ifstream::in);
-        settings.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        std::ifstream file;//(settingsPath, std::ifstream::in);
+        std::string settings;
+        //file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
 
         try {
-            settings.open(settingsPath);
-            
-            //  settings
-            int screenMode = 0;
-            bool vsync = true;
-            int width_win = 640, height_win = 480;
-            const int width_draw = 640, height_draw = 480;  //  modify for non-static resolution shmup stuff
-
-            while(settings.peek() != EOF) {
-                if(settings.peek() == '[' || settings.peek() == ';' || settings.peek() == '\n') {
-                    settings.ignore(512, '\n');
-                } else {
-                    std::string id;
-                    std::getline(settings, id, '=');
-                    if(id == "Width") {
-                        std::getline(settings, id);
-                        sscanf(id.c_str(), "%d", &width_win);
-                    } else if(id == "Height") {
-                        std::getline(settings, id);
-                        sscanf(id.c_str(), "%d", &height_win);
-                    } else if(id == "Vsync") {
-                        std::getline(settings, id);
-                        id == "true" ? vsync = true : vsync = false;
-                    } else if(id == "ScreenMode") {
-                        std::getline(settings, id);
-                        //  edit this default for if res is supposed to be resizeable
-                        if(id == "windowed") screenMode = 4;
-                        if(id == "borderless") screenMode = 1;
-                        if(id == "fullscreen") screenMode = 2;
-                    } else {
-                        //  check if its an input setting
-                        int x = 0;
-                        while(x < inputSkip && id != inputStrings[x]) {
-                            ++x;
-                        }
-
-                        if(x < inputSkip) {
-                            //  found
-                            //  https://wiki.libsdl.org/SDLScancodeLookup
-                            std::getline(settings, id);
-                            controls[x] = stoul(id);
-                        }
-                    }
-                }
-            }
-            settings.close();
-            init(title, screenMode, vsync, width_win, height_win, width_draw, height_draw);
-            return true;
-        } catch (std::ifstream::failure &ex) {
+            file.open(settingsPath);
+            std::stringstream filestream;
+            filestream << file.rdbuf();
+            file.close();
+            settings = filestream.str();
+        } catch(std::ifstream::failure &ex) {
             engine::log_debug("failed to open file, %s\n%s",  strerror(errno), ex.what());
+            file.close();
             return false;
         }
+        //  settings
+        int screenMode = 0;
+        bool vsync = true;
+        int width_win = 640, height_win = 480;
+        const int width_draw = 640, height_draw = 480;  //  modify for non-static resolution shmup stuff
+
+
+        size_t next = 0, offset = 0, length;
+        length = settings.length();
+
+
+        while(next < length) {
+            if(settings[next] == '[' || settings[next] == ';') {
+                while(next < length && settings[next] != '\n') {
+                    next++;
+                }
+            }
+            if(settings[next] == '\n') {
+                next++;
+            } else {
+                offset = 0;
+                while(next + offset < length && settings[next + offset] != '=') {
+                    offset++;
+                }
+                std::string id = settings.substr(next, offset);
+                next += offset + 1;
+                offset = 0;
+
+                while(next + offset < length && settings[next + offset] != '\n') {
+                    offset++;
+                }
+                std::string value = settings.substr(next, offset);
+                next += offset + 1;
+                offset = 0;
+
+                if(id == "Width") {
+                    width_win = std::strtol(value.c_str(), nullptr, 0);
+                } else if(id == "Height") {
+                    height_win = std::strtol(value.c_str(), nullptr, 0);
+                } else if(id == "Vsync") {
+                    vsync = value == "true" ? true : false;
+                } else if(id == "Screenmode") {
+                    if(value == "windowed") screenMode = 4;
+                    if(value == "borderless") screenMode = 1;
+                    if(value == "fullscreen") screenMode = 2;
+                } else {
+                    //  check if its an input setting
+                    int x = 0;
+                    while(x < inputSkip && id != inputStrings[x]) {
+                        ++x;
+                    }
+
+                    if(x < inputSkip) {
+                        //  found
+                        //  https://wiki.libsdl.org/SDLScancodeLookup
+                        controls[x] = stoul(value);
+                    }
+                }
+
+            }
+
+        }
+        init(title, screenMode, vsync, width_win, height_win, width_draw, height_draw);
+        return true;
     }
 
     void init(const char *title, int screenMode, bool vsync, int width, int height) {
