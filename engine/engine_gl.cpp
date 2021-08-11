@@ -5,9 +5,9 @@
 namespace engine {
     double mouseX, mouseY, mouseXold = 0.0, mouseYold = 0.0, mouseMoveX, mouseMoveY;
     bool quit;
-    bool keyState[kb::KeycodesLength];
+    int keyState[kb::KeycodesLength];
     bool keyPressed[kb::KeycodesLength];
-    bool keyStateTest[kb::KeycodesLength];
+    int keyStateTest[kb::KeycodesLength];
 
     void *currentShader = nullptr;
     
@@ -25,7 +25,7 @@ namespace engine {
         mouseYold = mouseY;
 
         for(int i=0;i<kb::KeycodesLength;i++) {
-            if(keyState[i] && !(keyStateTest[i])) {
+            if(keyState[i] > 0 && keyStateTest[i] == 0) {
                 keyPressed[i] = true;
             } else {
                 keyPressed[i] = false;
@@ -35,7 +35,7 @@ namespace engine {
     }
 
     void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-        keyState[scancode] = action == GLFW_PRESS ? true : false;
+        keyState[key] = action;
     }
 
     namespace gl {

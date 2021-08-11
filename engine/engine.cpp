@@ -781,6 +781,10 @@ namespace engine {
 
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); //add option for this later
 
+        for(int i = 0; i < kb::KeycodesLength; i++) {
+            keyState[i] = 0;
+        }
+
 
         drawWidth = width_draw;
         drawHeight = height_draw;
@@ -1022,7 +1026,7 @@ namespace engine {
     }
 
     bool checkKey(int key) {
-        return keyState[controls[key]];
+        return keyState[controls[key]] == GLFW_PRESS || keyState[controls[key]] == GLFW_REPEAT;
     }
 
     bool checkKeyPressed(int key) {
