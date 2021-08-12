@@ -789,9 +789,9 @@ namespace engine {
         drawWidth = width_draw;
         drawHeight = height_draw;
         scrMode = screenMode;
-        frameTimeTicks = ticks;
         fps = 0u;
         ticks = glfwGetTime();
+        frameTimeTicks = ticks;
 
         //  for borderless fullscreen calculation
         const GLFWvidmode *dmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -907,9 +907,8 @@ namespace engine {
             _vsync = false;
             glfwSwapInterval(0);
 
-            // cur_time = std::chrono::steady_clock::now();
-            // next_time = cur_time + std::chrono::milliseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
-            next_time = std::chrono::high_resolution_clock::now();
+            next_time = std::chrono::high_resolution_clock::now() + std::chrono::microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
+            // next_time = std::chrono::high_resolution_clock::now();
             #ifdef _MSC_VER
             timeBeginPeriod(1);
             #endif
@@ -918,7 +917,6 @@ namespace engine {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glEnable(GL_BLEND);
-        //glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // stbi_set_flip_vertically_on_load(true);  // don't need this because the shader i wrote accounts for it
@@ -949,6 +947,7 @@ namespace engine {
             high_resolution_clock::time_point sleep = high_resolution_clock::now();
             #endif
             #ifdef __GNUG__
+            next_time += microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
             timespec delayt, delayr;
             nanoseconds delaym = duration_cast<nanoseconds>(next_time - high_resolution_clock::now());
             delayt.tv_sec = 0;
@@ -958,6 +957,7 @@ namespace engine {
                 nanosleep(&delayt, &delayr);
             } while (delayr.tv_nsec > 0);
             #else
+            next_time = high_resolution_clock::now() + microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
             std::this_thread::sleep_until(next_time);
             #endif
 
@@ -970,11 +970,6 @@ namespace engine {
                 //  spin
                 temp++;
             }
-
-            next_time = high_resolution_clock::now() + microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
-            // next_time += microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
-            
-            
         }
 
         #ifdef _MSG_DEBUG_ENABLED_FPS
@@ -994,8 +989,8 @@ namespace engine {
             temp = 0u;
         }
         frameTimeTicks = temp_ticks;
-        #endif
         ++fps;
+        #endif
 
         
     }
