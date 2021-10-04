@@ -6,7 +6,8 @@
 
 // #include "SDL2/SDL.h"
 // #include "SDL2/SDL_opengl.h"
-#include "stb_image.h"
+#include "libs/stb_image.h"
+#include "libs/assetsys.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -46,7 +47,8 @@ namespace engine {
     }
 
     extern double mouseX, mouseY, mouseMoveX, mouseMoveY;
-    extern bool quit;
+    extern bool quit, loadFromZip;
+    extern assetsys_t *assets;
     extern int keyState[kb::KeycodesLength];
     extern bool keyPressed[kb::KeycodesLength];
     extern void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -134,7 +136,7 @@ namespace engine {
                 
                 void bind();
                 void bind(int txUnit);
-                void load(const std::string &path);
+                void load(std::string path);
 
                 static void activateUnit(int txUnit);
                 // static int getActiveUnit();

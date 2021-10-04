@@ -3,6 +3,7 @@
 
 #include "engine_gl.hpp"
 #include "engine_helper.hpp"
+#include "util.h"
 
 #include <vector>
 #include <memory>
@@ -14,7 +15,11 @@ namespace engine {
     enum inputKeys {
         inputUp, inputDown, inputLeft, inputRight,
         inputFire, inputFocus, inputBomb, inputPause,
-        inputQuit, inputRestart, inputSkip
+        inputQuit, inputRestart, inputSkip,
+
+
+
+        controlSize
     };
 
     enum Drawmode {
@@ -24,23 +29,50 @@ namespace engine {
         Drawmode3D
     };
 
+    enum EngineInitFlags {
+        ENGINE_INIT_VSYNC = 1 << 0,
+        ENGINE_INIT_RESIZEABLE = 1 << 1,
+        ENGINE_INIT_FIXEDASPECT = 1 << 2,
+        ENGINE_INIT_TRUEFULLSCREEN = 1 << 3,
+        ENGINE_INIT_BORDERLESS = 1 << 4,
+        ENGINE_INIT_FIXEDFPS = 1 << 5,
+        ENGINE_INIT_FIXEDDRAWSIZE = 1 << 6
+
+
+    };
+
     extern gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert, *shaderUI, *pshader, *shader3d;
+
+    extern double deltatime;
 
     bool checkKey(int key);
     bool checkKeyPressed(int key);
 
-    bool init(const char *title, const char *settingsPath);
-    void init(const char *title, int screenMode, bool vsync, int width, int height);
-    void init(const char *title, int screenMode, bool vsync, int width_win, int height_win, int width_draw, int height_draw);
+    bool init(const char *title, int flags, int width, int height, const char *settingsPath);
+    void init(const char *title, int flags, int width, int height);
+    void init(const char *title, int flags, int width, int height, int dwidth, int dheight);
     void inputs();
     void flip();
     void close();
 
     void setViewport();
     void setViewport(int x, int y, int w, int h);
+    void setDrawsize(int w, int h);
 
     void mouseCapture();
     void mouseRelease();
+
+    //  imgui stuff
+    //  accompanying text, pointer to variable, editable, window
+    void registerDebugWindow(std::string);
+    void registerDebugVariable(std::string, float*, bool);
+    void registerDebugVariable(std::string, float*, bool, size_t);
+    void registerDebugVariable(std::string, int*, bool);
+    void registerDebugVariable(std::string, int*, bool, size_t);
+    void registerDebugVariable(std::string, bool*, bool);
+    void registerDebugVariable(std::string, bool*, bool, size_t);
+    void registerDebugVariable(std::string, double*, bool);
+    void registerDebugVariable(std::string, double*, bool, size_t);
 
     // void InitialiseDrawmodes();
     void SetDrawmode(Drawmode dmode);
@@ -117,7 +149,7 @@ namespace engine {
             
             std::string path;
 
-            Model(const char *rawpath);
+            Model(std::string path);
             ~Model();
             void draw();
     };
@@ -142,16 +174,17 @@ namespace engine {
             Sprite *sprites;
             gl::VAO *vao;
             gl::VBO *vbo;
-            gl::Texture *tex;
             bool realloc;
 
-            void load(const std::string &path, int nummSprites);
-            void load(const std::string &path, int numSprites, size_t maxDraws);
+            void load(std::string path, int numSprites);
+            void load(std::string path, int numSprites, size_t maxDraws);
         public:
+        //  TODO this is here coz of font, seems wrong, clean up later
+            gl::Texture *tex;
             int numSprites;
 
-            SpriteSheet(const std::string &path, int numSprites);
-            SpriteSheet(const std::string &path, int numSprites, size_t maxDraws);
+            SpriteSheet(std::string path, int numSprites);
+            SpriteSheet(std::string path, int numSprites, size_t maxDraws);
             ~SpriteSheet();
 
             void setSprite(int num, int x, int y, int width, int height);
@@ -172,6 +205,41 @@ namespace engine {
             static void useShaderNormal();
             //  prepare stuff for drawing sprites
             //  static void prepareDraw();
+    };
+
+    class BitmapFont {
+        protected:
+            //  store or calculate char info
+            //  store for now
+
+            struct Charinfo {
+                int w;
+                int h;
+            } charinfo;
+
+            SpriteSheet *s;
+        
+        public:
+            
+            
+            BitmapFont(std::string);          //  font file
+            // BitmapFont(std::string, int);     //  font file, optional font size
+                                                //  dont need this on a bitmap font
+            ~BitmapFont();
+
+
+
+            void Write(std::string, float x, float y);
+            void Write(std::string, float x, float y, int w); //  specify char width in pixels
+            void WriteCentered(std::string, float x, float y);
+            void WriteCentered(std::string, float x, float y, int w); //  specify char width in pixels
+            void Dimensions(std::string, int*, int*);   //  get the expected dimensions to draw string
+            void Dimensions(std::string, int*, int*, int*);   //  get the expected dimensions to draw string
+
+            void buffer();
+            void draw();
+        
+
     };
 
     class Camera3D {
@@ -195,8 +263,8 @@ namespace engine {
             Camera3D();
     };
 
-    Model* LoadModel(const std::string&);
-    void UnloadModel(const std::string&);
+    Model* LoadModel(std::string);
+    void UnloadModel(std::string);
     void UnloadModel(Model*);
 }
 

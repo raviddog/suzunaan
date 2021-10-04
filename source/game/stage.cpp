@@ -279,6 +279,7 @@ void Stage::draw() {
     using namespace Game;
     engine::SetDrawmode(engine::DrawmodeSprite);
     engine::setViewport();
+    engine::setDrawsize(640, 480);
 
 
     img_guibg->draw();
@@ -289,12 +290,14 @@ void Stage::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     engine::shader3d->setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+    camera->bind();
     camera->update();    
     model->draw();
 
     fbuffer->unbind();
     engine::SetDrawmode(engine::DrawmodeSprite);
     engine::setViewport(32, 16, 384, 448);
+    engine::setDrawsize(384 - 32, 448 - 16);
     engine::SetDrawmode(engine::DrawmodeUI);
     
     
@@ -446,7 +449,6 @@ Stage::Stage() {
     camera->update();
     camera->bind();
 
-    // model = new engine::Model("./data/model/backpack.obj");
     model = engine::LoadModel("./data/model/backpack.obj");
     engine::shader3d->setInt("texture_diffuse1", 0);
     modelI = new engine::ModelInstance();

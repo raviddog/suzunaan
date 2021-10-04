@@ -11,8 +11,7 @@ namespace engine {
 
     void *currentShader = nullptr;
     
-    void inputs() {
-
+    void inputs() {        
         if(glfwWindowShouldClose(gl::window)) {
             quit = true;
         }
@@ -271,8 +270,32 @@ namespace engine {
         }
 
         //  need to make more of these for different settings and shit
-        void Texture::load(const std::string &path) {
-            unsigned char *data = stbi_load(path.c_str(), &srcWidth, &srcHeight, &srcChannels, 0);
+        void Texture::load(std::string path) {
+            unsigned char *data = nullptr;
+            assetsys_error_t error;
+            if(loadFromZip) {
+                assetsys_file_t file;
+                error = assetsys_file(assets, path.c_str() + 1, &file);
+                if(error == ASSETSYS_SUCCESS) {
+                    int size = assetsys_file_size(assets, file);
+                    if(size > 0) {
+                        unsigned char *buffer = new unsigned char[size];
+                        error = assetsys_file_load(assets, file, &size, (void*)buffer, size);
+                        if(error == ASSETSYS_SUCCESS) {
+                            data = stbi_load_from_memory(buffer, size, &srcWidth, &srcHeight, &srcChannels, 0);
+                        }
+                        delete[] buffer;
+                    }
+                }
+
+                if(error != ASSETSYS_SUCCESS) {
+                    //  attempt regular load
+                    log_debug("failed to load %s from data file, error code %d\n", path, error);
+                    data = stbi_load(path.c_str(), &srcWidth, &srcHeight, &srcChannels, 0);    
+                }
+            } else {
+                data = stbi_load(path.c_str(), &srcWidth, &srcHeight, &srcChannels, 0);
+            }
             if(data) {
                 switch(srcChannels) {
                     case 3:
@@ -299,82 +322,134 @@ namespace engine {
 
         void Shader::load(const GLchar* vertexPath, const GLchar* fragmentPath)
         {
-            std::string vertexCode;
-            std::string fragmentCode;
-            std::ifstream vShaderFile;
-            std::ifstream fShaderFile;
+            char *vShaderCode = nullptr, *fShaderCode = nullptr;
+            bool vfail = true, ffail = true;
+            
+            assetsys_error_t error;
+            if(loadFromZip) {
+                assetsys_file_t file;
+                error = assetsys_file(assets, vertexPath + 1, &file);
+                if(error == ASSETSYS_SUCCESS) {
+                    int size = assetsys_file_size(assets, file);
+                    if(size > 0) {
+                        char *buffer = new char[size];
+                        error = assetsys_file_load(assets, file, &size, (void*)buffer, size);
+                        if(error == ASSETSYS_SUCCESS) {
+                            vShaderCode = (char*)buffer;
+                            vfail = false;
+                        } else {
+                            delete[] buffer;
+                        }
+                    }
+                }
 
-            //ensure ifstream objects can throw exceptions
-            vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-            fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-
-            try
-            {
-                //open files
-                vShaderFile.open(vertexPath);
-                fShaderFile.open(fragmentPath);
-                std::stringstream vShaderStream, fShaderStream;
-
-                //read file's buffer contents into streams
-                vShaderStream << vShaderFile.rdbuf();
-                fShaderStream << fShaderFile.rdbuf();
-
-                //close file handlers
-                vShaderFile.close();
-                fShaderFile.close();
-
-                //convert stream into string
-                vertexCode = vShaderStream.str();
-                fragmentCode = fShaderStream.str();
+                error = assetsys_file(assets, fragmentPath + 1, &file);
+                if(error == ASSETSYS_SUCCESS) {
+                    int size = assetsys_file_size(assets, file);
+                    if(size > 0) {
+                        char *buffer = new char[size];
+                        error = assetsys_file_load(assets, file, &size, (void*)buffer, size);
+                        if(error == ASSETSYS_SUCCESS) {
+                            fShaderCode = buffer;
+                            ffail = false;
+                        } else {
+                            delete[] buffer;
+                        }
+                    }
+                }
             }
-            catch(std::ifstream::failure &e)
-            {
-                log_debug("failed to load shaders, unable to read files %s %s\n", vertexPath, fragmentPath);
+            if(!loadFromZip || error != ASSETSYS_SUCCESS) {
+                if(loadFromZip) {
+                    //  attempt regular load
+                    log_debug("failed to load shaders %s %s from data file, error code %d\n", vertexPath, fragmentPath, error);
+                }
+
+                if(vfail) {
+                    FILE *vFile;
+                    vFile = fopen(vertexPath, "rb");
+
+                    if(vFile) {
+                        fseek(vFile, 0L, SEEK_END);
+                        long size = ftell(vFile) + 1;
+                        fseek(vFile, 0L, SEEK_SET);
+                        char *buffer = new char[size + 1];
+                        fread(buffer, size, 1, vFile);
+                        buffer[size] = '\0';
+                        fclose(vFile);
+                        vShaderCode = buffer;
+                        vfail = false;
+                    } else {
+                        log_debug("failed to load shader file %s\n", vertexPath);
+                    }
+                }
+
+                if(ffail) {
+                    FILE *fFile;
+                    fFile = fopen(fragmentPath, "rb");
+
+                    if(fFile) {
+                        fseek(fFile, 0L, SEEK_END);
+                        long size = ftell(fFile) + 1;
+                        fseek(fFile, 0L, SEEK_SET);
+                        char *buffer = new char[size + 1];
+                        fread(buffer, size, 1, fFile);
+                        buffer[size] = '\0';
+                        fclose(fFile);
+                        fShaderCode = buffer;
+                        ffail = false;
+                    } else {
+                        log_debug("failed to load shader file %s\n", fragmentPath);
+                    }
+                }
             }
 
-            const char* vShaderCode = vertexCode.c_str();
-            const char* fShaderCode = fragmentCode.c_str();
+            if(!vfail && !ffail) {
+                uint32_t vertex, fragment;
+                int success;
+                char infoLog[512];
 
-            uint32_t vertex, fragment;
-            int success;
-            //  char infoLog[512];
+                //vertex shader
+                vertex = glCreateShader(GL_VERTEX_SHADER);
+                glShaderSource(vertex, 1, &vShaderCode, NULL);
+                glCompileShader(vertex);
 
-            //vertex shader
-            vertex = glCreateShader(GL_VERTEX_SHADER);
-            glShaderSource(vertex, 1, &vShaderCode, NULL);
-            glCompileShader(vertex);
+                glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+                if(!success) {
+                    glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+                    log_debug(infoLog);
+                    //report error, infolog contains details
+                };
 
-            glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-            if(!success) {
-                //glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-                //report error, infolog contains details
-            };
+                fragment = glCreateShader(GL_FRAGMENT_SHADER);
+                glShaderSource(fragment, 1, &fShaderCode, NULL);
+                glCompileShader(fragment);
 
-            fragment = glCreateShader(GL_FRAGMENT_SHADER);
-            glShaderSource(fragment, 1, &fShaderCode, NULL);
-            glCompileShader(fragment);
+                glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
+                if(!success) {
+                    glGetShaderInfoLog(fragment, 512, NULL, infoLog);
+                    log_debug(infoLog);
+                    //report error
+                }
 
-            glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
-            if(!success) {
-                //glGetShaderInfoLog(fragment, 512, NULL, infoLog)
-                //report error
+                ID = glCreateProgram();
+                glAttachShader(ID, vertex);
+                glAttachShader(ID, fragment);
+                glLinkProgram(ID);
+
+                glGetProgramiv(ID, GL_LINK_STATUS, &success);
+                if(!success) {
+                    // glGetProgramInfoLog(ID, 512, NULL, infoLog);
+                    // printf("%s ", infoLog);
+                }
+
+                log_debug("loaded shaders %s %s\n", vertexPath, fragmentPath);
+
+                glDeleteShader(vertex);
+                glDeleteShader(fragment);
+
+                delete[] vShaderCode;
+                delete[] fShaderCode;
             }
-
-            ID = glCreateProgram();
-            glAttachShader(ID, vertex);
-            glAttachShader(ID, fragment);
-            glLinkProgram(ID);
-
-            glGetProgramiv(ID, GL_LINK_STATUS, &success);
-            if(!success) {
-                // glGetProgramInfoLog(ID, 512, NULL, infoLog);
-                // printf("%s ", infoLog);
-            }
-
-            log_debug("loaded shaders %s %s\n", vertexPath, fragmentPath);
-
-            glDeleteShader(vertex);
-            glDeleteShader(fragment);
         }
 
         void Shader::use()
