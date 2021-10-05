@@ -286,6 +286,7 @@ void Stage::draw() {
 
     engine::SetDrawmode(engine::Drawmode3D);
     glViewport(0, 0, 352, 432);
+    // engine::setViewport(32, 16, 384, 448);
     fbuffer->bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     

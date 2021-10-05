@@ -332,9 +332,10 @@ namespace engine {
                 if(error == ASSETSYS_SUCCESS) {
                     int size = assetsys_file_size(assets, file);
                     if(size > 0) {
-                        char *buffer = new char[size];
+                        char *buffer = new char[size+1];
                         error = assetsys_file_load(assets, file, &size, (void*)buffer, size);
                         if(error == ASSETSYS_SUCCESS) {
+                            buffer[size] = '\0';
                             vShaderCode = (char*)buffer;
                             vfail = false;
                         } else {
@@ -347,9 +348,10 @@ namespace engine {
                 if(error == ASSETSYS_SUCCESS) {
                     int size = assetsys_file_size(assets, file);
                     if(size > 0) {
-                        char *buffer = new char[size];
+                        char *buffer = new char[size+1];
                         error = assetsys_file_load(assets, file, &size, (void*)buffer, size);
                         if(error == ASSETSYS_SUCCESS) {
+                            buffer[size] = '\0';
                             fShaderCode = buffer;
                             ffail = false;
                         } else {
@@ -365,17 +367,16 @@ namespace engine {
                 }
 
                 if(vfail) {
-                    FILE *vFile;
-                    vFile = fopen(vertexPath, "rb");
+                    std::ifstream file (vertexPath);
+                    if(file) {
+                        file.seekg(0, file.end);
+                        int size = file.tellg();
+                        file.seekg(0, file.beg);
 
-                    if(vFile) {
-                        fseek(vFile, 0L, SEEK_END);
-                        long size = ftell(vFile) + 1;
-                        fseek(vFile, 0L, SEEK_SET);
                         char *buffer = new char[size + 1];
-                        fread(buffer, size, 1, vFile);
+                        file.read(buffer, size);
+                        file.close();
                         buffer[size] = '\0';
-                        fclose(vFile);
                         vShaderCode = buffer;
                         vfail = false;
                     } else {
@@ -384,17 +385,16 @@ namespace engine {
                 }
 
                 if(ffail) {
-                    FILE *fFile;
-                    fFile = fopen(fragmentPath, "rb");
+                    std::ifstream file (fragmentPath);
+                    if(file) {
+                        file.seekg(0, file.end);
+                        int size = file.tellg();
+                        file.seekg(0, file.beg);
 
-                    if(fFile) {
-                        fseek(fFile, 0L, SEEK_END);
-                        long size = ftell(fFile) + 1;
-                        fseek(fFile, 0L, SEEK_SET);
                         char *buffer = new char[size + 1];
-                        fread(buffer, size, 1, fFile);
+                        file.read(buffer, size);
+                        file.close();
                         buffer[size] = '\0';
-                        fclose(fFile);
                         fShaderCode = buffer;
                         ffail = false;
                     } else {
@@ -415,8 +415,8 @@ namespace engine {
 
                 glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
                 if(!success) {
-                    glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-                    log_debug(infoLog);
+                    // glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+                    // log_debug(infoLog);
                     //report error, infolog contains details
                 };
 
@@ -426,8 +426,8 @@ namespace engine {
 
                 glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
                 if(!success) {
-                    glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-                    log_debug(infoLog);
+                    // glGetShaderInfoLog(fragment, 512, NULL, infoLog);
+                    // log_debug(infoLog);
                     //report error
                 }
 
@@ -438,7 +438,10 @@ namespace engine {
 
                 glGetProgramiv(ID, GL_LINK_STATUS, &success);
                 if(!success) {
-                    // glGetProgramInfoLog(ID, 512, NULL, infoLog);
+                    glGetProgramInfoLog(ID, 512, NULL, infoLog);
+                    log_debug(infoLog);
+                    // log_debug(vShaderCode);
+                    // log_debug(fShaderCode);
                     // printf("%s ", infoLog);
                 }
 
@@ -446,10 +449,10 @@ namespace engine {
 
                 glDeleteShader(vertex);
                 glDeleteShader(fragment);
-
-                delete[] vShaderCode;
-                delete[] fShaderCode;
             }
+
+            if(vShaderCode) delete[] vShaderCode;
+            if(fShaderCode) delete[] fShaderCode;
         }
 
         void Shader::use()
