@@ -136,7 +136,7 @@ namespace engine {
                 
                 void bind();
                 void bind(int txUnit);
-                void load(std::string path);
+                void load(const std::string &path);
 
                 static void activateUnit(int txUnit);
                 // static int getActiveUnit();

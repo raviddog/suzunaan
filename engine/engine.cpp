@@ -52,7 +52,7 @@ namespace engine {
 
     int scrWidth, scrHeight, drawWidth, drawHeight;
     bool maximised = false;
-    int viewport[4];
+    int viewport[4], scrMode;
     float scalex, scaley;
     
     int aspect_w, aspect_h, winflags;
@@ -253,12 +253,12 @@ namespace engine {
             int count = 1;
             Model *model;
 
-            ManagedModel(std::string);
+            ManagedModel(const std::string&);
             ~ManagedModel();
     };
 
-    ManagedModel::ManagedModel(std::string path) {
-        model = new Model(path);
+    ManagedModel::ManagedModel(const std::string &path) {
+        model = new Model(path.c_str());
         count = 1;
     }
 
@@ -268,7 +268,7 @@ namespace engine {
 
     std::unordered_map<std::string, ManagedModel*> *loadedModels;
 
-    Model* LoadModel(std::string path) {
+    Model* LoadModel(const std::string &path) {
         if(loadedModels->count(path)) {
             ManagedModel *tm = loadedModels->at(path);
             tm->count++;
@@ -280,7 +280,7 @@ namespace engine {
         }
     }
 
-    void UnloadModel(std::string path) {
+    void UnloadModel(const std::string &path) {
         if(loadedModels->count(path)) {
             ManagedModel *tm = loadedModels->at(path);
             tm->count--;
@@ -306,8 +306,8 @@ namespace engine {
          1.0f,  1.0f,  1.0f, 1.0f
     };
 
-    Model::Model(std::string rawpath) {
-        path = rawpath;
+    Model::Model(const char *rawpath) {
+        path = std::string(rawpath);
 
         materials = new std::vector<Material_t>();
         meshes = new std::vector<Mesh_t>();
@@ -431,8 +431,7 @@ namespace engine {
 
 
         } else {
-            //  load failed, error something'
-            log_debug("model load failed\n");
+            //  load failed, error something
         }
     }
 
@@ -465,11 +464,11 @@ namespace engine {
 
     //  [SPRITE]
 
-    SpriteSheet::SpriteSheet(std::string path, int numSprites) {
+    SpriteSheet::SpriteSheet(const std::string &path, int numSprites) {
         load(path, numSprites);
     }
 
-    SpriteSheet::SpriteSheet(std::string path, int numSprites, size_t maxDraws) {
+    SpriteSheet::SpriteSheet(const std::string &path, int numSprites, size_t maxDraws) {
         load(path, numSprites, maxDraws);
     }
 
@@ -482,7 +481,7 @@ namespace engine {
         delete sprites;
     }
 
-    void SpriteSheet::load(std::string path, int numSprites) {
+    void SpriteSheet::load(const std::string &path, int numSprites) {
         realloc = true;
 
         vao = new gl::VAO();
@@ -511,7 +510,7 @@ namespace engine {
         indices_stored_size = 0;
     }
 
-    void SpriteSheet::load(std::string path, int numSprites, size_t maxDraws) {
+    void SpriteSheet::load(const std::string &path, int numSprites, size_t maxDraws) {
         load(path, numSprites);
         vbo->bind();
         vbo->createBuffer(sizeof(float) * 28 * maxDraws, sizeof(uint32_t) * 6 * maxDraws);
@@ -714,11 +713,11 @@ namespace engine {
         
         glm::vec2 scrRes = glm::vec2((float)drawWidth, (float)drawHeight);
 
-        // shaderSpriteSheetInvert = new gl::Shader();
-        // shaderSpriteSheetInvert->load("/data/shaders/spritesheet.vert", "/data/shaders/spritesheet_invert.frag");
-        // shaderSpriteSheetInvert->use();
-        // shaderSpriteSheetInvert->setInt("txUnit", 0);
-        // shaderSpriteSheetInvert->setVec2("res", scrRes);
+        shaderSpriteSheetInvert = new gl::Shader();
+        shaderSpriteSheetInvert->load("./data/shaders/spritesheet.vert", "./data/shaders/spritesheet_invert.frag");
+        shaderSpriteSheetInvert->use();
+        shaderSpriteSheetInvert->setInt("txUnit", 0);
+        shaderSpriteSheetInvert->setVec2("res", scrRes);
 
         shaderSpriteSheet = new gl::Shader();
         shaderSpriteSheet->load("./data/shaders/spritesheet.vert", "./data/shaders/spritesheet.frag");
@@ -733,6 +732,10 @@ namespace engine {
         pshader->load("./data/shaders/test.vert", "./data/shaders/test.frag");
         pshader->use();
         pshader->setInt("screenTexture", 0);
+
+
+        currentDrawmode = DrawmodeUI;
+
     }
 
     void SetDrawmode(Drawmode dmode) {
@@ -743,11 +746,11 @@ namespace engine {
                     currentDrawmode = DrawmodeSprite;
                     glDisable(GL_DEPTH_TEST);
                     break;
-                // case DrawmodeSpriteInvert:
-                //     shaderSpriteSheetInvert->use();
-                //     currentDrawmode = DrawmodeSpriteInvert;
-                //     glDisable(GL_DEPTH_TEST);
-                //     break;
+                case DrawmodeSpriteInvert:
+                    shaderSpriteSheetInvert->use();
+                    currentDrawmode = DrawmodeSpriteInvert;
+                    glDisable(GL_DEPTH_TEST);
+                    break;
                 case Drawmode3D:
                     shader3d->use();
                     currentDrawmode = Drawmode3D;
@@ -913,48 +916,15 @@ namespace engine {
         }
         //  default settings
         //  really gotta put these somewhere else
-        //  settings
-        int screenMode = 0;
-        bool vsync = false;
-        int width_win = 1280, height_win = 960;
-        const int width_draw = 640, height_draw = 480;  //  modify for non-static resolution shmup stuff
+        bool vsync = true;
 
 
         if(readstate) {
             ini_t *ini = ini_load(settings.c_str(), NULL);
-            int count = ini_property_count(ini, INI_GLOBAL_SECTION);
-            for(;count > 0; count--) {
-                std::string setting = ini_property_name(ini, INI_GLOBAL_SECTION, count - 1);
-                ini_property_value(ini, INI_GLOBAL_SECTION, count - 1);
-
-                if(setting == "Width") {
-                    width_win = std::strtol(ini_property_value(ini, INI_GLOBAL_SECTION, count - 1), nullptr, 0);
-                } else if(setting == "Height") {
-                    height_win = std::strtol(ini_property_value(ini, INI_GLOBAL_SECTION, count - 1), nullptr, 0);
-                } else if(setting == "Vsync") {
-                    // vsync = std::strcmp("true", ini_property_value(ini, INI_GLOBAL_SECTION, count - 1)) == 0 ? true : false;
-                } else if(setting == "Screenmode") {
-                    const char *value = ini_property_value(ini, INI_GLOBAL_SECTION, count - 1);
-                    if(std::strcmp("windowed", value) == 0) screenMode = 4;
-                    if(std::strcmp("borderless", value) == 0) screenMode = 1;
-                    if(std::strcmp("fullscreen", value) == 0) screenMode = 2;
-                } else {
-                    //  check if its an input setting
-                    size_t x = 0;
-                    while(x < inputStrings->length() && setting != inputStrings[x]) {
-                        ++x;
-                    }
-
-                    if(x < inputSkip) {
-                        //  found
-                        //  https://wiki.libsdl.org/SDLScancodeLookup
-                        controls[x] = std::stoul(ini_property_value(ini, INI_GLOBAL_SECTION, count - 1));
-                    }
-                }
-
-            }
-
-            ini_destroy(ini);
+            int vsync_i = ini_find_property(ini, INI_GLOBAL_SECTION, "vsync", 0);
+            std::string vsync_t = ini_property_value(ini, INI_GLOBAL_SECTION, vsync_i);
+            
+            vsync = vsync_t == "true";
         }
 
         //  else use defaults
@@ -964,7 +934,7 @@ namespace engine {
         }
 
 
-        init(title, flags, width_win, height_win, width_draw, height_draw);
+        init(title, flags, width, height);
         return true;
     }
 
@@ -1082,12 +1052,12 @@ namespace engine {
         }
 
         
+        InitialiseDrawmodes(); 
+        SetDrawmode(DrawmodeSprite);
+
         int w, h;
         glfwGetFramebufferSize(gl::window, &w, &h);
         windowResizeCallback(gl::window, w, h);
-        
-        InitialiseDrawmodes(); 
-        SetDrawmode(DrawmodeSprite);
 
         loadedModels = new std::unordered_map<std::string, ManagedModel*>();
 
@@ -1231,6 +1201,11 @@ namespace engine {
                 temp++;
             }
         }
+
+        #ifdef _MSG_DEBUG_ENABLED_FPS
+        //  print debug fps data
+            
+        static std::stringstream d;
         
         #ifndef IMGUI_DISABLE
         ImGui_ImplOpenGL3_NewFrame();
@@ -1282,20 +1257,28 @@ namespace engine {
             ImGui::End();
         }
 
-        
-        #ifdef _MSG_DEBUG_ENABLED_FPS
-        //  print debug fps data
-            
-        static std::stringstream d;
-
         ImGui::Begin("Performance");
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::Text(d.str().c_str());
         ImGui::End();
 
+        ImGui::Render();
+        setViewport();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        #endif
+
         double temp_ticks = glfwGetTime();
         avgTicksTotal += temp_ticks - frameTimeTicks;
         if(temp_ticks > ticks + 1.0) {
+            d.str("");
+            d << "Avg Frame time: " << avgTicksTotal / fps << "ms | ";
+            d << "FPS: " << fps << " | Avg FPS: " << 1. / (avgTicksTotal / fps) << " | Deltatime: " << deltatime;
+            if(!_vsync) {
+                d << " | Slept: " << slept << "ms | ";
+                d << "Spun: " << temp;
+            }
+            // glfwSetWindowTitle(gl::window, d.str().c_str());
             fps = 0u;
             ticks = temp_ticks;
             temp = 0u;
@@ -1305,12 +1288,6 @@ namespace engine {
         ++fps;
         #endif
 
-
-        ImGui::Render();
-        setViewport();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        #endif
 
 
 

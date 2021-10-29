@@ -430,7 +430,7 @@ Stage::Stage() {
     auto stagescript_ptr = &stagescript;
     auto enemy_scripts_ptr = &enemy_scripts;
     auto bullet_scripts_ptr = &bullet_scripts;
-    Game::loadScript("./script/scriptloader.txt", stagescript_ptr, enemy_scripts_ptr, bullet_scripts_ptr);
+    Game::loadScript("./data/script/scriptloader.txt", stagescript_ptr, enemy_scripts_ptr, bullet_scripts_ptr);
     stagescript = *stagescript_ptr;
     enemy_scripts = *enemy_scripts_ptr;
     bullet_scripts = *bullet_scripts_ptr;
