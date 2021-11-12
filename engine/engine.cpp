@@ -186,8 +186,8 @@ namespace engine {
         int w, h;
         Dimensions(text, &w, &h);
 
-        x -= w / 2;
-        y -= h / 2;
+        x -= w / 2.f;
+        y -= h / 2.f;
 
         int line = 0;
         int c = 0;
@@ -212,7 +212,7 @@ namespace engine {
                 line++;
                 c = 0;
             } else {
-                s->drawSprite((int)text.at(i), x + c * w, y + line * charinfo.h * (w / charinfo.w), 0.f, w, charinfo.h * (w / charinfo.w));
+                s->drawSprite((int)text.at(i), x + c * w, y + line * charinfo.h * ((float)w / charinfo.w), 0.f, w, charinfo.h * ((float)w / charinfo.w));
                 c++;
             }
         }
@@ -222,8 +222,8 @@ namespace engine {
         int wx, h;
         Dimensions(text, &wx, &h, &w);
 
-        x -= wx / 2;
-        y -= h / 2;
+        x -= wx / 2.f;
+        y -= h / 2.f;
 
         int line = 0;
         int c = 0;
@@ -233,7 +233,7 @@ namespace engine {
                 line++;
                 c = 0;
             } else {
-                s->drawSprite((int)text.at(i), x + c * w, y + line * charinfo.h * (w / charinfo.w), 0.f, w, charinfo.h * (w / charinfo.w));
+                s->drawSprite((int)text.at(i), x + c * w, y + line * charinfo.h * ((float)w / charinfo.w), 0.f, w, charinfo.h * ((float)w / charinfo.w));
                 c++;
             }
         }
@@ -897,34 +897,46 @@ namespace engine {
             "Skip"
         };
 
-        std::ifstream file;
-        std::string settings;
         bool readstate = false;
+        const char *settings = nullptr;
 
-        try {
-            file.open(settingsPath);
-            std::stringstream filestream;
-            filestream << file.rdbuf();
-            file.close();
-            settings = filestream.str();
+        FILE *file;
+        file = fopen(settingsPath, "r");
+
+        if(file) {
+            fseek(file, 0L, SEEK_END);
+            long size = ftell(file);
+            fseek(file, 0L, SEEK_SET);
+            char *buffer = new char[size + 1];
+            fread(buffer, 1, size, file);
+            buffer[size] = '\0';
+            fclose(file);
+            settings = buffer;
             readstate = true;
-        } catch(std::ifstream::failure &ex) {
-            engine::log_debug("failed to open settings file, %s\n%s",  strerror(errno), ex.what());
-            file.close();
-            // return false;
+        } else {
+            log_debug("failed to load settings file %s\n", settingsPath);
             readstate = false;
+            fclose(file);
         }
+
         //  default settings
         //  really gotta put these somewhere else
         bool vsync = true;
 
 
         if(readstate) {
-            ini_t *ini = ini_load(settings.c_str(), NULL);
-            int vsync_i = ini_find_property(ini, INI_GLOBAL_SECTION, "vsync", 0);
-            std::string vsync_t = ini_property_value(ini, INI_GLOBAL_SECTION, vsync_i);
+            ini_t *ini = ini_load(settings, NULL);
+            int settings_i = ini_find_section(ini, "Settings", 8);
+            int vsync_i = ini_find_property(ini, settings_i, "vsync", 6);
+            if(vsync_i > -1) {
+                const char *test = ini_property_value(ini, settings_i, vsync_i);
+                std::string vsync_v = std::string(test);
+                vsync = vsync_v == "true";
+            }
             
-            vsync = vsync_t == "true";
+
+            ini_destroy(ini);
+            delete[] settings;
         }
 
         //  else use defaults
