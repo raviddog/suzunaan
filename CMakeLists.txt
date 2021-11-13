@@ -27,4 +27,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_property(TARGET thszn PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 endif()
 
-add_custom_command(TARGET thszn PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/res" $<TARGET_FILE_DIR:thszn>)
+# non-code resource files
+add_custom_command(TARGET thszn PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/res/common" $<TARGET_FILE_DIR:thszn>)
+if(WIN32)
+    add_custom_command(TARGET thszn PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/res/win32" $<TARGET_FILE_DIR:thszn>)
+endif()
+if(UNIX)
+    add_custom_command(TARGET thszn PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/res/gnu" $<TARGET_FILE_DIR:thszn>)
+endif()
