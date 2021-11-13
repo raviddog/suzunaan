@@ -926,17 +926,37 @@ namespace engine {
 
         if(readstate) {
             ini_t *ini = ini_load(settings, NULL);
+            delete[] settings;
+
             int settings_i = ini_find_section(ini, "Settings", 8);
             int vsync_i = ini_find_property(ini, settings_i, "vsync", 6);
             if(vsync_i > -1) {
-                const char *test = ini_property_value(ini, settings_i, vsync_i);
-                std::string vsync_v = std::string(test);
+                std::string vsync_v = std::string(ini_property_value(ini, settings_i, vsync_i));
                 vsync = vsync_v == "true";
             }
+
+            int keys_i = ini_find_section(ini, "Key", 3);
+            if(keys_i > -1) {
+                int keys_count = ini_property_count(ini, keys_i);
+                for(int i = 0; i < keys_count; i++) {
+                    std::string name = std::string(ini_property_name(ini, keys_i, i));
+                    for(int i = 0; i < controlSize; i++) {
+                        if(name == inputStrings[i]) {
+                            int val = strtol(ini_property_value(ini, keys_i, i), nullptr, 0);
+                            if(val > 0) {
+                                controls[i] = val;
+                                log_debug("remapped %s to %d\n", name.c_str(), val);
+                            }
+                            break;
+                        }
+                    } 
+
+                }
+            }
+
             
 
             ini_destroy(ini);
-            delete[] settings;
         }
 
         //  else use defaults
@@ -956,7 +976,6 @@ namespace engine {
 
     //  2d init test
     void init(const char *title, int flags, int width, int height, int dwidth, int dheight) {
-        debug_init();
 
         /*
             flags contains a list of init flags
