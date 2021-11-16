@@ -74,6 +74,8 @@ namespace engine {
     void registerDebugVariable(std::string, double*, bool);
     void registerDebugVariable(std::string, double*, bool, size_t);
 
+    void removeDebugWindow(std::string);
+
     // void InitialiseDrawmodes();
     void SetDrawmode(Drawmode dmode);
 

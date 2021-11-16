@@ -62,7 +62,7 @@ namespace engine {
     uint32_t controls[controlSize];
 
     //  framerate stuff
-    static bool _vsync, _fixeddrawsize = true;
+    static bool _vsync;
     uint32_t fps;
     double ticks, frameTimeTicks, avgTicksTotal;
     std::chrono::high_resolution_clock::time_point cur_time, next_time;
@@ -478,7 +478,7 @@ namespace engine {
         delete vao;
         delete verts;
         delete indices;
-        delete sprites;
+        delete[] sprites;
     }
 
     void SpriteSheet::load(const std::string &path, int numSprites) {
@@ -1195,20 +1195,99 @@ namespace engine {
     //  [FLIP]
 
     void flip() {       
+        #ifndef IMGUI_DISABLE
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
-        using namespace std::chrono;
+        for(size_t i = 0; i < imgui_windows->size(); i++) {
+            ImGui::Begin(imgui_windows->at(i).first.c_str());
+            for(size_t j = 0; j < imgui_windows->at(i).second->size(); j++) {
+                imgui_t temp = imgui_windows->at(i).second->at(j);
+                if(temp.type == 1) {
+                    //  float
+                    ImGui::Text("%s", temp.text.c_str());
+                    ImGui::SameLine();
+                    if(temp.edit) {
+                        ImGui::InputFloat("##value", (float*)temp.value, 1.0f);
+                    } else {
+                        ImGui::Text("%f", *(float*)temp.value);
+                    }
+                } else if(temp.type == 2) {
+                    //  int
+                    ImGui::Text("%s", temp.text.c_str());
+                    ImGui::SameLine();
+                    if(temp.edit) {
+                        ImGui::InputInt("##value", (int*)temp.value, 1.0f);
+                    } else {
+                        ImGui::Text("%d", *(int*)temp.value);
+                    }
+                } else if(temp.type == 3) {
+                    //  bool
+                    ImGui::Text("%s", temp.text.c_str());
+                    ImGui::SameLine();
+                    if(*(bool*)temp.value) {
+                        ImGui::Text(" True");
+                    } else {
+                        ImGui::Text(" False");
+                    }
+                } else if(temp.type == 4) {
+                    //  double
+                    ImGui::Text("%s", temp.text.c_str());
+                    ImGui::SameLine();
+                    if(temp.edit) {
+                        ImGui::InputDouble("##value", (double*)temp.value, 1.0f);
+                    } else {
+                        ImGui::Text("%f", *(double*)temp.value);
+                    }
+                }
+            }
+            ImGui::End();
+        }
+
         #ifdef _MSG_DEBUG_ENABLED_FPS
-        uint32_t slept;
+        static std::stringstream d;
+        double temp_ticks = glfwGetTime();
+        avgTicksTotal += temp_ticks - frameTimeTicks;
+        if(temp_ticks > ticks + 1.0) {
+            d.str("");
+            d << "Avg Frame time: " << avgTicksTotal / fps << "ms | ";
+            d << "FPS: " << fps << " | Avg FPS: " << 1. / (avgTicksTotal / fps) << " | Deltatime: " << deltatime;
+            // glfwSetWindowTitle(gl::window, d.str().c_str());
+            fps = 0u;
+            ticks = temp_ticks;
+            avgTicksTotal = 0.;
+        }
+        frameTimeTicks = temp_ticks;
+        ++fps;
+
+        ImGui::Begin("Performance");
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("%s", d.str().c_str());
+        ImGui::End();
         #endif
-        //  if vsync disabled, cap fps
-        int temp = 0;
+
+        ImGui::Render();
+        setViewport();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        #endif
+
+        //  flip buffers
+        glfwSwapBuffers(gl::window);
+
+        //  clear new buffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        //  update deltatime
+        deltatime = glfwGetTime() - last_frame;
+        last_frame = glfwGetTime();
+
+        //  if not vsync, wait for next frame
+        using namespace std::chrono;
         if(!_vsync) {
-            //  wait
-            #ifdef _MSG_DEBUG_ENABLED_FPS
-            high_resolution_clock::time_point sleep = high_resolution_clock::now();
-            #endif
             #ifdef __GNUG__
-            next_time += microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
+            next_time = high_resolution_clock::now() + microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
             timespec delayt, delayr;
             nanoseconds delaym = duration_cast<nanoseconds>(next_time - high_resolution_clock::now());
             delayt.tv_sec = 0;
@@ -1222,115 +1301,12 @@ namespace engine {
             std::this_thread::sleep_until(next_time);
             #endif
 
-            #ifdef _MSG_DEBUG_ENABLED_FPS
-            slept = duration_cast<milliseconds>(high_resolution_clock::now() - sleep).count();
-            #endif
-
             // auto wake_time = steady_clock::now();
-            while(high_resolution_clock::now() < next_time) {
-                //  spin
-                temp++;
-            }
+            // while(high_resolution_clock::now() < next_time) {
+            //     //  spin
+            //     temp++;
+            // }
         }
-
-        #ifdef _MSG_DEBUG_ENABLED_FPS
-        //  print debug fps data
-            
-        static std::stringstream d;
-        
-        #ifndef IMGUI_DISABLE
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        for(size_t i = 0; i < imgui_windows->size(); i++) {
-            ImGui::Begin(imgui_windows->at(i).first.c_str());
-            for(size_t j = 0; j < imgui_windows->at(i).second->size(); j++) {
-                imgui_t temp = imgui_windows->at(i).second->at(j);
-                if(temp.type == 1) {
-                    //  float
-                    ImGui::Text(temp.text.c_str());
-                    ImGui::SameLine();
-                    if(temp.edit) {
-                        ImGui::InputFloat("##value", (float*)temp.value, 1.0f);
-                    } else {
-                        ImGui::Text("%f", *(float*)temp.value);
-                    }
-                } else if(temp.type == 2) {
-                    //  int
-                    ImGui::Text(temp.text.c_str());
-                    ImGui::SameLine();
-                    if(temp.edit) {
-                        ImGui::InputInt("##value", (int*)temp.value, 1.0f);
-                    } else {
-                        ImGui::Text("%d", *(int*)temp.value);
-                    }
-                } else if(temp.type == 3) {
-                    //  bool
-                    ImGui::Text(temp.text.c_str());
-                    ImGui::SameLine();
-                    if(*(bool*)temp.value) {
-                        ImGui::Text(" True");
-                    } else {
-                        ImGui::Text(" False");
-                    }
-                } else if(temp.type == 4) {
-                    //  double
-                    ImGui::Text(temp.text.c_str());
-                    ImGui::SameLine();
-                    if(temp.edit) {
-                        ImGui::InputDouble("##value", (double*)temp.value, 1.0f);
-                    } else {
-                        ImGui::Text("%f", *(double*)temp.value);
-                    }
-                }
-            }
-            ImGui::End();
-        }
-
-        ImGui::Begin("Performance");
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::Text(d.str().c_str());
-        ImGui::End();
-
-        ImGui::Render();
-        setViewport();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        #endif
-
-        double temp_ticks = glfwGetTime();
-        avgTicksTotal += temp_ticks - frameTimeTicks;
-        if(temp_ticks > ticks + 1.0) {
-            d.str("");
-            d << "Avg Frame time: " << avgTicksTotal / fps << "ms | ";
-            d << "FPS: " << fps << " | Avg FPS: " << 1. / (avgTicksTotal / fps) << " | Deltatime: " << deltatime;
-            if(!_vsync) {
-                d << " | Slept: " << slept << "ms | ";
-                d << "Spun: " << temp;
-            }
-            // glfwSetWindowTitle(gl::window, d.str().c_str());
-            fps = 0u;
-            ticks = temp_ticks;
-            temp = 0u;
-            avgTicksTotal = 0.;
-        }
-        frameTimeTicks = temp_ticks;
-        ++fps;
-        #endif
-
-
-
-
-        //  update deltatime
-        deltatime = glfwGetTime() - last_frame;
-        last_frame = glfwGetTime();
-
-        //  flip buffers
-        glfwSwapBuffers(gl::window);
-
-        //  clear new buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    
     }
 
@@ -1522,6 +1498,23 @@ namespace engine {
         std::vector<imgui_t> *v = new std::vector<imgui_t>();
         std::pair<std::string, std::vector<imgui_t>*> t = std::make_pair(text, v);
         imgui_windows->push_back(t);
+        #endif
+    }
+
+    void removeDebugWindow(std::string text) {
+        #ifndef INGUI_DISABLE
+        if(imgui_windows) {
+            for(auto i = imgui_windows->begin(); i != imgui_windows->end(); i++) {
+                auto win = i->first;
+                if(text == win) {
+                    delete i->second;
+                    i = imgui_windows->erase(i);
+                    break;
+                }
+            }
+        }
+
+
         #endif
     }
 }

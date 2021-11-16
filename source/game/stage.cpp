@@ -20,6 +20,7 @@ std::vector<Game::enemy_s*> *Game::enemy_s::enemy_draw;
 
 namespace Game {
     const int BULLET_MAX = 120000;
+    int bullet_count = 0;
     float bullet_hitbox_radius_temp = 4.27f;
     float cameraSpeed = 0.05f;
 
@@ -237,7 +238,7 @@ void Stage::logic() {
     }
 
     //  update all bullets + prepare draw verts
-    int count = 0;
+    bullet_count = 0;
     std::vector<int>::const_iterator iteratorB = bullet_draw_order->begin();
     while(iteratorB != bullet_draw_order->end()) {
         bullets[*iteratorB].update();
@@ -260,7 +261,7 @@ void Stage::logic() {
             freebullets->push_back(*iteratorB);
             iteratorB = bullet_draw_order->erase(iteratorB);
         } else {
-            count += 1;
+            bullet_count += 1;
             if(bullets[*iteratorB].frames < 0) {
                 int num = (bullets[*iteratorB].type % 16) / 2;
                 float sizemod = (7.5f - bullets[*iteratorB].frames) / 7.5f;
@@ -460,6 +461,10 @@ Stage::Stage() {
     engine::shader3d->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     engine::shader3d->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
     engine::shader3d->setFloat("material.shininess", 32.f);
+
+    engine::registerDebugWindow("stats");
+    engine::registerDebugVariable("Bullet count: ", &bullet_count, false);
+    
 }
 
 Stage::~Stage() {
@@ -488,5 +493,7 @@ Stage::~Stage() {
     delete fbuffer;
     delete camera;
     delete modelI;
+
+    engine::removeDebugWindow("stats");
 
 }
