@@ -5,7 +5,7 @@ teststage.txt
 
 #enemy
 1:testenemy.txt
-
+2:spawner.txt
 
 #bullet
 1:b.txt

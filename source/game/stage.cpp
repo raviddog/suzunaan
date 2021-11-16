@@ -305,7 +305,7 @@ void Stage::draw() {
     
     destrect->bind();
     fbuffer->tex->bind();
-    destrect->draw(2);
+    // destrect->draw(2);
 
     // engine::setViewport();    
     engine::SetDrawmode(engine::DrawmodeSprite);

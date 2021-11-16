@@ -38,7 +38,9 @@ namespace Game{
     //  #FIX 51
     //  create a common functions engine module and put these in it later
     template <class T>
-    T between(T min, T max);
+    T between(T min, T max) {
+        return (max - min) * (float)rand() / (float)RAND_MAX + min;
+    }
     float toRadians(float deg);
     float toDegrees(float rad);
 
@@ -294,6 +296,21 @@ namespace Game{
                         case 14:
                             instr_moveToParent();
                             break;
+                        case 15:
+                        {
+                            std::pair<float, float> val = script_getFloatFloat(args.type_5);
+                            instr_random_angle(val.first, val.second);
+                            break;
+                        }
+                        case 16:
+                        {
+                            std::pair<float, float> val = script_getFloatFloat(args.type_5);
+                            instr_random_angle_change(val.first, val.second);
+                            break;
+                        }
+                        case 17:
+                            instr_bullet_offset(args.type_2);
+                            break;
                         default:
                             break;
                     }
@@ -470,6 +487,39 @@ namespace Game{
             enemy_s *parent = enemy_draw->at(i);
             this->x_pos = parent->x_pos;
             this->y_pos = parent->y_pos;
+        }
+    }
+
+    void enemy_s::instr_random_angle_change(float min, float max) {
+        angle += between<float>(min, max);
+    }
+
+    void enemy_s::instr_random_angle(float min, float max) {
+        angle = between<float>(min, max);
+    }
+
+    void enemy_s::instr_bullet_offset(int spawnID) {
+        if(instructions->bullet_spawns->count(spawnID) > 0) {
+            bullet_spawn bs = instructions->bullet_spawns->at(spawnID);
+            bullet_s *bullet = getBullet();
+            if(bullet) {
+                //  initialise bullet with spawn values
+                bullet->type = bs.type;
+                bullet->x_pos = x_pos + bs.x_offset;
+                bullet->y_pos = y_pos + bs.y_offset;
+                bullet->speed = this->speed + bs.speed;
+                bullet->angle = this->angle + bs.angle;
+                bullet->accel = bs.accel;
+                bullet->angle_change = bs.angle_change;
+                bullet->instructions = nullptr;
+                bullet->owner = id;
+
+                if(bs.scriptID > 0) {
+                    if(bullet_scripts->count(bs.scriptID) > 0) {
+                        bullet->instructions = (bullet_scripts->at(bs.scriptID)).get();
+                    }
+                }
+            }
         }
     }
 }

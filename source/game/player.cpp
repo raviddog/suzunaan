@@ -34,14 +34,14 @@ namespace Game {
         //  0000 0000
 
         bool keys[8] = {
-            keyState & 0x01,
-            keyState & 0x02,
-            keyState & 0x04,
-            keyState & 0x08,
-            keyState & 0x10,
-            keyState & 0x20,
-            keyState & 0x40,
-            keyState & 0x80
+            static_cast<bool>(keyState & 0x01),
+            static_cast<bool>(keyState & 0x02),
+            static_cast<bool>(keyState & 0x04),
+            static_cast<bool>(keyState & 0x08),
+            static_cast<bool>(keyState & 0x10),
+            static_cast<bool>(keyState & 0x20),
+            static_cast<bool>(keyState & 0x40),
+            static_cast<bool>(keyState & 0x80)
         };
 
         enum key {

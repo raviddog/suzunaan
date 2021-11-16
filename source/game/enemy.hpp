@@ -40,6 +40,9 @@ namespace Game {
             void instr_angle_change(float);
             void instr_bullet_ring(int, int);
             void instr_moveToParent();
+            void instr_random_angle_change(float, float);
+            void instr_random_angle(float, float);
+            void instr_bullet_offset(int);
         public:
             enemy_s();
             enemy_s(float x_pos, float y_pos, int type, int hp);

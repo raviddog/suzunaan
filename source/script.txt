@@ -81,6 +81,10 @@ bullet(uint type, uint scriptID, float speed, float angle)
 fire bullet from location at specified speed/angle
 if scriptID = 0, no script is attached
 
+bullet_offset(uint type, uint scriptID, float speed, float angle)
+fire bullet from location at offset speed/angle from current uint
+if scriptID = 0, no script is attached
+
 bullet_ring(uint type, uint scriptID, float speed, uint num)
 fire ring of bullets from location at specified speed
 initial angle is direction enemy is facing

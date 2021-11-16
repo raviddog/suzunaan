@@ -74,6 +74,9 @@ namespace Game {
             enemy_instr->insert({"angle_change", std::make_pair(12, 1)});
             enemy_instr->insert({"bullet_ring", std::make_pair(13, 101)});
             enemy_instr->insert({"moveToParent", std::make_pair(14, 0)});
+            enemy_instr->insert({"random_angle", std::make_pair(15, 5)});
+            enemy_instr->insert({"random_angle_change", std::make_pair(16, 5)});
+            enemy_instr->insert({"bullet_offset", std::make_pair(17, 100)});
         }
 
         if(stage_instr == nullptr) {

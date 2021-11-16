@@ -1,0 +1,3 @@
+type: enemy
+
+1:intervalStart(2, 0): random_angle(85, 95) bullet_offset(68, 0, 2, 3) bullet_offset(68, 0, 2, 6) bullet_offset(68, 0, 2, 9) bullet_offset(68, 0, 2, 12) bullet_offset(68, 0, 2, 5) bullet_offset(68, 0, 2, 18) bullet_offset(68, 0, 2, 21) bullet_offset(68, 0, 2, 24) bullet_offset(68, 0, 2, 0) bullet_offset(68, 0, 2, -3) bullet_offset(68, 0, 2, -6) bullet_offset(68, 0, 2, -9) bullet_offset(68, 0, 2, -12) bullet_offset(68, 0, 2, -5) bullet_offset(68, 0, 2, -18) bullet_offset(68, 0, 2, -21);
