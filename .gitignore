@@ -5,6 +5,9 @@
 
 # default c++ gitignore file
 
+# clangd files
+/.cache
+
 # Prerequisites
 *.d
 

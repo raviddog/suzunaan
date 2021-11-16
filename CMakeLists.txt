@@ -6,6 +6,10 @@ set(OUT_DIR ${CMAKE_BINARY_DIR}/bin)
 set(IN_RES_DIR ./res)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./bin)
+if(UNIX)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+ENDIF()
 
 add_subdirectory(engine)
 add_subdirectory(source/game)
