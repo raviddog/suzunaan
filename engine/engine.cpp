@@ -3,6 +3,7 @@
 #include "debug.hpp"
 
 #include <chrono>
+#include <cstring>
 #include <thread>
 #include <string>
 #include <fstream>
@@ -80,7 +81,22 @@ namespace engine {
     };
     std::vector<std::pair<std::string, std::vector<imgui_t>*>> *imgui_windows = nullptr;
     
+    struct joystick_t {
+        bool enabled;
+        bool lstick;
+        bool rstick;
+        bool dpad;
+        enum {
+            ENGINE_JOYSTICK_DEADZONE_CIRCLE,
+            ENGINE_JOYSTICK_DEADZONE_SQUARE,
+            ENGINE_JOYSTICK_DEADZONE_DIAMOND
+        } lstick_deadzone_type, rstick_deadzone_type;
+        float lstick_size, rstick_size;
 
+        uint32_t controls[controlSize];
+    };
+
+    std::vector<joystick_t> *joysticks;
 
     gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert, *shaderUI, *pshader, *shader3d;
 
@@ -883,18 +899,18 @@ namespace engine {
         controls[inputRestart] = kb::R;
         controls[inputSkip] = kb::LControl;
 
-        std::string inputStrings[] = {
-            "Up",
-            "Down",
-            "Left",
-            "Right",
-            "Fire",
-            "Focus",
-            "Bomb",
-            "Pause",
-            "Quit",
-            "Restart",
-            "Skip"
+        const char *inputStrings[] = {
+            "up",
+            "down",
+            "left",
+            "right",
+            "fire",
+            "focus",
+            "bomb",
+            "pause",
+            "quit",
+            "restart",
+            "skip"
         };
 
         bool readstate = false;
@@ -922,6 +938,7 @@ namespace engine {
         //  default settings
         //  really gotta put these somewhere else
         bool vsync = true;
+        int width_win = 640, height_win = 480;
 
 
         if(readstate) {
@@ -929,23 +946,31 @@ namespace engine {
             delete[] settings;
 
             int settings_i = ini_find_section(ini, "Settings", 8);
-            int vsync_i = ini_find_property(ini, settings_i, "vsync", 6);
+            int vsync_i = ini_find_property(ini, settings_i, "vsync", 5);
             if(vsync_i > -1) {
-                std::string vsync_v = std::string(ini_property_value(ini, settings_i, vsync_i));
-                vsync = vsync_v == "true";
+                vsync = std::strcmp(ini_property_value(ini, settings_i, vsync_i), "true") == 0 ? "true" : "false";
             }
+            int width_win_i = ini_find_property(ini, settings_i, "width", 5);
+            if(width_win_i > -1) {
+                width_win = std::strtol(ini_property_value(ini, settings_i, width_win_i), nullptr, 0);
+            }
+            int height_win_i = ini_find_property(ini, settings_i, "height", 6);
+            if(height_win_i > -1) {
+                height_win = std::strtol(ini_property_value(ini, settings_i, height_win_i), nullptr, 0);
+            }
+
 
             int keys_i = ini_find_section(ini, "Key", 3);
             if(keys_i > -1) {
                 int keys_count = ini_property_count(ini, keys_i);
                 for(int i = 0; i < keys_count; i++) {
-                    std::string name = std::string(ini_property_name(ini, keys_i, i));
+                    const char *name = ini_property_name(ini, keys_i, i);
                     for(int i = 0; i < controlSize; i++) {
-                        if(name == inputStrings[i]) {
+                        if(std::strcmp(name, inputStrings[i]) == 0) {
                             int val = strtol(ini_property_value(ini, keys_i, i), nullptr, 0);
                             if(val > 0) {
                                 controls[i] = val;
-                                log_debug("remapped %s to %d\n", name.c_str(), val);
+                                log_debug("remapped %s to %d\n", name, val);
                             }
                             break;
                         }
@@ -966,7 +991,7 @@ namespace engine {
         }
 
 
-        init(title, flags, width, height);
+        init(title, flags, width_win, height_win, width, height);
         return true;
     }
 
