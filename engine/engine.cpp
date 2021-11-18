@@ -81,22 +81,23 @@ namespace engine {
     };
     std::vector<std::pair<std::string, std::vector<imgui_t>*>> *imgui_windows = nullptr;
     
+    //  defaults are for shmup, change later
     struct joystick_t {
-        bool enabled;
-        bool lstick;
-        bool rstick;
-        bool dpad;
+        bool enabled = false;
+        bool lstick = true;
+        bool rstick = false;
+        bool dpad = true;
         enum {
             ENGINE_JOYSTICK_DEADZONE_CIRCLE,
             ENGINE_JOYSTICK_DEADZONE_SQUARE,
             ENGINE_JOYSTICK_DEADZONE_DIAMOND
-        } lstick_deadzone_type, rstick_deadzone_type;
-        float lstick_size, rstick_size;
+        } lstick_deadzone_type = ENGINE_JOYSTICK_DEADZONE_CIRCLE, rstick_deadzone_type = ENGINE_JOYSTICK_DEADZONE_CIRCLE;
+        float lstick_size = 0.3f, rstick_size = 0.3f;
 
         uint32_t controls[controlSize];
-    };
+    } joystick_settings;
 
-    std::vector<joystick_t> *joysticks;
+    // std::vector<joystick_t> *joysticks = nullptr;
 
     gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert, *shaderUI, *pshader, *shader3d;
 
@@ -945,43 +946,117 @@ namespace engine {
             ini_t *ini = ini_load(settings, NULL);
             delete[] settings;
 
-            int settings_i = ini_find_section(ini, "Settings", 8);
-            int vsync_i = ini_find_property(ini, settings_i, "vsync", 5);
-            if(vsync_i > -1) {
-                vsync = std::strcmp(ini_property_value(ini, settings_i, vsync_i), "true") == 0 ? "true" : "false";
-            }
-            int width_win_i = ini_find_property(ini, settings_i, "width", 5);
-            if(width_win_i > -1) {
-                width_win = std::strtol(ini_property_value(ini, settings_i, width_win_i), nullptr, 0);
-            }
-            int height_win_i = ini_find_property(ini, settings_i, "height", 6);
-            if(height_win_i > -1) {
-                height_win = std::strtol(ini_property_value(ini, settings_i, height_win_i), nullptr, 0);
-            }
-
-
-            int keys_i = ini_find_section(ini, "Key", 3);
-            if(keys_i > -1) {
-                int keys_count = ini_property_count(ini, keys_i);
-                for(int i = 0; i < keys_count; i++) {
-                    const char *name = ini_property_name(ini, keys_i, i);
-                    for(int i = 0; i < controlSize; i++) {
-                        if(std::strcmp(name, inputStrings[i]) == 0) {
-                            int val = strtol(ini_property_value(ini, keys_i, i), nullptr, 0);
-                            if(val > 0) {
-                                controls[i] = val;
-                                log_debug("remapped %s to %d\n", name, val);
-                            }
-                            break;
-                        }
-                    } 
-
+            if(ini) {
+                int settings_i = ini_find_section(ini, "Settings", 8);
+                int vsync_i = ini_find_property(ini, settings_i, "vsync", 5);
+                if(vsync_i > -1) {
+                    vsync = std::strcmp(ini_property_value(ini, settings_i, vsync_i), "true") == 0 ? "true" : "false";
                 }
+                int width_win_i = ini_find_property(ini, settings_i, "width", 5);
+                if(width_win_i > -1) {
+                    width_win = std::strtol(ini_property_value(ini, settings_i, width_win_i), nullptr, 0);
+                }
+                int height_win_i = ini_find_property(ini, settings_i, "height", 6);
+                if(height_win_i > -1) {
+                    height_win = std::strtol(ini_property_value(ini, settings_i, height_win_i), nullptr, 0);
+                }
+
+
+                int keys_i = ini_find_section(ini, "Key", 3);
+                if(keys_i > -1) {
+                    int keys_count = ini_property_count(ini, keys_i);
+                    for(int i = 0; i < keys_count; i++) {
+                        const char *name = ini_property_name(ini, keys_i, i);
+                        for(int i = 0; i < controlSize; i++) {
+                            if(std::strcmp(name, inputStrings[i]) == 0) {
+                                int val = strtol(ini_property_value(ini, keys_i, i), nullptr, 0);
+                                if(val > 0) {
+                                    controls[i] = val;
+                                    log_debug("remapped %s to %d\n", name, val);
+                                }
+                                break;
+                            }
+                        } 
+
+                    }
+                }
+
+                int joystick_i = ini_find_section(ini, "Joystick", 8);
+                if(joystick_i > -1) {
+                    int enabled_i = ini_find_property(ini, joystick_i, "enabled", 7);
+                    if(enabled_i > -1) {
+                        joystick_settings.enabled = std::strcmp(ini_property_value(ini, joystick_i, enabled_i), "true") == 0;
+                    }
+
+                    int lstick_i = ini_find_property(ini, joystick_i, "lstick", 6);
+                    if(lstick_i > -1) {
+                        joystick_settings.lstick = std::strcmp(ini_property_value(ini, joystick_i, lstick_i), "true") == 0;
+                    }
+
+                    int rstick_i = ini_find_property(ini, joystick_i, "rstick", 6);
+                    if(rstick_i > -1) {
+                        joystick_settings.rstick = std::strcmp(ini_property_value(ini, joystick_i, rstick_i), "true") == 0;
+                    }
+
+                    int dpad_i = ini_find_property(ini, joystick_i, "dpad", 4);
+                    if(dpad_i > -1) {
+                        joystick_settings.dpad = std::strcmp(ini_property_value(ini, joystick_i, dpad_i), "true") == 0;
+                    }
+
+                    int lstick_deadzone_i = ini_find_property(ini, joystick_i, "lstick_deadzone", 15);
+                    if(lstick_deadzone_i > -1) {
+                        const char *lstick_deadzone_v = ini_property_value(ini, joystick_i, lstick_deadzone_i);
+                        if(std::strcmp(lstick_deadzone_v, "circle") == 0) {
+                            joystick_settings.lstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_CIRCLE;
+                        } else if(std::strcmp(lstick_deadzone_v, "square") == 0) {
+                            joystick_settings.lstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_SQUARE;
+                        } else if(std::strcmp(lstick_deadzone_v, "diamond") == 0) {
+                            joystick_settings.lstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_DIAMOND;
+                        }
+                    }
+
+                    int rstick_deadzone_i = ini_find_property(ini, joystick_i, "rstick_deadzone", 15);
+                    if(rstick_deadzone_i > -1) {
+                        const char *rstick_deadzone_v = ini_property_value(ini, joystick_i, rstick_deadzone_i);
+                        if(std::strcmp(rstick_deadzone_v, "circle") == 0) {
+                            joystick_settings.rstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_CIRCLE;
+                        } else if(std::strcmp(rstick_deadzone_v, "square") == 0) {
+                            joystick_settings.rstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_SQUARE;
+                        } else if(std::strcmp(rstick_deadzone_v, "diamond") == 0) {
+                            joystick_settings.rstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_DIAMOND;
+                        }
+                    }
+
+                    int lstick_size_i = ini_find_property(ini, joystick_i, "lstick_size", 11);
+                    if(lstick_size_i > -1) {
+                        joystick_settings.lstick_size = std::strtof(ini_property_value(ini, joystick_i, lstick_size_i), nullptr);
+                    }
+
+                    int rstick_size_i = ini_find_property(ini, joystick_i, "rstick_size", 11);
+                    if(rstick_size_i > -1) {
+                        joystick_settings.rstick_size = std::strtof(ini_property_value(ini, joystick_i, rstick_size_i), nullptr);
+                    }
+
+                    int joystick_keys_count = ini_property_count(ini, joystick_i);
+                    for(int i = 0; i < joystick_keys_count; i++) {
+                        const char *name = ini_property_name(ini, joystick_i, i);
+                        for(int i = 0; i < controlSize; i++) {
+                            if(std::strcmp(name, inputStrings[i]) == 0) {
+                                int val = strtol(ini_property_value(ini, joystick_i, i), nullptr, 0);
+                                if(val > 0) {
+                                    joystick_settings.controls[i] = val;
+                                    log_debug("remapped %s to %d\n", name, val);
+                                }
+                                break;
+                            }
+                        } 
+                    }
+
+                    // joysticks = new std::vector<joystick_t>();
+                }
+
+                ini_destroy(ini);
             }
-
-            
-
-            ini_destroy(ini);
         }
 
         //  else use defaults
@@ -1374,11 +1449,16 @@ namespace engine {
     }
 
     bool checkKey(int key) {
-        return keyState[controls[key]] == GLFW_PRESS || keyState[controls[key]] == GLFW_REPEAT;
+        if(keyState[controls[key]] == GLFW_PRESS) return true;
+        if(keyState[controls[key]] == GLFW_REPEAT) return true;
+
+
+        return false;
     }
 
     bool checkKeyPressed(int key) {
-        return keyPressed[controls[key]];
+        if(keyPressed[controls[key]]) return true;
+        return false;
     }
 
     void mouseCapture() {
