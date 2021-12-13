@@ -2,6 +2,7 @@
 
 #include "debug.hpp"
 
+#include <GLFW/glfw3.h>
 #include <chrono>
 #include <cstring>
 #include <thread>
@@ -96,6 +97,7 @@ namespace engine {
 
         uint32_t controls[controlSize];
     } joystick_settings;
+    std::vector<GLFWgamepadstate*> *gamepads;
 
     // std::vector<joystick_t> *joysticks = nullptr;
 
@@ -972,7 +974,7 @@ namespace engine {
                                 int val = strtol(ini_property_value(ini, keys_i, i), nullptr, 0);
                                 if(val > 0) {
                                     controls[i] = val;
-                                    log_debug("remapped %s to %d\n", name, val);
+                                    log_debug("mapped %s to %d\n", name, val);
                                 }
                                 break;
                             }
@@ -1040,12 +1042,12 @@ namespace engine {
                     int joystick_keys_count = ini_property_count(ini, joystick_i);
                     for(int i = 0; i < joystick_keys_count; i++) {
                         const char *name = ini_property_name(ini, joystick_i, i);
-                        for(int i = 0; i < controlSize; i++) {
-                            if(std::strcmp(name, inputStrings[i]) == 0) {
+                        for(int j = 0; j < controlSize; j++) {
+                            if(std::strcmp(name, inputStrings[j]) == 0) {
                                 int val = strtol(ini_property_value(ini, joystick_i, i), nullptr, 0);
                                 if(val > 0) {
-                                    joystick_settings.controls[i] = val;
-                                    log_debug("remapped %s to %d\n", name, val);
+                                    joystick_settings.controls[j] = val;
+                                    log_debug("mapped joystick %s to %d\n", name, val);
                                 }
                                 break;
                             }
@@ -1209,6 +1211,22 @@ namespace engine {
 
         imgui_windows = new std::vector<std::pair<std::string, std::vector<imgui_t>*>>();
         #endif
+
+        //  gamepads
+        gamepads = new std::vector<GLFWgamepadstate*>();
+        for(auto i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
+            if(glfwJoystickPresent(i)) {
+                if(glfwJoystickIsGamepad(i)) {
+                    gamepads->push_back(new GLFWgamepadstate);
+                    log_debug("Gamepad %d detected\n", i);
+                } else {
+                    gamepads->push_back(nullptr);
+                    log_debug("Gamepad %d detected but no mapping available, Name: %s | GUID: %s\n", i, glfwGetJoystickName(i), glfwGetJoystickGUID(i));
+                }
+            } else {
+                gamepads->push_back(nullptr);
+            }
+        }
     }
 
     void windowMaximiseCallback(GLFWwindow *window, int m) {

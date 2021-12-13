@@ -1,6 +1,7 @@
 #include "engine_gl.hpp"
 
 #include "debug.hpp"
+#include <GLFW/glfw3.h>
 
 namespace engine {
     double mouseX, mouseY, mouseXold = 0.0, mouseYold = 0.0, mouseMoveX, mouseMoveY;
@@ -10,6 +11,8 @@ namespace engine {
     int keyStateTest[kb::KeycodesLength];
 
     void *currentShader = nullptr;
+
+    
     
     void inputs() {        
         if(glfwWindowShouldClose(gl::window)) {
@@ -30,6 +33,14 @@ namespace engine {
                 keyPressed[i] = false;
             }
             keyStateTest[i] = keyState[i];
+        }
+
+        if(gamepads) {
+            for(auto i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
+                if(gamepads->at(i) != nullptr) {
+                    glfwGetGamepadState(i, gamepads->at(i));
+                }
+            }
         }
     }
 
