@@ -107,7 +107,6 @@ namespace engine {
 
     void windowMaximiseCallback(GLFWwindow*, int);
     void windowResizeCallback(GLFWwindow*, int, int);
-    void errorCallback(int, const char*);
 
     int gcd(int a, int b) {
         return b ? gcd(b, a % b) : a;
@@ -1138,10 +1137,8 @@ namespace engine {
 
         glfwMakeContextCurrent(gl::window);
         gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        glfwSetKeyCallback(gl::window, key_callback);
         glfwSetWindowSizeCallback(gl::window, windowResizeCallback);
         glfwSetWindowMaximizeCallback(gl::window, windowMaximiseCallback);
-        glfwSetErrorCallback(errorCallback);
 
         aspect_w = drawWidth;
         aspect_h = drawHeight;
@@ -1227,6 +1224,9 @@ namespace engine {
                 gamepads->push_back(nullptr);
             }
         }
+
+        //  clean up later
+        gl::init();
     }
 
     void windowMaximiseCallback(GLFWwindow *window, int m) {
@@ -1490,9 +1490,7 @@ namespace engine {
         glfwSetInputMode(gl::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
-    void errorCallback(int error, const char *description) {
-        log_debug("Error %d: %s\n", error, description);
-    }
+    
 
     //  [IMGUI]
 

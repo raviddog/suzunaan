@@ -58,6 +58,7 @@ namespace engine {
     namespace gl {
         extern GLFWwindow *window;
         // extern SDL_GLContext maincontext;
+        void init();
 
         struct modelVertex {
             glm::vec3 Position;
