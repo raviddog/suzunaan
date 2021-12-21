@@ -8,8 +8,10 @@
 #include <thread>
 #include <string>
 #include <fstream>
+#include <map>
 #include <unordered_map>
 
+#include "engine_gl.hpp"
 #include "libs/imgui/imgui.h"
 #include "libs/imgui/imgui_impl_glfw.h"
 #include "libs/imgui/imgui_impl_opengl3.h"
@@ -60,8 +62,39 @@ namespace engine {
     int aspect_w, aspect_h, winflags;
         
     double deltatime, last_frame;
-    
-    uint32_t controls[controlSize];
+
+    struct controlState {
+        float value;
+        bool state;
+        bool pressed;
+    } controls[controlSize];
+
+    struct controlMapping {
+        controlMapping(int j, bool a, int k) : joystick(j), axis(a), key(k) {}
+        int joystick;
+        bool axis;
+        int key;
+    };
+
+    std::multimap<int, controlMapping> *controlMaps;
+
+    //  defaults are for shmup, change later
+    struct joystick_t {
+        bool enabled = false;
+        bool lstick = true;
+        bool rstick = false;
+        bool dpad = true;
+        enum {
+            ENGINE_JOYSTICK_DEADZONE_CIRCLE,
+            ENGINE_JOYSTICK_DEADZONE_SQUARE,
+            ENGINE_JOYSTICK_DEADZONE_DIAMOND
+        } lstick_deadzone_type = ENGINE_JOYSTICK_DEADZONE_CIRCLE, rstick_deadzone_type = ENGINE_JOYSTICK_DEADZONE_CIRCLE;
+        float lstick_size = 0.3f, rstick_size = 0.3f;
+    } joystick_settings;
+
+    std::vector<GLFWgamepadstate*> *gamepads;
+
+    // std::vector<joystick_t> *joysticks = nullptr;
 
     //  framerate stuff
     static bool _vsync;
@@ -82,24 +115,6 @@ namespace engine {
     };
     std::vector<std::pair<std::string, std::vector<imgui_t>*>> *imgui_windows = nullptr;
     
-    //  defaults are for shmup, change later
-    struct joystick_t {
-        bool enabled = false;
-        bool lstick = true;
-        bool rstick = false;
-        bool dpad = true;
-        enum {
-            ENGINE_JOYSTICK_DEADZONE_CIRCLE,
-            ENGINE_JOYSTICK_DEADZONE_SQUARE,
-            ENGINE_JOYSTICK_DEADZONE_DIAMOND
-        } lstick_deadzone_type = ENGINE_JOYSTICK_DEADZONE_CIRCLE, rstick_deadzone_type = ENGINE_JOYSTICK_DEADZONE_CIRCLE;
-        float lstick_size = 0.3f, rstick_size = 0.3f;
-
-        uint32_t controls[controlSize];
-    } joystick_settings;
-    std::vector<GLFWgamepadstate*> *gamepads;
-
-    // std::vector<joystick_t> *joysticks = nullptr;
 
     gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert, *shaderUI, *pshader, *shader3d;
 
@@ -888,18 +903,20 @@ namespace engine {
     bool init(const char *title, int flags, int width, int height, const char *settingsPath) {
         debug_init();
 
+        //  controls
+        controlMaps = new std::multimap<int, controlMapping>();
         //  default controls if there's none in config
-        controls[inputUp] = kb::Up;
-        controls[inputDown] = kb::Down;
-        controls[inputLeft] = kb::Left;
-        controls[inputRight] = kb::Right;
-        controls[inputFire] = kb::Z;
-        controls[inputFocus] = kb::LShift;
-        controls[inputBomb] = kb::X;
-        controls[inputPause] = kb::Escape;
-        controls[inputQuit] = kb::Q;
-        controls[inputRestart] = kb::R;
-        controls[inputSkip] = kb::LControl;
+        controlMaps->insert(std::make_pair(inputUp, controlMapping(-1, false, kb::Up)));
+        controlMaps->insert(std::make_pair(inputDown, controlMapping(-1, false, kb::Down)));
+        controlMaps->insert(std::make_pair(inputLeft, controlMapping(-1, false, kb::Left)));
+        controlMaps->insert(std::make_pair(inputRight, controlMapping(-1, false, kb::Right)));
+        controlMaps->insert(std::make_pair(inputFire, controlMapping(-1, false, kb::Z)));
+        controlMaps->insert(std::make_pair(inputFocus, controlMapping(-1, false, kb::LShift)));
+        controlMaps->insert(std::make_pair(inputBomb, controlMapping(-1, false, kb::X)));
+        controlMaps->insert(std::make_pair(inputPause, controlMapping(-1, false, kb::Escape)));
+        controlMaps->insert(std::make_pair(inputQuit, controlMapping(-1, false, kb::Q)));
+        controlMaps->insert(std::make_pair(inputRestart, controlMapping(-1, false, kb::R)));
+        controlMaps->insert(std::make_pair(inputSkip, controlMapping(-1, false, kb::LControl)));
 
         const char *inputStrings[] = {
             "up",
@@ -932,7 +949,7 @@ namespace engine {
             settings = buffer;
             readstate = true;
         } else {
-            log_debug("failed to load settings file %s\n", settingsPath);
+            log_debug("failed to open settings file %s\n", settingsPath);
             readstate = false;
             fclose(file);
         }
@@ -968,11 +985,11 @@ namespace engine {
                     int keys_count = ini_property_count(ini, keys_i);
                     for(int i = 0; i < keys_count; i++) {
                         const char *name = ini_property_name(ini, keys_i, i);
-                        for(int i = 0; i < controlSize; i++) {
-                            if(std::strcmp(name, inputStrings[i]) == 0) {
+                        for(int j = 0; j < controlSize; j++) {
+                            if(std::strcmp(name, inputStrings[j]) == 0) {
                                 int val = strtol(ini_property_value(ini, keys_i, i), nullptr, 0);
                                 if(val > 0) {
-                                    controls[i] = val;
+                                    controlMaps->insert(std::make_pair(j, controlMapping(-1, false, val)));
                                     log_debug("mapped %s to %d\n", name, val);
                                 }
                                 break;
@@ -1045,7 +1062,7 @@ namespace engine {
                             if(std::strcmp(name, inputStrings[j]) == 0) {
                                 int val = strtol(ini_property_value(ini, joystick_i, i), nullptr, 0);
                                 if(val > 0) {
-                                    joystick_settings.controls[j] = val;
+                                    controlMaps->insert(std::make_pair(j, controlMapping(0, false, val)));
                                     log_debug("mapped joystick %s to %d\n", name, val);
                                 }
                                 break;
@@ -1227,6 +1244,25 @@ namespace engine {
 
         //  clean up later
         gl::init();
+    }
+
+    void inputs() {
+        GLinputs();
+        //  calculate all thingies
+        //  TODO add deadzone calculations here
+        for(int i = 0; i < controlSize; i++) {
+            for(auto range = controlMaps->equal_range(i); range.first != range.second; range.first++) {
+                if(range.first->second.joystick > -1) {
+
+                } else {
+                    controls[i].state = keyState[range.first->second.key];
+                    controls[i].pressed = keyPressed[range.first->second.key];
+                    if(controls[i].state) {
+                        controls[i].value = 1.f;
+                    }
+                }
+            }
+        }
     }
 
     void windowMaximiseCallback(GLFWwindow *window, int m) {
@@ -1467,16 +1503,21 @@ namespace engine {
     }
 
     bool checkKey(int key) {
-        if(keyState[controls[key]] == GLFW_PRESS) return true;
-        if(keyState[controls[key]] == GLFW_REPEAT) return true;
+        if(controls[key].state) return true;
 
+        
 
         return false;
     }
 
     bool checkKeyPressed(int key) {
-        if(keyPressed[controls[key]]) return true;
+        if(controls[key].pressed) return true;
+        
         return false;
+    }
+
+    float checkKeyAxis(int key) {
+
     }
 
     void mouseCapture() {

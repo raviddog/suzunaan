@@ -47,6 +47,7 @@ namespace engine {
 
     bool checkKey(int key);
     bool checkKeyPressed(int key);
+    float checkKeyAxis(int key);
 
     bool init(const char *title, int flags, int width, int height, const char *settingsPath);
     void init(const char *title, int flags, int width, int height);

@@ -53,7 +53,7 @@ namespace engine {
     extern bool keyPressed[kb::KeycodesLength];
     extern void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
     extern std::vector<GLFWgamepadstate*> *gamepads;
-    void inputs();
+    void GLinputs();
 
     namespace gl {
         extern GLFWwindow *window;
