@@ -10,6 +10,7 @@
 #include <fstream>
 #include <map>
 #include <unordered_map>
+#include <utility>
 
 #include "engine_gl.hpp"
 #include "libs/imgui/imgui.h"
@@ -71,9 +72,11 @@ namespace engine {
 
     struct controlMapping {
         controlMapping(int j, bool a, int k) : joystick(j), axis(a), key(k) {}
+        controlMapping(int j, bool a, int k, bool ap) : joystick(j), axis(a), key(k), axis_positive(ap) {}
         int joystick;
         bool axis;
         int key;
+        bool axis_positive;
     };
 
     std::multimap<int, controlMapping> *controlMaps;
@@ -906,17 +909,18 @@ namespace engine {
         //  controls
         controlMaps = new std::multimap<int, controlMapping>();
         //  default controls if there's none in config
-        controlMaps->insert(std::make_pair(inputUp, controlMapping(-1, false, kb::Up)));
-        controlMaps->insert(std::make_pair(inputDown, controlMapping(-1, false, kb::Down)));
-        controlMaps->insert(std::make_pair(inputLeft, controlMapping(-1, false, kb::Left)));
-        controlMaps->insert(std::make_pair(inputRight, controlMapping(-1, false, kb::Right)));
-        controlMaps->insert(std::make_pair(inputFire, controlMapping(-1, false, kb::Z)));
-        controlMaps->insert(std::make_pair(inputFocus, controlMapping(-1, false, kb::LShift)));
-        controlMaps->insert(std::make_pair(inputBomb, controlMapping(-1, false, kb::X)));
-        controlMaps->insert(std::make_pair(inputPause, controlMapping(-1, false, kb::Escape)));
-        controlMaps->insert(std::make_pair(inputQuit, controlMapping(-1, false, kb::Q)));
-        controlMaps->insert(std::make_pair(inputRestart, controlMapping(-1, false, kb::R)));
-        controlMaps->insert(std::make_pair(inputSkip, controlMapping(-1, false, kb::LControl)));
+        //  there are no default controls, put a config file idiot
+        // controlMaps->insert(std::make_pair(inputUp, controlMapping(-1, false, kb::Up)));
+        // controlMaps->insert(std::make_pair(inputDown, controlMapping(-1, false, kb::Down)));
+        // controlMaps->insert(std::make_pair(inputLeft, controlMapping(-1, false, kb::Left)));
+        // controlMaps->insert(std::make_pair(inputRight, controlMapping(-1, false, kb::Right)));
+        // controlMaps->insert(std::make_pair(inputFire, controlMapping(-1, false, kb::Z)));
+        // controlMaps->insert(std::make_pair(inputFocus, controlMapping(-1, false, kb::LShift)));
+        // controlMaps->insert(std::make_pair(inputBomb, controlMapping(-1, false, kb::X)));
+        // controlMaps->insert(std::make_pair(inputPause, controlMapping(-1, false, kb::Escape)));
+        // controlMaps->insert(std::make_pair(inputQuit, controlMapping(-1, false, kb::Q)));
+        // controlMaps->insert(std::make_pair(inputRestart, controlMapping(-1, false, kb::R)));
+        // controlMaps->insert(std::make_pair(inputSkip, controlMapping(-1, false, kb::LControl)));
 
         const char *inputStrings[] = {
             "up",
@@ -1009,6 +1013,14 @@ namespace engine {
                     int lstick_i = ini_find_property(ini, joystick_i, "lstick", 6);
                     if(lstick_i > -1) {
                         joystick_settings.lstick = std::strcmp(ini_property_value(ini, joystick_i, lstick_i), "true") == 0;
+
+                        //  insert stick mappings here?
+                        if(joystick_settings.lstick) {
+                            controlMaps->insert(std::make_pair(inputUp, controlMapping(0, true, GLFW_GAMEPAD_AXIS_LEFT_Y, false)));
+                            controlMaps->insert(std::make_pair(inputDown, controlMapping(0, true, GLFW_GAMEPAD_AXIS_LEFT_Y, true)));
+                            controlMaps->insert(std::make_pair(inputLeft, controlMapping(0, true, GLFW_GAMEPAD_AXIS_LEFT_X, false)));
+                            controlMaps->insert(std::make_pair(inputRight, controlMapping(0, true, GLFW_GAMEPAD_AXIS_LEFT_X, true)));
+                        }
                     }
 
                     int rstick_i = ini_find_property(ini, joystick_i, "rstick", 6);
@@ -1061,7 +1073,7 @@ namespace engine {
                         for(int j = 0; j < controlSize; j++) {
                             if(std::strcmp(name, inputStrings[j]) == 0) {
                                 int val = strtol(ini_property_value(ini, joystick_i, i), nullptr, 0);
-                                if(val > 0) {
+                                if(val > -1) {
                                     controlMaps->insert(std::make_pair(j, controlMapping(0, false, val)));
                                     log_debug("mapped joystick %s to %d\n", name, val);
                                 }
@@ -1251,12 +1263,63 @@ namespace engine {
         //  calculate all thingies
         //  TODO add deadzone calculations here
         for(int i = 0; i < controlSize; i++) {
+            //  TODO check for each control for multiple input overrides
+            bool updated = false;
             for(auto range = controlMaps->equal_range(i); range.first != range.second; range.first++) {
-                if(range.first->second.joystick > -1) {
+                controlMapping map = range.first->second;
+                if(map.joystick > -1) {
+                    if(joystick_settings.enabled) {
+                        //  skip entire section if joystick is disabled
+                        if(map.axis) {
+                            //  is axis
+                            if(map.key <= GLFW_GAMEPAD_AXIS_LAST) {
+                                //  get joystick
+                                if(gamepads->at(map.joystick)) {
+                                    controls[i].value = gamepads->at(map.joystick)->axes[map.key];
+                                    //  axis to button test
+                                    //  temp with hardcoded deadzone
+                                    if(map.axis_positive) {
+                                        if(controls[i].value > 0.3f) {
+                                            controls[i].state = true;
+                                            controls[i].pressed = true;
+                                        } else {
+                                            controls[i].state = false;
+                                            controls[i].pressed = false;
+                                        }
+                                    } else {
+                                        if(controls[i].value < -0.3f) {
+                                            controls[i].state = true;
+                                            controls[i].pressed = true;
+                                        } else {
+                                            controls[i].state = false;
+                                            controls[i].pressed = false;
+                                        }
+                                    }
 
+
+                                    //  actual implenentation here
+                                    // switch(map.key) {
+                                        //  switch for axes to check correct deadzone setting
+                                    // }
+                                }
+                                //  else joystick unplugged
+                            }
+                        } else {
+                            //  is button
+                            if(map.key <= GLFW_GAMEPAD_BUTTON_LAST) {
+                                if(gamepads->at(map.joystick)) {
+                                    controls[i].state = gamepads->at(map.joystick)->buttons[map.key];
+                                    controls[i].pressed = gamepads->at(map.joystick)->buttons[map.key]; // TODO fix later
+                                    //  button to axis test
+                                    controls[i].value = controls[i].state ? 1.f : 0.f;
+                                }
+                                //  else joystick unplugged
+                            }
+                        }
+                    }
                 } else {
-                    controls[i].state = keyState[range.first->second.key];
-                    controls[i].pressed = keyPressed[range.first->second.key];
+                    controls[i].state = keyState[map.key];
+                    controls[i].pressed = keyPressed[map.key];  //  need to reimplement this too later
                     if(controls[i].state) {
                         controls[i].value = 1.f;
                     }
@@ -1517,6 +1580,7 @@ namespace engine {
     }
 
     float checkKeyAxis(int key) {
+        return controls[key].value;
 
     }
 
