@@ -190,8 +190,9 @@ namespace engine {
                 scrHeight = 480;
             }
 
-            drawWidth = scrWidth;
-            drawHeight = scrHeight;
+            //  TODO THIS IS TERRIBLE TERRIBLE SUPERBAD
+            drawWidth = 640;
+            drawHeight = 480;
             
             
             

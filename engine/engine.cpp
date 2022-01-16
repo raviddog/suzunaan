@@ -891,7 +891,7 @@ namespace engine {
                 int settings_i = ini_find_section(ini, "Settings", 8);
                 int vsync_i = ini_find_property(ini, settings_i, "vsync", 5);
                 if(vsync_i > -1) {
-                    vsync = std::strcmp(ini_property_value(ini, settings_i, vsync_i), "true") == 0 ? "true" : "false";
+                    vsync = std::strcmp(ini_property_value(ini, settings_i, vsync_i), "true") == 0 ? true : false;
                 }
 
                 
