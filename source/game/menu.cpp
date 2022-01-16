@@ -4,17 +4,14 @@
 //  migrate these to class members later
 static engine::SpriteSheet *img_base_options;
 static int opt_selected, opt_tree;
-static bool draw_changed;
 
 void Menu::logic() {
     if(opt_tree == 0) {
         if(engine::checkKeyPressed(engine::inputUp)) {
             opt_selected -= 1;
-            draw_changed = true;
         }
         if(engine::checkKeyPressed(engine::inputDown)) {
             opt_selected += 1;
-            draw_changed = true;
         }
 
         if(opt_selected < 0) {
@@ -23,16 +20,12 @@ void Menu::logic() {
             opt_selected = 0;
         }
 
-        if(draw_changed) {
-            //  rebuffer
-            img_base_options->drawSpriteCentered(opt_selected + 2, 320.f, 240.f - (opt_selected * 64.f));
-            img_base_options->drawSpriteCentered(0, 320.f, 240.f);
-            img_base_options->drawSpriteCentered(1, 320.f, 176.f);
-            
-            
-            img_base_options->buffer();
-            draw_changed = false;
-        }
+        img_base_options->drawSpriteCentered(opt_selected + 2, 320.f, 240.f - (opt_selected * 64.f));
+        img_base_options->drawSpriteCentered(0, 320.f, 240.f);
+        img_base_options->drawSpriteCentered(1, 320.f, 176.f);
+        
+        
+        img_base_options->buffer();
 
 
         if(engine::checkKey(engine::inputFire)) {
@@ -47,6 +40,8 @@ void Menu::logic() {
 }
 
 void Menu::draw() {
+    engine::setDrawsize(640, 480);
+    engine::setViewport();
     if(opt_tree == 0) {
         img_base_options->draw();
     }
@@ -62,7 +57,6 @@ Menu::Menu() {
 
     opt_selected = 0;
     opt_tree = 0;
-    draw_changed = true;
 }
 
 Menu::~Menu() {

@@ -1034,7 +1034,7 @@ namespace engine {
         avgTicksTotal += temp_ticks - frameTimeTicks;
         if(temp_ticks > ticks + 1.0) {
             d.str("");
-            d << "Avg Frame time: " << avgTicksTotal / fps << "ms | ";
+            d << "Avg Frame time: " << avgTicksTotal / fps << "s | ";
             d << "FPS: " << fps << " | Avg FPS: " << 1. / (avgTicksTotal / fps) << " | Deltatime: " << deltatime;
             // glfwSetWindowTitle(gl::window, d.str().c_str());
             fps = 0u;
@@ -1045,7 +1045,7 @@ namespace engine {
         ++fps;
 
         ImGui::Begin("Performance");
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", ImGui::GetIO().DeltaTime, ImGui::GetIO().Framerate);
         ImGui::Text("%s", d.str().c_str());
         ImGui::End();
         #endif
@@ -1069,8 +1069,13 @@ namespace engine {
         //  if not vsync, wait for next frame
         using namespace std::chrono;
         if(!_vsync) {
+            auto goal_time = next_time + microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
+            if(high_resolution_clock::now() > goal_time) {
+                next_time = high_resolution_clock::now();
+            } else {
+                next_time = goal_time;
+            }
             #ifdef __GNUG__
-            next_time = high_resolution_clock::now() + microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
             timespec delayt, delayr;
             nanoseconds delaym = duration_cast<nanoseconds>(next_time - high_resolution_clock::now());
             delayt.tv_sec = 0;
@@ -1080,7 +1085,7 @@ namespace engine {
                 nanosleep(&delayt, &delayr);
             } while (delayr.tv_nsec > 0);
             #else
-            next_time = high_resolution_clock::now() + microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS);
+            // next_time = high_resolution_clock::now() + microseconds(_ENGINE_NOVSYNC_DELAY_MICROSECONDS); // minus render time
             std::this_thread::sleep_until(next_time);
             #endif
 

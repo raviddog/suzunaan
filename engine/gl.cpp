@@ -183,6 +183,17 @@ namespace engine {
                     if(height_i > -1) {
                         scrHeight = strtol(ini_property_value(ini, settings_i, height_i), nullptr, 0);
                     }
+                    int screenmode_i = ini_find_property(ini, settings_i, "screenmode", 10);
+                    if(screenmode_i  > -1) {
+                        const char *smode = ini_property_value(ini, settings_i, screenmode_i);
+                        if(std::strcmp(smode, "windowed") == 0) {
+
+                        } else if(std::strcmp(smode, "borderless") == 0) {
+                            flags = flags | ENGINE_INIT_BORDERLESS;
+                        } else if(std::strcmp(smode, "fullscreen") == 0) {
+                            flags = flags | ENGINE_INIT_TRUEFULLSCREEN;
+                        }
+                    }
                 }
             } else {
                 //  set defaults
@@ -203,6 +214,8 @@ namespace engine {
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
             glfwWindowHint(GLFW_RESIZABLE, flags & ENGINE_INIT_RESIZEABLE);
+
+            winflags = flags;
 
             
 
