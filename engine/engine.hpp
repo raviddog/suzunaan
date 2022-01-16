@@ -1,7 +1,8 @@
 #ifndef _ENGINE_H
 #define _ENGINE_H
 
-#include "engine_gl.hpp"
+#include "gl.hpp"
+#include "input.hpp"
 #include "engine_helper.hpp"
 #include "util.h"
 
@@ -10,17 +11,7 @@
 #include <unordered_map>
 
 namespace engine {
-
-    //  set game controls here
-    enum inputKeys {
-        inputUp, inputDown, inputLeft, inputRight,
-        inputFire, inputFocus, inputBomb, inputPause,
-        inputQuit, inputRestart, inputSkip,
-
-
-
-        controlSize
-    };
+  
 
     enum Drawmode {
         DrawmodeSprite,
@@ -29,25 +20,12 @@ namespace engine {
         Drawmode3D
     };
 
-    enum EngineInitFlags {
-        ENGINE_INIT_VSYNC = 1 << 0,
-        ENGINE_INIT_RESIZEABLE = 1 << 1,
-        ENGINE_INIT_FIXEDASPECT = 1 << 2,
-        ENGINE_INIT_TRUEFULLSCREEN = 1 << 3,
-        ENGINE_INIT_BORDERLESS = 1 << 4,
-        ENGINE_INIT_FIXEDFPS = 1 << 5,
-        ENGINE_INIT_FIXEDDRAWSIZE = 1 << 6
-
-
-    };
+    
 
     extern gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert, *shaderUI, *pshader, *shader3d;
 
     extern double deltatime;
 
-    bool checkKey(int key);
-    bool checkKeyPressed(int key);
-    float checkKeyAxis(int key);
 
     bool init(const char *title, int flags, int width, int height, const char *settingsPath);
     void init(const char *title, int flags, int width, int height);
@@ -60,8 +38,6 @@ namespace engine {
     void setViewport(int x, int y, int w, int h);
     void setDrawsize(int w, int h);
 
-    void mouseCapture();
-    void mouseRelease();
 
     //  imgui stuff
     //  accompanying text, pointer to variable, editable, window

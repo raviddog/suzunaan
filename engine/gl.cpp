@@ -1,48 +1,268 @@
-#include "engine_gl.hpp"
+#include "gl.hpp"
 
 #include "debug.hpp"
 #include <GLFW/glfw3.h>
 
+
 namespace engine {
-    double mouseX, mouseY, mouseXold = 0.0, mouseYold = 0.0, mouseMoveX, mouseMoveY;
-    bool quit;
-    int keyState[kb::KeycodesLength];
-    bool keyPressed[kb::KeycodesLength];
-    int keyStateTest[kb::KeycodesLength];
+    namespace gl {
+        int scrWidth, scrHeight, drawWidth, drawHeight;
+        bool maximised = false;
+        int viewport[4], scrMode;
+        float scalex, scaley;
+        
+        int aspect_w, aspect_h, winflags;
+        bool quit;
+        void *currentShader = nullptr;
+        int keyState[kb::KeycodesLength];
 
-    void *currentShader = nullptr;
 
-    
-    
-    void GLinputs() {        
-        if(glfwWindowShouldClose(gl::window)) {
-            quit = true;
+        void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+            keyState[key] = action;
         }
 
-        glfwPollEvents();
-        glfwGetCursorPos(gl::window, &mouseX, &mouseY);
-        mouseMoveX = mouseX - mouseXold;
-        mouseMoveY = mouseY - mouseYold;
-        mouseXold = mouseX;
-        mouseYold = mouseY;
-
-        for(int i=0;i<kb::KeycodesLength;i++) {
-            if(keyState[i] > 0 && keyStateTest[i] == 0) {
-                keyPressed[i] = true;
-            } else {
-                keyPressed[i] = false;
-            }
-            keyStateTest[i] = keyState[i];
+        void errorCallback(int error, const char *description) {
+            log_debug("Error %d: %s\n", error, description);
         }
 
-        if(gamepads) {
-            for(auto i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
-                if(gamepads->at(i) != nullptr) {
-                    glfwGetGamepadState(i, gamepads->at(i));
+        void joystickCallback(int jid, int event) {
+            if(event == GLFW_CONNECTED) {
+                if(glfwJoystickPresent(jid)) {
+                    if(glfwJoystickIsGamepad(jid)) {
+                        if(gamepads->at(jid) == nullptr) {
+                            gamepads->at(jid) = new GLFWgamepadstate;
+                            log_debug("Gamepad %d connected\n", jid);
+                        }
+                        //  else you plugged in an already plugged in gamepad
+                    } else {
+                        delete gamepads->at(jid);
+                        gamepads->at(jid) = nullptr;
+                        log_debug("Gamepad %d connected but no mapping available, Name: %s | GUID: %s\n", jid, glfwGetJoystickName(jid), glfwGetJoystickGUID(jid));
+                    }
+                } else {
+                    gamepads->push_back(nullptr);
                 }
+            } else if(event == GLFW_DISCONNECTED) {
+                if(gamepads->at(jid) != nullptr) {
+                    delete gamepads->at(jid);
+                    gamepads->at(jid) = nullptr;
+                }
+                log_debug("Gamepad %d disconnected\n", jid);
             }
-        } else {
-            //  reinit gamepads, same code as engine
+        }
+
+        int gcd(int a, int b) {
+            return b ? gcd(b, a % b) : a;
+        }
+
+        void aspectRatio(int *x, int *y) {
+            int d = gcd(*x, *y);
+            *x = *x / d;
+            *y = *y / d;
+        }
+
+        void aspectRatio(float *x, float *y) {
+            float d = gcd(*x, *y);
+            *x = *x / d;
+            *y = *y / d;
+        }
+
+        void setViewport() {
+            //  no arguments resets the viewport to original
+            //  glviewport runs off of window resolution
+            glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+            //  auto change draw res if appropriate flags?
+        }
+
+        void setViewport(int x, int y, int w, int h) {
+            //  arguments provided in draw size
+            //  sets coordinates based on window size
+            //  scalex/scaley calculated on window size
+            glViewport( viewport[0] + (int)(scalex * (float)x),
+                        viewport[1] + (int)(scaley * (float)y),
+                        (int)(scalex * (float)w),
+                        (int)(scaley * (float)h));
+        }
+
+        void windowMaximiseCallback(GLFWwindow *window, int m) {
+            maximised = m == 1? true : false;
+        }
+
+        //  run this after window resizing
+        void windowResizeCallback(GLFWwindow *window, int width, int height) {
+            scrWidth = width;
+            scrHeight = height;
+            //  precalculate stuff for setviewport
+            //  set viewport to specified rectangle (inside draw area)
+            //  need to calculate x and y based off of the existing draw area
+            scalex = (float)scrWidth / (float)drawWidth;
+            scaley = (float)scrHeight / (float)drawHeight;
+
+            if((winflags & ENGINE_INIT_FIXEDDRAWSIZE) || (winflags & ENGINE_INIT_FIXEDASPECT && maximised)) {
+                
+                
+                scalex = (float)scrWidth / (float)drawWidth;
+                scaley = (float)scrHeight / (float)drawHeight;
+                
+                float draw_ratio = (float)drawWidth / (float)drawHeight;
+                float screen_ratio = (float)scrWidth / (float)scrHeight;
+                if(draw_ratio > screen_ratio) {
+                    //  draw area is wider than screen
+                    float y_scale = (float)scrWidth / (float)drawWidth;
+                    float height = (float)drawHeight * y_scale;
+                    int offset = (scrHeight - (int)height) / 2;
+                    glViewport(0, offset, scrWidth, (int)height);
+                    viewport[0] = 0;
+                    viewport[1] = offset;
+                    viewport[2] = scrWidth;
+                    viewport[3] = (int)height;
+                    scaley = scalex;
+
+                    if(!(winflags & ENGINE_INIT_FIXEDDRAWSIZE)) {
+                        drawWidth = scrWidth;
+                        drawHeight = scrHeight - offset;
+                    }
+                } else if(draw_ratio < screen_ratio) {
+                    //  draw area is narrower than screen
+                    float x_scale = (float)scrHeight / (float)drawHeight;
+                    float width = (float)drawWidth * x_scale;
+                    int offset = (scrWidth - (int)width) / 2;
+                    glViewport(offset, 0, (int)width, scrHeight);
+                    viewport[0] = offset;
+                    viewport[1] = 0;
+                    viewport[2] = (int)width;
+                    viewport[3] = scrHeight;
+                    scalex = scaley;
+
+                    if(!(winflags & ENGINE_INIT_FIXEDDRAWSIZE)) {
+                        drawWidth = scrWidth - offset;
+                        drawHeight = scrHeight;
+                    }
+                } else {
+                    //  no letterboxing
+                    glViewport(0, 0, scrWidth, scrHeight);
+                    viewport[0] = 0;
+                    viewport[1] = 0;
+                    viewport[2] = scrWidth;
+                    viewport[3] = scrHeight;
+                }
+
+                
+
+                
+            } else {
+                //  no letterboxing
+                glViewport(0, 0, scrWidth, scrHeight);
+                viewport[0] = 0;
+                viewport[1] = 0;
+                viewport[2] = scrWidth;
+                viewport[3] = scrHeight;
+                
+                drawWidth = width;
+                drawHeight = height;
+            }
+
+            log_debug("resize callback\n");
+        }
+
+    
+        std::vector<GLFWgamepadstate*> *gamepads;
+
+        void init_GL(ini_t *ini, int flags, const char *title) {
+            //  pull required variables from ini
+            //  create and assign required variables from flags
+
+            if(ini) {
+                int settings_i = ini_find_section(ini, "Settings", 8);
+                if(settings_i > -1) {
+                    int width_i = ini_find_property(ini, settings_i, "width", 5);
+                    if(width_i > -1) {
+                        scrWidth = strtol(ini_property_value(ini, settings_i, width_i), nullptr, 0);
+                    }
+                    int height_i = ini_find_property(ini, settings_i, "height", 6);
+                    if(height_i > -1) {
+                        scrHeight = strtol(ini_property_value(ini, settings_i, height_i), nullptr, 0);
+                    }
+                }
+            } else {
+                //  set defaults
+                scrWidth = 640;
+                scrHeight = 480;
+            }
+
+            drawWidth = scrWidth;
+            drawHeight = scrHeight;
+            
+            
+            
+            
+            //  gl init
+            glfwInit();
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            glfwWindowHint(GLFW_RESIZABLE, flags & ENGINE_INIT_RESIZEABLE);
+
+            
+
+            const GLFWvidmode *dmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            if(winflags & ENGINE_INIT_TRUEFULLSCREEN) {
+                maximised = true;
+                glfwWindowHint(GLFW_RED_BITS, dmode->redBits);
+                glfwWindowHint(GLFW_GREEN_BITS, dmode->greenBits);
+                glfwWindowHint(GLFW_BLUE_BITS, dmode->blueBits);
+                if(winflags & ENGINE_INIT_FIXEDFPS) {
+                    // glfwWindowHint(GLFW_REFRESH_RATE, _ENGINE_FPS_CAP);
+                    glfwWindowHint(GLFW_REFRESH_RATE, 60);
+                } else {
+                    glfwWindowHint(GLFW_REFRESH_RATE, dmode->refreshRate);
+                }
+                window = glfwCreateWindow(scrWidth, scrHeight, title, glfwGetPrimaryMonitor(), NULL);
+                glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, dmode->width, dmode->height, GLFW_DONT_CARE);
+            } else if(winflags & ENGINE_INIT_BORDERLESS) {
+                maximised = true;
+                glfwWindowHint(GLFW_RED_BITS, dmode->redBits);
+                glfwWindowHint(GLFW_GREEN_BITS, dmode->greenBits);
+                glfwWindowHint(GLFW_BLUE_BITS, dmode->blueBits);
+                glfwWindowHint(GLFW_REFRESH_RATE, dmode->refreshRate);
+                window = glfwCreateWindow(dmode->width, dmode->height, title, glfwGetPrimaryMonitor(), NULL);
+                glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, dmode->width, dmode->height, GLFW_DONT_CARE);
+                scrWidth = dmode->width;
+                scrHeight = dmode->height;
+            } else {
+                window = glfwCreateWindow(scrWidth, scrHeight, title, NULL, NULL);
+            }
+
+            glfwMakeContextCurrent(window);
+            gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+            glfwSetWindowSizeCallback(window, windowResizeCallback);
+            glfwSetWindowMaximizeCallback(window, windowMaximiseCallback);
+
+            aspect_w = drawWidth;
+            aspect_h = drawHeight;
+            aspectRatio(&aspect_w, &aspect_h);
+
+            if(winflags & ENGINE_INIT_FIXEDASPECT) {
+                glfwSetWindowAspectRatio(window, aspect_w, aspect_h);
+            }
+
+            
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            
+
+            int w, h;
+            glfwGetFramebufferSize(window, &w, &h);
+            windowResizeCallback(window, w, h);
+            glfwSetErrorCallback(errorCallback);
+            glfwSetKeyCallback(window, key_callback);
+            glfwSetJoystickCallback(joystickCallback);
+
+
+            //  gamepads
             gamepads = new std::vector<GLFWgamepadstate*>();
             for(auto i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
                 if(glfwJoystickPresent(i)) {
@@ -57,52 +277,7 @@ namespace engine {
                     gamepads->push_back(nullptr);
                 }
             }
-        }
-    }
 
-    void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-        keyState[key] = action;
-    }
-
-    void errorCallback(int error, const char *description) {
-        log_debug("Error %d: %s\n", error, description);
-    }
-
-    void joystickCallback(int jid, int event) {
-        if(event == GLFW_CONNECTED) {
-            if(glfwJoystickPresent(jid)) {
-                if(glfwJoystickIsGamepad(jid)) {
-                    if(gamepads->at(jid) == nullptr) {
-                        gamepads->at(jid) = new GLFWgamepadstate;
-                        log_debug("Gamepad %d connected\n", jid);
-                    }
-                    //  else you plugged in an already plugged in gamepad
-                } else {
-                    delete gamepads->at(jid);
-                    gamepads->at(jid) = nullptr;
-                    log_debug("Gamepad %d connected but no mapping available, Name: %s | GUID: %s\n", jid, glfwGetJoystickName(jid), glfwGetJoystickGUID(jid));
-                }
-            } else {
-                gamepads->push_back(nullptr);
-            }
-        } else if(event == GLFW_DISCONNECTED) {
-            if(gamepads->at(jid) != nullptr) {
-                delete gamepads->at(jid);
-                gamepads->at(jid) = nullptr;
-            }
-            log_debug("Gamepad %d disconnected\n", jid);
-        }
-    }
-
-    namespace gl {
-
-        void init() {
-            //  gl init
-            //  mostly setting callbacks and stuff
-
-            glfwSetErrorCallback(errorCallback);
-            glfwSetKeyCallback(window, key_callback);
-            glfwSetJoystickCallback(joystickCallback);
         }
 
         GLFWwindow *window;

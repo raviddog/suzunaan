@@ -120,8 +120,8 @@ void Stage::logic() {
     if (engine::checkKey(engine::inputBomb)) {
         camera->mov_up -= cameraSpeed;
     }
-    camera->angle_h -= engine::mouseMoveX * cameraSpeed;
-    camera->angle_v -= engine::mouseMoveY * cameraSpeed;
+    // camera->angle_h -= engine::mouseMoveX * cameraSpeed;
+    // camera->angle_v -= engine::mouseMoveY * cameraSpeed;
 
     if(stagescript) {
         if(stagescript->frame_triggers->count(frames) > 0) {

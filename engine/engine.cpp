@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "engine_gl.hpp"
+#include "gl.hpp"
 #include "libs/imgui/imgui.h"
 #include "libs/imgui/imgui_impl_glfw.h"
 #include "libs/imgui/imgui_impl_opengl3.h"
@@ -55,47 +55,11 @@ namespace engine {
     
     assetsys_t *assets = nullptr;
 
-    int scrWidth, scrHeight, drawWidth, drawHeight;
-    bool maximised = false;
-    int viewport[4], scrMode;
-    float scalex, scaley;
     
-    int aspect_w, aspect_h, winflags;
         
     double deltatime, last_frame;
 
-    struct controlState {
-        float value;
-        bool state;
-        bool pressed;
-    } controls[controlSize];
-
-    struct controlMapping {
-        controlMapping(int j, bool a, int k) : joystick(j), axis(a), key(k) {}
-        controlMapping(int j, bool a, int k, bool ap) : joystick(j), axis(a), key(k), axis_positive(ap) {}
-        int joystick;
-        bool axis;
-        int key;
-        bool axis_positive;
-    };
-
-    std::multimap<int, controlMapping> *controlMaps;
-
-    //  defaults are for shmup, change later
-    struct joystick_t {
-        bool enabled = false;
-        bool lstick = true;
-        bool rstick = false;
-        bool dpad = true;
-        enum {
-            ENGINE_JOYSTICK_DEADZONE_CIRCLE,
-            ENGINE_JOYSTICK_DEADZONE_SQUARE,
-            ENGINE_JOYSTICK_DEADZONE_DIAMOND
-        } lstick_deadzone_type = ENGINE_JOYSTICK_DEADZONE_CIRCLE, rstick_deadzone_type = ENGINE_JOYSTICK_DEADZONE_CIRCLE;
-        float lstick_size = 0.3f, rstick_size = 0.3f;
-    } joystick_settings;
-
-    std::vector<GLFWgamepadstate*> *gamepads;
+    
 
     // std::vector<joystick_t> *joysticks = nullptr;
 
@@ -121,26 +85,7 @@ namespace engine {
 
     gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert, *shaderUI, *pshader, *shader3d;
 
-    static Drawmode currentDrawmode;
-
-    void windowMaximiseCallback(GLFWwindow*, int);
-    void windowResizeCallback(GLFWwindow*, int, int);
-
-    int gcd(int a, int b) {
-        return b ? gcd(b, a % b) : a;
-    }
-
-    void aspectRatio(int *x, int *y) {
-        int d = gcd(*x, *y);
-        *x = *x / d;
-        *y = *y / d;
-    }
-
-    void aspectRatio(float *x, float *y) {
-        float d = gcd(*x, *y);
-        *x = *x / d;
-        *y = *y / d;
-    }
+    static Drawmode currentDrawmode;    
 
     //  [TEXT]
     BitmapFont::BitmapFont(std::string path) {
@@ -747,7 +692,7 @@ namespace engine {
         //  load draw modes (shaders)
         //  static gl::Shader *shaderSpriteSheet, *shaderSpriteSheetInvert, *shaderUI;
         
-        glm::vec2 scrRes = glm::vec2((float)drawWidth, (float)drawHeight);
+        glm::vec2 scrRes = glm::vec2((float)gl::drawWidth, (float)gl::drawHeight);
 
         shaderSpriteSheetInvert = new gl::Shader();
         shaderSpriteSheetInvert->load("./data/shaders/spritesheet.vert", "./data/shaders/spritesheet_invert.frag");
@@ -906,36 +851,7 @@ namespace engine {
     bool init(const char *title, int flags, int width, int height, const char *settingsPath) {
         debug_init();
 
-        //  controls
-        controlMaps = new std::multimap<int, controlMapping>();
-        //  default controls if there's none in config
-        //  there are no default controls, put a config file idiot
-        // controlMaps->insert(std::make_pair(inputUp, controlMapping(-1, false, kb::Up)));
-        // controlMaps->insert(std::make_pair(inputDown, controlMapping(-1, false, kb::Down)));
-        // controlMaps->insert(std::make_pair(inputLeft, controlMapping(-1, false, kb::Left)));
-        // controlMaps->insert(std::make_pair(inputRight, controlMapping(-1, false, kb::Right)));
-        // controlMaps->insert(std::make_pair(inputFire, controlMapping(-1, false, kb::Z)));
-        // controlMaps->insert(std::make_pair(inputFocus, controlMapping(-1, false, kb::LShift)));
-        // controlMaps->insert(std::make_pair(inputBomb, controlMapping(-1, false, kb::X)));
-        // controlMaps->insert(std::make_pair(inputPause, controlMapping(-1, false, kb::Escape)));
-        // controlMaps->insert(std::make_pair(inputQuit, controlMapping(-1, false, kb::Q)));
-        // controlMaps->insert(std::make_pair(inputRestart, controlMapping(-1, false, kb::R)));
-        // controlMaps->insert(std::make_pair(inputSkip, controlMapping(-1, false, kb::LControl)));
-
-        const char *inputStrings[] = {
-            "up",
-            "down",
-            "left",
-            "right",
-            "fire",
-            "focus",
-            "bomb",
-            "pause",
-            "quit",
-            "restart",
-            "skip"
-        };
-
+        //  load settings file
         bool readstate = false;
         const char *settings = nullptr;
 
@@ -958,226 +874,47 @@ namespace engine {
             fclose(file);
         }
 
-        //  default settings
-        //  really gotta put these somewhere else
-        bool vsync = true;
-        int width_win = 640, height_win = 480;
+        
 
 
         if(readstate) {
             ini_t *ini = ini_load(settings, NULL);
             delete[] settings;
 
+            gl::init_GL(ini, flags, title);
+            init_input(ini);
+
+            bool vsync = true;
+
             if(ini) {
+                
                 int settings_i = ini_find_section(ini, "Settings", 8);
                 int vsync_i = ini_find_property(ini, settings_i, "vsync", 5);
                 if(vsync_i > -1) {
                     vsync = std::strcmp(ini_property_value(ini, settings_i, vsync_i), "true") == 0 ? "true" : "false";
                 }
-                int width_win_i = ini_find_property(ini, settings_i, "width", 5);
-                if(width_win_i > -1) {
-                    width_win = std::strtol(ini_property_value(ini, settings_i, width_win_i), nullptr, 0);
-                }
-                int height_win_i = ini_find_property(ini, settings_i, "height", 6);
-                if(height_win_i > -1) {
-                    height_win = std::strtol(ini_property_value(ini, settings_i, height_win_i), nullptr, 0);
-                }
 
-
-                int keys_i = ini_find_section(ini, "Key", 3);
-                if(keys_i > -1) {
-                    int keys_count = ini_property_count(ini, keys_i);
-                    for(int i = 0; i < keys_count; i++) {
-                        const char *name = ini_property_name(ini, keys_i, i);
-                        for(int j = 0; j < controlSize; j++) {
-                            if(std::strcmp(name, inputStrings[j]) == 0) {
-                                int val = strtol(ini_property_value(ini, keys_i, i), nullptr, 0);
-                                if(val > 0) {
-                                    controlMaps->insert(std::make_pair(j, controlMapping(-1, false, val)));
-                                    log_debug("mapped %s to %d\n", name, val);
-                                }
-                                break;
-                            }
-                        } 
-
-                    }
-                }
-
-                int joystick_i = ini_find_section(ini, "Joystick", 8);
-                if(joystick_i > -1) {
-                    int enabled_i = ini_find_property(ini, joystick_i, "enabled", 7);
-                    if(enabled_i > -1) {
-                        joystick_settings.enabled = std::strcmp(ini_property_value(ini, joystick_i, enabled_i), "true") == 0;
-                    }
-
-                    int lstick_i = ini_find_property(ini, joystick_i, "lstick", 6);
-                    if(lstick_i > -1) {
-                        joystick_settings.lstick = std::strcmp(ini_property_value(ini, joystick_i, lstick_i), "true") == 0;
-
-                        //  insert stick mappings here?
-                        if(joystick_settings.lstick) {
-                            controlMaps->insert(std::make_pair(inputUp, controlMapping(0, true, GLFW_GAMEPAD_AXIS_LEFT_Y, false)));
-                            controlMaps->insert(std::make_pair(inputDown, controlMapping(0, true, GLFW_GAMEPAD_AXIS_LEFT_Y, true)));
-                            controlMaps->insert(std::make_pair(inputLeft, controlMapping(0, true, GLFW_GAMEPAD_AXIS_LEFT_X, false)));
-                            controlMaps->insert(std::make_pair(inputRight, controlMapping(0, true, GLFW_GAMEPAD_AXIS_LEFT_X, true)));
-                        }
-                    }
-
-                    int rstick_i = ini_find_property(ini, joystick_i, "rstick", 6);
-                    if(rstick_i > -1) {
-                        joystick_settings.rstick = std::strcmp(ini_property_value(ini, joystick_i, rstick_i), "true") == 0;
-                    }
-
-                    int dpad_i = ini_find_property(ini, joystick_i, "dpad", 4);
-                    if(dpad_i > -1) {
-                        joystick_settings.dpad = std::strcmp(ini_property_value(ini, joystick_i, dpad_i), "true") == 0;
-                    }
-
-                    int lstick_deadzone_i = ini_find_property(ini, joystick_i, "lstick_deadzone", 15);
-                    if(lstick_deadzone_i > -1) {
-                        const char *lstick_deadzone_v = ini_property_value(ini, joystick_i, lstick_deadzone_i);
-                        if(std::strcmp(lstick_deadzone_v, "circle") == 0) {
-                            joystick_settings.lstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_CIRCLE;
-                        } else if(std::strcmp(lstick_deadzone_v, "square") == 0) {
-                            joystick_settings.lstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_SQUARE;
-                        } else if(std::strcmp(lstick_deadzone_v, "diamond") == 0) {
-                            joystick_settings.lstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_DIAMOND;
-                        }
-                    }
-
-                    int rstick_deadzone_i = ini_find_property(ini, joystick_i, "rstick_deadzone", 15);
-                    if(rstick_deadzone_i > -1) {
-                        const char *rstick_deadzone_v = ini_property_value(ini, joystick_i, rstick_deadzone_i);
-                        if(std::strcmp(rstick_deadzone_v, "circle") == 0) {
-                            joystick_settings.rstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_CIRCLE;
-                        } else if(std::strcmp(rstick_deadzone_v, "square") == 0) {
-                            joystick_settings.rstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_SQUARE;
-                        } else if(std::strcmp(rstick_deadzone_v, "diamond") == 0) {
-                            joystick_settings.rstick_deadzone_type = joystick_t::ENGINE_JOYSTICK_DEADZONE_DIAMOND;
-                        }
-                    }
-
-                    int lstick_size_i = ini_find_property(ini, joystick_i, "lstick_size", 11);
-                    if(lstick_size_i > -1) {
-                        joystick_settings.lstick_size = std::strtof(ini_property_value(ini, joystick_i, lstick_size_i), nullptr);
-                    }
-
-                    int rstick_size_i = ini_find_property(ini, joystick_i, "rstick_size", 11);
-                    if(rstick_size_i > -1) {
-                        joystick_settings.rstick_size = std::strtof(ini_property_value(ini, joystick_i, rstick_size_i), nullptr);
-                    }
-
-                    int joystick_keys_count = ini_property_count(ini, joystick_i);
-                    for(int i = 0; i < joystick_keys_count; i++) {
-                        const char *name = ini_property_name(ini, joystick_i, i);
-                        for(int j = 0; j < controlSize; j++) {
-                            if(std::strcmp(name, inputStrings[j]) == 0) {
-                                int val = strtol(ini_property_value(ini, joystick_i, i), nullptr, 0);
-                                if(val > -1) {
-                                    controlMaps->insert(std::make_pair(j, controlMapping(0, false, val)));
-                                    log_debug("mapped joystick %s to %d\n", name, val);
-                                }
-                                break;
-                            }
-                        } 
-                    }
-
-                    // joysticks = new std::vector<joystick_t>();
-                }
+                
 
                 ini_destroy(ini);
             }
+
+            if(vsync) {
+                flags = flags | ENGINE_INIT_VSYNC;
+            }
         }
 
-        //  else use defaults
+        // else cant read settings file, create one?
 
-        if(vsync) {
-            flags = flags | ENGINE_INIT_VSYNC;
-        }
-
-
-        init(title, flags, width_win, height_win, width, height);
-        return true;
-    }
-
-    void init(const char *title, int flags, int width, int height) {
-        init(title, flags, width, height, width, height);
-    }
-
-    //  2d init test
-    void init(const char *title, int flags, int width, int height, int dwidth, int dheight) {
-
-        /*
-            flags contains a list of init flags
-            - resizeable
-            - vsync
-            -
-            width can be fixed window width, suggested width or an aspect ratio based on selected screen init flags
         
-        */
-
-        glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_RESIZABLE, flags & ENGINE_INIT_RESIZEABLE);
-
-        for(int i = 0; i < kb::KeycodesLength; i++) {
-            keyState[i] = 0;
-        }
-
-        drawWidth = dwidth;
-        drawHeight = dheight;
+        
         fps = 0u;
         ticks = glfwGetTime();
         frameTimeTicks = ticks;
-        winflags = flags;
 
-        const GLFWvidmode *dmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        if(winflags & ENGINE_INIT_TRUEFULLSCREEN) {
-            maximised = true;
-            glfwWindowHint(GLFW_RED_BITS, dmode->redBits);
-            glfwWindowHint(GLFW_GREEN_BITS, dmode->greenBits);
-            glfwWindowHint(GLFW_BLUE_BITS, dmode->blueBits);
-            if(winflags & ENGINE_INIT_FIXEDFPS) {
-                glfwWindowHint(GLFW_REFRESH_RATE, _ENGINE_FPS_CAP);
-            } else {
-                glfwWindowHint(GLFW_REFRESH_RATE, dmode->refreshRate);
-            }
-            gl::window = glfwCreateWindow(width, height, title, glfwGetPrimaryMonitor(), NULL);
-            glfwSetWindowMonitor(gl::window, glfwGetPrimaryMonitor(), 0, 0, dmode->width, dmode->height, GLFW_DONT_CARE);
-            scrWidth = width;
-            scrHeight = height;
-        } else if(winflags & ENGINE_INIT_BORDERLESS) {
-            maximised = true;
-            glfwWindowHint(GLFW_RED_BITS, dmode->redBits);
-            glfwWindowHint(GLFW_GREEN_BITS, dmode->greenBits);
-            glfwWindowHint(GLFW_BLUE_BITS, dmode->blueBits);
-            glfwWindowHint(GLFW_REFRESH_RATE, dmode->refreshRate);
-            gl::window = glfwCreateWindow(dmode->width, dmode->height, title, glfwGetPrimaryMonitor(), NULL);
-            glfwSetWindowMonitor(gl::window, glfwGetPrimaryMonitor(), 0, 0, dmode->width, dmode->height, GLFW_DONT_CARE);
-            scrWidth = dmode->width;
-            scrHeight = dmode->height;
-        } else {
-            gl::window = glfwCreateWindow(width, height, title, NULL, NULL);
-            scrWidth = width;
-            scrHeight = height;
-        }
+        
 
-        glfwMakeContextCurrent(gl::window);
-        gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        glfwSetWindowSizeCallback(gl::window, windowResizeCallback);
-        glfwSetWindowMaximizeCallback(gl::window, windowMaximiseCallback);
-
-        aspect_w = drawWidth;
-        aspect_h = drawHeight;
-        aspectRatio(&aspect_w, &aspect_h);
-
-        if(winflags & ENGINE_INIT_FIXEDASPECT) {
-            glfwSetWindowAspectRatio(gl::window, aspect_w, aspect_h);
-        }
-
-        if(winflags & ENGINE_INIT_VSYNC) {
+        if(flags & ENGINE_INIT_VSYNC) {
             _vsync = true;
             glfwSwapInterval(1);
         } else {
@@ -1191,10 +928,6 @@ namespace engine {
             #endif
         }
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // stbi_set_flip_vertically_on_load(true);  // don't need this because the shader i wrote accounts for it
 
@@ -1210,13 +943,9 @@ namespace engine {
             loadFromZip = true;
         }
 
-        
+        //  shaders, probs split into init in the 2d and 3d files/backgroudn/whatever
         InitialiseDrawmodes(); 
         SetDrawmode(DrawmodeSprite);
-
-        int w, h;
-        glfwGetFramebufferSize(gl::window, &w, &h);
-        windowResizeCallback(gl::window, w, h);
 
         loadedModels = new std::unordered_map<std::string, ManagedModel*>();
 
@@ -1228,6 +957,7 @@ namespace engine {
         //  imgui
         #ifndef IMGUI_DISABLE
         IMGUI_CHECKVERSION();
+        
         ImGui::CreateContext();
 
         ImGui::StyleColorsDark();
@@ -1238,176 +968,12 @@ namespace engine {
         imgui_windows = new std::vector<std::pair<std::string, std::vector<imgui_t>*>>();
         #endif
 
-        //  gamepads
-        gamepads = new std::vector<GLFWgamepadstate*>();
-        for(auto i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
-            if(glfwJoystickPresent(i)) {
-                if(glfwJoystickIsGamepad(i)) {
-                    gamepads->push_back(new GLFWgamepadstate);
-                    log_debug("Gamepad %d detected\n", i);
-                } else {
-                    gamepads->push_back(nullptr);
-                    log_debug("Gamepad %d detected but no mapping available, Name: %s | GUID: %s\n", i, glfwGetJoystickName(i), glfwGetJoystickGUID(i));
-                }
-            } else {
-                gamepads->push_back(nullptr);
-            }
-        }
-
-        //  clean up later
-        gl::init();
+        
+        return true;
+        
     }
 
-    void inputs() {
-        GLinputs();
-        //  calculate all thingies
-        //  TODO add deadzone calculations here
-        for(int i = 0; i < controlSize; i++) {
-            //  TODO check for each control for multiple input overrides
-            bool updated = false;
-            for(auto range = controlMaps->equal_range(i); range.first != range.second; range.first++) {
-                controlMapping map = range.first->second;
-                if(map.joystick > -1) {
-                    if(joystick_settings.enabled) {
-                        //  skip entire section if joystick is disabled
-                        if(map.axis) {
-                            //  is axis
-                            if(map.key <= GLFW_GAMEPAD_AXIS_LAST) {
-                                //  get joystick
-                                if(gamepads->at(map.joystick)) {
-                                    controls[i].value = gamepads->at(map.joystick)->axes[map.key];
-                                    //  axis to button test
-                                    //  temp with hardcoded deadzone
-                                    if(map.axis_positive) {
-                                        if(controls[i].value > 0.3f) {
-                                            controls[i].state = true;
-                                            controls[i].pressed = true;
-                                        } else {
-                                            controls[i].state = false;
-                                            controls[i].pressed = false;
-                                        }
-                                    } else {
-                                        if(controls[i].value < -0.3f) {
-                                            controls[i].state = true;
-                                            controls[i].pressed = true;
-                                        } else {
-                                            controls[i].state = false;
-                                            controls[i].pressed = false;
-                                        }
-                                    }
-
-
-                                    //  actual implenentation here
-                                    // switch(map.key) {
-                                        //  switch for axes to check correct deadzone setting
-                                    // }
-                                }
-                                //  else joystick unplugged
-                            }
-                        } else {
-                            //  is button
-                            if(map.key <= GLFW_GAMEPAD_BUTTON_LAST) {
-                                if(gamepads->at(map.joystick)) {
-                                    controls[i].state = gamepads->at(map.joystick)->buttons[map.key];
-                                    controls[i].pressed = gamepads->at(map.joystick)->buttons[map.key]; // TODO fix later
-                                    //  button to axis test
-                                    controls[i].value = controls[i].state ? 1.f : 0.f;
-                                }
-                                //  else joystick unplugged
-                            }
-                        }
-                    }
-                } else {
-                    controls[i].state = keyState[map.key];
-                    controls[i].pressed = keyPressed[map.key];  //  need to reimplement this too later
-                    if(controls[i].state) {
-                        controls[i].value = 1.f;
-                    }
-                }
-            }
-        }
-    }
-
-    void windowMaximiseCallback(GLFWwindow *window, int m) {
-        maximised = m == 1? true : false;
-    }
-
-    //  run this after window resizing
-    void windowResizeCallback(GLFWwindow *window, int width, int height) {
-        scrWidth = width;
-        scrHeight = height;
-        //  precalculate stuff for setviewport
-        //  set viewport to specified rectangle (inside draw area)
-        //  need to calculate x and y based off of the existing draw area
-        scalex = (float)scrWidth / (float)drawWidth;
-        scaley = (float)scrHeight / (float)drawHeight;
-
-        if((winflags & ENGINE_INIT_FIXEDDRAWSIZE) || (winflags & ENGINE_INIT_FIXEDASPECT && maximised)) {
-            
-            
-            scalex = (float)scrWidth / (float)drawWidth;
-            scaley = (float)scrHeight / (float)drawHeight;
-            
-            float draw_ratio = (float)drawWidth / (float)drawHeight;
-            float screen_ratio = (float)scrWidth / (float)scrHeight;
-            if(draw_ratio > screen_ratio) {
-                //  draw area is wider than screen
-                float y_scale = (float)scrWidth / (float)drawWidth;
-                float height = (float)drawHeight * y_scale;
-                int offset = (scrHeight - (int)height) / 2;
-                glViewport(0, offset, scrWidth, (int)height);
-                viewport[0] = 0;
-                viewport[1] = offset;
-                viewport[2] = scrWidth;
-                viewport[3] = (int)height;
-                scaley = scalex;
-
-                if(!(winflags & ENGINE_INIT_FIXEDDRAWSIZE)) {
-                    drawWidth = scrWidth;
-                    drawHeight = scrHeight - offset;
-                }
-            } else if(draw_ratio < screen_ratio) {
-                //  draw area is narrower than screen
-                float x_scale = (float)scrHeight / (float)drawHeight;
-                float width = (float)drawWidth * x_scale;
-                int offset = (scrWidth - (int)width) / 2;
-                glViewport(offset, 0, (int)width, scrHeight);
-                viewport[0] = offset;
-                viewport[1] = 0;
-                viewport[2] = (int)width;
-                viewport[3] = scrHeight;
-                scalex = scaley;
-
-                if(!(winflags & ENGINE_INIT_FIXEDDRAWSIZE)) {
-                    drawWidth = scrWidth - offset;
-                    drawHeight = scrHeight;
-                }
-            } else {
-                //  no letterboxing
-                glViewport(0, 0, scrWidth, scrHeight);
-                viewport[0] = 0;
-                viewport[1] = 0;
-                viewport[2] = scrWidth;
-                viewport[3] = scrHeight;
-            }
-
-            
-
-            
-        } else {
-            //  no letterboxing
-            glViewport(0, 0, scrWidth, scrHeight);
-            viewport[0] = 0;
-            viewport[1] = 0;
-            viewport[2] = scrWidth;
-            viewport[3] = scrHeight;
-            
-            drawWidth = width;
-            drawHeight = height;
-        }
-
-        log_debug("resize callback\n");
-    }
+    
 
     //  [FLIP]
 
@@ -1541,22 +1107,7 @@ namespace engine {
         glfwTerminate();
     }
 
-    void setViewport() {
-        //  no arguments resets the viewport to original
-        //  glviewport runs off of window resolution
-        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-        //  auto change draw res if appropriate flags?
-    }
-
-    void setViewport(int x, int y, int w, int h) {
-        //  arguments provided in draw size
-        //  sets coordinates based on window size
-        //  scalex/scaley calculated on window size
-        glViewport( viewport[0] + (int)(scalex * (float)x),
-                    viewport[1] + (int)(scaley * (float)y),
-                    (int)(scalex * (float)w),
-                    (int)(scaley * (float)h));
-    }
+    
 
     void setDrawsize(int w, int h) {
         //  set size for sprite shader
@@ -1565,37 +1116,13 @@ namespace engine {
         shaderSpriteSheet->setVec2("res", scrRes);
     }
 
-    bool checkKey(int key) {
-        if(controls[key].state) return true;
-
-        
-
-        return false;
+    void setViewport() {
+        gl::setViewport();
     }
 
-    bool checkKeyPressed(int key) {
-        if(controls[key].pressed) return true;
-        
-        return false;
+    void setViewport(int x, int y, int w, int h) {
+        gl::setViewport(x, y, w, h);
     }
-
-    float checkKeyAxis(int key) {
-        return controls[key].value;
-
-    }
-
-    void mouseCapture() {
-        glfwSetInputMode(gl::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        if(glfwRawMouseMotionSupported()) {
-            glfwSetInputMode(gl::window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-        }
-    }
-
-    void mouseRelease() {
-        glfwSetInputMode(gl::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
-
-    
 
     //  [IMGUI]
 

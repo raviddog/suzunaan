@@ -9,7 +9,7 @@ int main(int argv, char** args) {
     }
     init();
 
-    while(!engine::quit) {
+    while(!engine::gl::quit) {
         //  update input struct
         engine::inputs();
 

@@ -4,10 +4,9 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
-// #include "SDL2/SDL.h"
-// #include "SDL2/SDL_opengl.h"
 #include "libs/stb_image.h"
 #include "libs/assetsys.h"
+#include "libs/ini.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -46,19 +45,33 @@ namespace engine {
         };
     }
 
-    extern double mouseX, mouseY, mouseMoveX, mouseMoveY;
-    extern bool quit, loadFromZip;
+    extern bool loadFromZip;
     extern assetsys_t *assets;
-    extern int keyState[kb::KeycodesLength];
-    extern bool keyPressed[kb::KeycodesLength];
     extern void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-    extern std::vector<GLFWgamepadstate*> *gamepads;
-    void GLinputs();
+
+    enum EngineInitFlags {
+        ENGINE_INIT_VSYNC = 1 << 0,
+        ENGINE_INIT_RESIZEABLE = 1 << 1,
+        ENGINE_INIT_FIXEDASPECT = 1 << 2,
+        ENGINE_INIT_TRUEFULLSCREEN = 1 << 3,
+        ENGINE_INIT_BORDERLESS = 1 << 4,
+        ENGINE_INIT_FIXEDFPS = 1 << 5,
+        ENGINE_INIT_FIXEDDRAWSIZE = 1 << 6
+
+
+    };
 
     namespace gl {
+        extern bool quit;
         extern GLFWwindow *window;
+        extern int drawWidth, drawHeight;
+        extern std::vector<GLFWgamepadstate*> *gamepads;
+        extern int keyState[kb::KeycodesLength];
+
         // extern SDL_GLContext maincontext;
-        void init();
+        void init_GL(ini_t *ini, int flags, const char *title);
+        void setViewport();
+        void setViewport(int x, int y, int w, int h);
 
         struct modelVertex {
             glm::vec3 Position;

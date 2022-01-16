@@ -40,7 +40,7 @@ void Menu::logic() {
                 changeState(1);
             } else if(opt_selected == 1) {
                 // changeState(2);
-                engine::quit = true;
+                engine::gl::quit = true;
             }
         }
     }
